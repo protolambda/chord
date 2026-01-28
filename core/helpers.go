@@ -22,6 +22,19 @@ func Bundle(nodes ...Node) Node {
 	}
 }
 
+// Compose creates a bundle from a head node and optional tail nodes.
+// This provides cleaner composition syntax by requiring at least one node.
+func Compose(head Node, tail ...Node) Node {
+	nodes := make([]Node, 1+len(tail))
+	nodes[0] = head
+	copy(nodes[1:], tail)
+	return Obj{
+		Key:      "",
+		Val:      "",
+		SubNodes: slices.Values(nodes),
+	}
+}
+
 // Raw creates a node that renders the given string directly in the output
 func Raw(v string) Node {
 	return Obj{

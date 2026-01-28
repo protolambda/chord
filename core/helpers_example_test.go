@@ -20,6 +20,16 @@ func ExampleBundle() {
 	// Output: 123<br/>hello world
 }
 
+func ExampleCompose() {
+	Dump(Compose(Element("h1", Raw("Title")), Element("p", Raw("Content"))))
+	// Output: <h1>Title</h1><p>Content</p>
+}
+
+func ExampleCompose_single() {
+	Dump(Compose(Element("div", Raw("only one"))))
+	// Output: <div>only one</div>
+}
+
 func ExampleBoolAttribute() {
 	Dump(VoidElement("input", Attribute("type", "checkbox"), BoolAttribute("checked")))
 	// Output: <input type="checkbox" checked/>

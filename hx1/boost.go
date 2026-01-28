@@ -1,0 +1,30 @@
+package hx1
+
+import "github.com/protolambda/chord/core"
+
+// Boost sets the hx-boost attribute to convert links and forms to AJAX.
+func Boost(v string) core.Node { return core.Attribute("hx-boost", v) }
+
+// Preserve sets the hx-preserve boolean attribute to preserve element across swaps.
+func Preserve() core.Node { return core.BoolAttribute("hx-preserve") }
+
+// Confirm sets the hx-confirm attribute to show confirmation dialog before request.
+func Confirm(v string) core.Node { return core.Attribute("hx-confirm", v) }
+
+// Prompt sets the hx-prompt attribute to show prompt dialog before request.
+func Prompt(v string) core.Node { return core.Attribute("hx-prompt", v) }
+
+// Disable sets the hx-disable boolean attribute to disable HTMX processing.
+func Disable() core.Node { return core.BoolAttribute("hx-disable") }
+
+// DisabledElt sets the hx-disabled-elt attribute to disable elements during request.
+func DisabledElt(v string) core.Node { return core.Attribute("hx-disabled-elt", v) }
+
+// Disinherit sets the hx-disinherit attribute to prevent inheritance of attributes.
+func Disinherit(v string) core.Node { return core.Attribute("hx-disinherit", v) }
+
+// Encoding sets the hx-encoding attribute to set request encoding.
+func Encoding(v string) core.Node { return core.Attribute("hx-encoding", v) }
+
+// Ext sets the hx-ext attribute to enable HTMX extensions.
+func Ext(v string) core.Node { return core.Attribute("hx-ext", v) }
