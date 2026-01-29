@@ -44,3 +44,28 @@ func ExampleComment() {
 	Dump(Element("div", Comment("Hello world")))
 	// Output: <div><!-- Hello world --></div>
 }
+
+func ExampleWithIndent() {
+	Dump(
+		Element("div", Attribute("class", "outer"), Attribute("id", "root"),
+			Element("div", Attribute("class", "middle"),
+				Element("div", Attribute("class", "inner"),
+					Raw("Hello"),
+				),
+				Element("span", Raw("World")),
+			),
+		),
+		WithIndent(),
+	)
+	// Output:
+	// <div class="outer" id="root">
+	//   <div class="middle">
+	//     <div class="inner">
+	//       Hello
+	//     </div>
+	//     <span>
+	//       World
+	//     </span>
+	//   </div>
+	// </div>
+}

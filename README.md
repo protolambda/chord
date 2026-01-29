@@ -121,7 +121,7 @@ func main() {
     // Attach state to context and render
     ctx := context.WithValue(context.Background(), isLoggedInKey, true)
     var out strings.Builder
-    if err := core.Render(ctx, page, &out); err != nil {
+    if err := core.Render(ctx, page, &out, core.WithIndent()); err != nil {
         log.Fatal(err)
     }
     // out.String() contains the rendered HTML

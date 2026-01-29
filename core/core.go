@@ -37,7 +37,12 @@ type Node interface {
 	Eval(ctx context.Context) (Obj, error)
 }
 
-func Render(ctx context.Context, v Node, out *strings.Builder) error {
+func Render(ctx context.Context, v Node, out *strings.Builder, opts ...Option) error {
+	cfg := &renderConfig{}
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
 	root, err := v.Eval(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to load root element: %w", err)
@@ -50,7 +55,7 @@ func Render(ctx context.Context, v Node, out *strings.Builder) error {
 		if subErr != nil {
 			return fmt.Errorf("failed to open: %w", subErr)
 		}
-		err := renderObj(ctx, o, out, tmp)
+		err := renderObj(ctx, o, out, tmp, cfg, 0)
 		if err != nil {
 			return fmt.Errorf("failed to render: %w", err)
 		}
@@ -58,7 +63,7 @@ func Render(ctx context.Context, v Node, out *strings.Builder) error {
 	return nil
 }
 
-func renderObj(ctx context.Context, root Obj, out *strings.Builder, tmpSeenAttribs map[string]struct{}) error {
+func renderObj(ctx context.Context, root Obj, out *strings.Builder, tmpSeenAttribs map[string]struct{}, cfg *renderConfig, depth int) error {
 	if !root.IsElement {
 		return fmt.Errorf("expected node to be an element")
 	}
@@ -67,11 +72,21 @@ func renderObj(ctx context.Context, root Obj, out *strings.Builder, tmpSeenAttri
 		return fmt.Errorf("expected element to have a key")
 	}
 
+	indent := ""
+	if cfg.Indent {
+		indent = strings.Repeat("  ", depth)
+	}
+
 	if root.Val != "" {
+		out.WriteString(indent)
 		out.WriteString(root.Val)
+		if cfg.Indent {
+			out.WriteString("\n")
+		}
 		return nil
 	}
 
+	out.WriteString(indent)
 	out.WriteString("<")
 	out.WriteString(root.Key)
 
@@ -142,16 +157,28 @@ func renderObj(ctx context.Context, root Obj, out *strings.Builder, tmpSeenAttri
 			return fmt.Errorf("unexpected sub-elements in void element: %v", children)
 		}
 		out.WriteString("/>")
+		if cfg.Indent {
+			out.WriteString("\n")
+		}
 	} else {
 		out.WriteString(">")
+		if cfg.Indent && len(children) > 0 {
+			out.WriteString("\n")
+		}
 		for i, child := range children {
-			if err := renderObj(ctx, child, out, tmpSeenAttribs); err != nil {
+			if err := renderObj(ctx, child, out, tmpSeenAttribs, cfg, depth+1); err != nil {
 				return fmt.Errorf("failed to render sub-element %d (type %q): %w", i, child.Key, err)
 			}
+		}
+		if cfg.Indent && len(children) > 0 {
+			out.WriteString(indent)
 		}
 		out.WriteString("</")
 		out.WriteString(root.Key)
 		out.WriteString(">")
+		if cfg.Indent {
+			out.WriteString("\n")
+		}
 	}
 	return nil
 }

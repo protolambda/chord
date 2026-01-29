@@ -186,8 +186,18 @@ func Example_bootstrapGrid() {
 			bs.ColMD(6, text.Text("Left")),
 			bs.ColMD(6, text.Text("Right")),
 		),
-	))
-	// Output: <div class="container"><div class="row"><div class="col-md-6">Left</div><div class="col-md-6">Right</div></div></div>
+	), core.WithIndent())
+	// Output:
+	// <div class="container">
+	//   <div class="row">
+	//     <div class="col-md-6">
+	//       Left
+	//     </div>
+	//     <div class="col-md-6">
+	//       Right
+	//     </div>
+	//   </div>
+	// </div>
 }
 
 // Bootstrap utility classes (from ba package) can be combined freely.
@@ -330,6 +340,27 @@ func Example_complete() {
 			hx2.Get("/api/refresh"), hx2.Target("#stats"),
 			bi.ArrowClockwise, text.Text(" Refresh"),
 		),
-	))
-	// Output: <div class="container mt-4"><header><h1 class="mb-3">Dashboard</h1></header><div class="row"><div class="col-md-4"><div class="card"><div class="card-body">Users: 42</div></div></div></div><button class="btn btn-primary mt-3" hx-get="/api/refresh" hx-target="#stats"><i class="bi bi-arrow-clockwise"></i> Refresh</button></div>
+	), core.WithIndent())
+	// Output:
+	// <div class="container mt-4">
+	//   <header>
+	//     <h1 class="mb-3">
+	//       Dashboard
+	//     </h1>
+	//   </header>
+	//   <div class="row">
+	//     <div class="col-md-4">
+	//       <div class="card">
+	//         <div class="card-body">
+	//           Users: 42
+	//         </div>
+	//       </div>
+	//     </div>
+	//   </div>
+	//   <button class="btn btn-primary mt-3" hx-get="/api/refresh" hx-target="#stats">
+	//     <i class="bi bi-arrow-clockwise"></i>
+	//      Refresh
+	//   </button>
+	// </div>
+	//
 }
