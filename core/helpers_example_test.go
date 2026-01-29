@@ -39,3 +39,8 @@ func ExampleAttribute() {
 	Dump(Element("div", Attribute("data-x", "123")))
 	// Output: <div data-x="123"></div>
 }
+
+func ExampleComment() {
+	Dump(Element("div", Comment("Hello world")))
+	// Output: <div><!-- Hello world --></div>
+}

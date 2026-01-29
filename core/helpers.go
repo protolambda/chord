@@ -1,6 +1,7 @@
 package core
 
 import (
+	"html"
 	"slices"
 )
 
@@ -89,5 +90,14 @@ func VoidElement(name string, opts ...Node) Node {
 		Val:       "",
 		Void:      true,
 		SubNodes:  slices.Values(opts),
+	}
+}
+
+// Comment creates an HTML comment with string-escaped text content.
+func Comment(content string) Node {
+	return Obj{
+		IsElement: true,
+		Key:       "COMMENT", // avoid squashing of this element
+		Val:       "<!-- " + html.EscapeString(content) + " -->",
 	}
 }
