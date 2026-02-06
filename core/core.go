@@ -162,6 +162,14 @@ func renderObj(ctx context.Context, root Obj, out *strings.Builder, tmpSeenAttri
 		}
 	} else {
 		out.WriteString(">")
+
+		// Do not indent within <pre> tags.
+		if root.IsElement && root.Key == "pre" {
+			cpy := *cfg
+			cpy.Indent = false
+			cfg = &cpy
+		}
+
 		if cfg.Indent && len(children) > 0 {
 			out.WriteString("\n")
 		}

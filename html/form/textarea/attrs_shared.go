@@ -1,6 +1,10 @@
 package textarea
 
-import "github.com/protolambda/chord/core"
+import (
+	"html"
+
+	"github.com/protolambda/chord/core"
+)
 
 // Name sets the name attribute.
 func Name(v string) core.Node { return core.Attribute("name", v) }
@@ -9,7 +13,7 @@ func Name(v string) core.Node { return core.Attribute("name", v) }
 func Value(v string) core.Node { return core.Attribute("value", v) }
 
 // Placeholder sets the placeholder attribute.
-func Placeholder(v string) core.Node { return core.Attribute("placeholder", v) }
+func Placeholder(v string) core.Node { return core.Attribute("placeholder", html.EscapeString(v)) }
 
 // Required sets the required boolean attribute.
 func Required() core.Node { return core.BoolAttribute("required") }
