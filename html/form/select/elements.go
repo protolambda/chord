@@ -1,16 +1,19 @@
 // Package selectel provides HTML select elements (select, optgroup, option, datalist).
 package selectel
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
+)
 
 // Select creates a select element.
-func Select(opts ...core.Node) core.Node { return core.Element("select", opts...) }
+func Select(attrs ...attrib.Node) elem.Scope { return elem.New("select", attrs...) }
 
 // Optgroup creates an optgroup element.
-func Optgroup(opts ...core.Node) core.Node { return core.Element("optgroup", opts...) }
+func Optgroup(attrs ...attrib.Node) elem.Scope { return elem.New("optgroup", attrs...) }
 
 // Option creates an option element.
-func Option(opts ...core.Node) core.Node { return core.Element("option", opts...) }
+func Option(attrs ...attrib.Node) elem.Scope { return elem.New("option", attrs...) }
 
 // Datalist creates a datalist element.
-func Datalist(opts ...core.Node) core.Node { return core.Element("datalist", opts...) }
+func Datalist(attrs ...attrib.Node) elem.Scope { return elem.New("datalist", attrs...) }

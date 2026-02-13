@@ -3,142 +3,143 @@ package bs
 import (
 	"fmt"
 
-	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/group/div"
 )
 
 // Container creates a Bootstrap container div element.
-func Container(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("container"), opts...))
+func Container(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("container"), attrs...))
 }
 
 // ContainerFluid creates a Bootstrap container-fluid div element.
-func ContainerFluid(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("container-fluid"), opts...))
+func ContainerFluid(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("container-fluid"), attrs...))
 }
 
 // ContainerSM creates a Bootstrap container-sm div element.
-func ContainerSM(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("container-sm"), opts...))
+func ContainerSM(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("container-sm"), attrs...))
 }
 
 // ContainerMD creates a Bootstrap container-md div element.
-func ContainerMD(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("container-md"), opts...))
+func ContainerMD(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("container-md"), attrs...))
 }
 
 // ContainerLG creates a Bootstrap container-lg div element.
-func ContainerLG(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("container-lg"), opts...))
+func ContainerLG(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("container-lg"), attrs...))
 }
 
 // ContainerXL creates a Bootstrap container-xl div element.
-func ContainerXL(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("container-xl"), opts...))
+func ContainerXL(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("container-xl"), attrs...))
 }
 
 // ContainerXXL creates a Bootstrap container-xxl div element.
-func ContainerXXL(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("container-xxl"), opts...))
+func ContainerXXL(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("container-xxl"), attrs...))
 }
 
 // Row creates a Bootstrap row div element.
-func Row(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("row"), opts...))
+func Row(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("row"), attrs...))
 }
 
 // Col creates a Bootstrap col div element.
-func Col(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col"), opts...))
+func Col(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col"), attrs...))
 }
 
 // Col1 creates a Bootstrap col-1 div element.
-func Col1(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col-1"), opts...))
+func Col1(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col-1"), attrs...))
 }
 
 // Col2 creates a Bootstrap col-2 div element.
-func Col2(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col-2"), opts...))
+func Col2(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col-2"), attrs...))
 }
 
 // Col3 creates a Bootstrap col-3 div element.
-func Col3(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col-3"), opts...))
+func Col3(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col-3"), attrs...))
 }
 
 // Col4 creates a Bootstrap col-4 div element.
-func Col4(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col-4"), opts...))
+func Col4(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col-4"), attrs...))
 }
 
 // Col5 creates a Bootstrap col-5 div element.
-func Col5(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col-5"), opts...))
+func Col5(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col-5"), attrs...))
 }
 
 // Col6 creates a Bootstrap col-6 div element.
-func Col6(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col-6"), opts...))
+func Col6(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col-6"), attrs...))
 }
 
 // Col7 creates a Bootstrap col-7 div element.
-func Col7(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col-7"), opts...))
+func Col7(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col-7"), attrs...))
 }
 
 // Col8 creates a Bootstrap col-8 div element.
-func Col8(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col-8"), opts...))
+func Col8(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col-8"), attrs...))
 }
 
 // Col9 creates a Bootstrap col-9 div element.
-func Col9(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col-9"), opts...))
+func Col9(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col-9"), attrs...))
 }
 
 // Col10 creates a Bootstrap col-10 div element.
-func Col10(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col-10"), opts...))
+func Col10(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col-10"), attrs...))
 }
 
 // Col11 creates a Bootstrap col-11 div element.
-func Col11(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col-11"), opts...))
+func Col11(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col-11"), attrs...))
 }
 
 // Col12 creates a Bootstrap col-12 div element.
-func Col12(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col-12"), opts...))
+func Col12(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col-12"), attrs...))
 }
 
 // ColSM creates a Bootstrap col-sm-{n} div element.
-func ColSM(n int, opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class(fmt.Sprintf("col-sm-%d", n)), opts...))
+func ColSM(n int, attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class(fmt.Sprintf("col-sm-%d", n)), attrs...))
 }
 
 // ColMD creates a Bootstrap col-md-{n} div element.
-func ColMD(n int, opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class(fmt.Sprintf("col-md-%d", n)), opts...))
+func ColMD(n int, attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class(fmt.Sprintf("col-md-%d", n)), attrs...))
 }
 
 // ColLG creates a Bootstrap col-lg-{n} div element.
-func ColLG(n int, opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class(fmt.Sprintf("col-lg-%d", n)), opts...))
+func ColLG(n int, attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class(fmt.Sprintf("col-lg-%d", n)), attrs...))
 }
 
 // ColXL creates a Bootstrap col-xl-{n} div element.
-func ColXL(n int, opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class(fmt.Sprintf("col-xl-%d", n)), opts...))
+func ColXL(n int, attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class(fmt.Sprintf("col-xl-%d", n)), attrs...))
 }
 
 // ColXXL creates a Bootstrap col-xxl-{n} div element.
-func ColXXL(n int, opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class(fmt.Sprintf("col-xxl-%d", n)), opts...))
+func ColXXL(n int, attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class(fmt.Sprintf("col-xxl-%d", n)), attrs...))
 }
 
 // ColAuto creates a Bootstrap col-auto div element.
-func ColAuto(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("col-auto"), opts...))
+func ColAuto(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("col-auto"), attrs...))
 }

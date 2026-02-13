@@ -1,34 +1,36 @@
 // Package on provides DOM event handler attributes.
 package on
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+)
 
 // Click sets the onclick event handler.
-func Click(v string) core.Node { return core.Attribute("onclick", v) }
+func Click(v string) attrib.Node { return attrib.KV("onclick", v) }
 
 // DblClick sets the ondblclick event handler.
-func DblClick(v string) core.Node { return core.Attribute("ondblclick", v) }
+func DblClick(v string) attrib.Node { return attrib.KV("ondblclick", v) }
 
 // MouseDown sets the onmousedown event handler.
-func MouseDown(v string) core.Node { return core.Attribute("onmousedown", v) }
+func MouseDown(v string) attrib.Node { return attrib.KV("onmousedown", v) }
 
 // MouseUp sets the onmouseup event handler.
-func MouseUp(v string) core.Node { return core.Attribute("onmouseup", v) }
+func MouseUp(v string) attrib.Node { return attrib.KV("onmouseup", v) }
 
 // MouseMove sets the onmousemove event handler.
-func MouseMove(v string) core.Node { return core.Attribute("onmousemove", v) }
+func MouseMove(v string) attrib.Node { return attrib.KV("onmousemove", v) }
 
 // MouseOver sets the onmouseover event handler.
-func MouseOver(v string) core.Node { return core.Attribute("onmouseover", v) }
+func MouseOver(v string) attrib.Node { return attrib.KV("onmouseover", v) }
 
 // MouseOut sets the onmouseout event handler.
-func MouseOut(v string) core.Node { return core.Attribute("onmouseout", v) }
+func MouseOut(v string) attrib.Node { return attrib.KV("onmouseout", v) }
 
 // MouseEnter sets the onmouseenter event handler.
-func MouseEnter(v string) core.Node { return core.Attribute("onmouseenter", v) }
+func MouseEnter(v string) attrib.Node { return attrib.KV("onmouseenter", v) }
 
 // MouseLeave sets the onmouseleave event handler.
-func MouseLeave(v string) core.Node { return core.Attribute("onmouseleave", v) }
+func MouseLeave(v string) attrib.Node { return attrib.KV("onmouseleave", v) }
 
 // ContextMenu sets the oncontextmenu event handler.
-func ContextMenu(v string) core.Node { return core.Attribute("oncontextmenu", v) }
+func ContextMenu(v string) attrib.Node { return attrib.KV("oncontextmenu", v) }

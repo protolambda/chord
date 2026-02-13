@@ -1,6 +1,8 @@
 package text
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+)
 
 // Datetime sets the datetime attribute for time elements.
-func Datetime(v string) core.Node { return core.Attribute("datetime", v) }
+func Datetime(v string) attrib.Node { return attrib.KV("datetime", v) }

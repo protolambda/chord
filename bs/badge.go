@@ -1,42 +1,43 @@
 package bs
 
 import (
-	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/text"
 )
 
 // Badge creates a basic Bootstrap badge.
-func Badge(opts ...core.Node) core.Node {
-	return text.Span(core.Compose(attr.Class("badge"), opts...))
+func Badge(attrs ...attrib.Node) elem.Scope {
+	return text.Span(attrib.Cons(attr.Class("badge"), attrs...))
 }
 
 // BadgePrimary creates a primary Bootstrap badge.
-func BadgePrimary(opts ...core.Node) core.Node {
-	return text.Span(core.Compose(attr.Class("badge text-bg-primary"), opts...))
+func BadgePrimary(attrs ...attrib.Node) elem.Scope {
+	return text.Span(attrib.Cons(attr.Class("badge text-bg-primary"), attrs...))
 }
 
 // BadgeSecondary creates a secondary Bootstrap badge.
-func BadgeSecondary(opts ...core.Node) core.Node {
-	return text.Span(core.Compose(attr.Class("badge text-bg-secondary"), opts...))
+func BadgeSecondary(attrs ...attrib.Node) elem.Scope {
+	return text.Span(attrib.Cons(attr.Class("badge text-bg-secondary"), attrs...))
 }
 
 // BadgeSuccess creates a success Bootstrap badge.
-func BadgeSuccess(opts ...core.Node) core.Node {
-	return text.Span(core.Compose(attr.Class("badge text-bg-success"), opts...))
+func BadgeSuccess(attrs ...attrib.Node) elem.Scope {
+	return text.Span(attrib.Cons(attr.Class("badge text-bg-success"), attrs...))
 }
 
 // BadgeDanger creates a danger Bootstrap badge.
-func BadgeDanger(opts ...core.Node) core.Node {
-	return text.Span(core.Compose(attr.Class("badge text-bg-danger"), opts...))
+func BadgeDanger(attrs ...attrib.Node) elem.Scope {
+	return text.Span(attrib.Cons(attr.Class("badge text-bg-danger"), attrs...))
 }
 
 // BadgeWarning creates a warning Bootstrap badge.
-func BadgeWarning(opts ...core.Node) core.Node {
-	return text.Span(core.Compose(attr.Class("badge text-bg-warning"), opts...))
+func BadgeWarning(attrs ...attrib.Node) elem.Scope {
+	return text.Span(attrib.Cons(attr.Class("badge text-bg-warning"), attrs...))
 }
 
 // BadgeInfo creates an info Bootstrap badge.
-func BadgeInfo(opts ...core.Node) core.Node {
-	return text.Span(core.Compose(attr.Class("badge text-bg-info"), opts...))
+func BadgeInfo(attrs ...attrib.Node) elem.Scope {
+	return text.Span(attrib.Cons(attr.Class("badge text-bg-info"), attrs...))
 }

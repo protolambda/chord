@@ -2,22 +2,24 @@ package meta_test
 
 import (
 	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/meta"
 	"github.com/protolambda/chord/html/text"
 )
 
 func ExampleHTML() {
-	core.Dump(meta.HTML(core.Attribute("lang", "en")))
+	core.Dump(meta.HTML(attrib.KV("lang", "en")))
 	// Output: <html lang="en"></html>
 }
 
 func ExampleHead() {
-	core.Dump(meta.Head(meta.Title(text.Text("Page"))))
+	core.Dump(meta.Head()(meta.Title()(text.Text("Page"))))
 	// Output: <head><title>Page</title></head>
 }
 
 func ExampleTitle() {
-	core.Dump(meta.Title(text.Text("My Page")))
+	core.Dump(meta.Title()(text.Text("My Page")))
 	// Output: <title>My Page</title>
 }
 
@@ -42,6 +44,6 @@ func ExampleBase() {
 }
 
 func ExampleStyle() {
-	core.Dump(meta.Style(core.Raw("body { margin: 0; }")))
+	core.Dump(meta.Style()(elem.Raw("body { margin: 0; }")))
 	// Output: <style>body { margin: 0; }</style>
 }

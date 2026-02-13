@@ -1,6 +1,8 @@
 package interactive
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+)
 
 // Open sets the open boolean attribute.
-func Open() core.Node { return core.BoolAttribute("open") }
+func Open() attrib.Node { return attrib.Bool("open") }

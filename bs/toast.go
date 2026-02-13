@@ -3,7 +3,8 @@ package bs
 import (
 	"context"
 
-	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
@@ -11,35 +12,37 @@ import (
 
 // Toast represents a Bootstrap toast component.
 type Toast struct {
-	Header core.Node // toast-header content
-	Body   core.Node // toast-body content
-	Attrs  core.Node
+	Header elem.Node // toast-header content
+	Body   elem.Node // toast-body content
+	Attrs  attrib.Node
 }
 
-// Eval builds the toast structure with proper Bootstrap markup.
-func (t Toast) Eval(ctx context.Context) (core.Obj, error) {
-	var children []core.Node
-	if t.Attrs != nil {
-		children = append(children, t.Attrs)
-	}
-	children = append(children, attr.Class("toast"))
+func (Toast) ChordNode() {}
 
+// Eval builds the toast structure with proper Bootstrap markup.
+func (t Toast) Eval(ctx context.Context) (elem.Obj, error) {
+	var attrs []attrib.Node
+	if t.Attrs != nil {
+		attrs = append(attrs, t.Attrs)
+	}
+	attrs = append(attrs, attr.Class("toast"))
+
+	var children []elem.Node
 	if t.Header != nil {
-		header := div.Div(
-			attr.Class("toast-header"),
+		header := div.Div(attr.Class("toast-header"))(
 			t.Header,
 			button.Button(
 				attr.Class("btn-close"),
 				button.Type(button.TypeButton),
 				attr.Data("bs-dismiss", "toast"),
-			),
+			)(),
 		)
 		children = append(children, header)
 	}
 
 	if t.Body != nil {
-		children = append(children, div.Div(attr.Class("toast-body"), t.Body))
+		children = append(children, div.Div(attr.Class("toast-body"))(t.Body))
 	}
 
-	return div.Div(children...).Eval(ctx)
+	return div.Div(attrs...)(children...).Eval(ctx)
 }

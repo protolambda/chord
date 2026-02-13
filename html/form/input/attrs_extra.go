@@ -1,6 +1,8 @@
 package input
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+)
 
 // InputType represents valid input type values.
 type InputType string
@@ -31,4 +33,4 @@ const (
 )
 
 // Type sets the type attribute with a typed InputType.
-func Type(t InputType) core.Node { return core.Attribute("type", string(t)) }
+func Type(t InputType) attrib.Node { return attrib.KV("type", string(t)) }

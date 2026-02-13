@@ -2,12 +2,13 @@ package output_test
 
 import (
 	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
 	"github.com/protolambda/chord/html/form/output"
 	"github.com/protolambda/chord/html/text"
 )
 
 func ExampleOutput() {
-	core.Dump(output.Output(output.For("a b"), core.Attribute("name", "result"), text.Text("0")))
+	core.Dump(output.Output(output.For("a b"), attrib.KV("name", "result"))(text.Text("0")))
 	// Output: <output for="a b" name="result">0</output>
 }
 
@@ -22,6 +23,6 @@ func ExampleMeter() {
 }
 
 func ExampleProgress_indeterminate() {
-	core.Dump(output.Progress(text.Text("Loading...")))
+	core.Dump(output.Progress()(text.Text("Loading...")))
 	// Output: <progress>Loading...</progress>
 }

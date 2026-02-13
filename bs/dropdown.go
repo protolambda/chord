@@ -3,7 +3,8 @@ package bs
 import (
 	"context"
 
-	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
@@ -14,49 +15,51 @@ import (
 
 // Dropdown represents a Bootstrap dropdown component.
 type Dropdown struct {
-	Toggle core.Node   // toggle button content
-	Items  []core.Node // dropdown items
-	Attrs  core.Node
+	Toggle elem.Node   // toggle button content
+	Items  []elem.Node // dropdown items
+	Attrs  attrib.Node
 }
 
+func (Dropdown) ChordNode() {}
+
 // Eval builds the dropdown structure with proper Bootstrap markup.
-func (d Dropdown) Eval(ctx context.Context) (core.Obj, error) {
-	var children []core.Node
+func (d Dropdown) Eval(ctx context.Context) (elem.Obj, error) {
+	var dropdownAttrs []attrib.Node
 	if d.Attrs != nil {
-		children = append(children, d.Attrs)
+		dropdownAttrs = append(dropdownAttrs, d.Attrs)
 	}
-	children = append(children, attr.Class("dropdown"))
+	dropdownAttrs = append(dropdownAttrs, attr.Class("dropdown"))
 
 	toggleBtn := button.Button(
 		attr.Class("btn btn-secondary dropdown-toggle"),
 		button.Type(button.TypeButton),
 		attr.Data("bs-toggle", "dropdown"),
-		d.Toggle,
-	)
+	)(d.Toggle)
 
-	menu := list.UL(
-		core.Compose(attr.Class("dropdown-menu"), d.Items...),
-	)
+	menu := list.UL(attr.Class("dropdown-menu"))(d.Items...)
 
-	children = append(children, toggleBtn, menu)
-	return div.Div(children...).Eval(ctx)
+	return div.Div(dropdownAttrs...)(toggleBtn, menu).Eval(ctx)
 }
 
 // DropdownItem creates a Bootstrap dropdown item.
-func DropdownItem(opts ...core.Node) core.Node {
-	return list.LI(
-		text.A(core.Compose(attr.Class("dropdown-item"), opts...)),
-	)
+func DropdownItem(attrs ...attrib.Node) elem.Scope {
+	return func(children ...elem.Node) elem.Node {
+		return list.LI()(
+			text.A(attrib.Cons(attr.Class("dropdown-item"), attrs...))(children...),
+		)
+	}
 }
 
 // DropdownDivider creates a Bootstrap dropdown divider.
-func DropdownDivider() core.Node {
-	return list.LI(text.HR(attr.Class("dropdown-divider")))
+func DropdownDivider() elem.Node {
+	return list.LI()(text.HR(attr.Class("dropdown-divider")))
 }
 
 // DropdownHeader creates a Bootstrap dropdown header.
-func DropdownHeader(opts ...core.Node) core.Node {
-	return list.LI(
-		section.H6(core.Compose(attr.Class("dropdown-header"), opts...)),
-	)
+func DropdownHeader(attrs ...attrib.Node) elem.Scope {
+	return func(children ...elem.Node) elem.Node {
+		return list.LI()(
+			section.H6(attrib.Cons(attr.Class("dropdown-header"), attrs...))(children...),
+		)
+	}
 }

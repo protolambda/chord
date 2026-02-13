@@ -1,7 +1,10 @@
 // Package input provides the HTML input element and its attributes.
 package input
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
+)
 
 // Input creates an input element (void).
-func Input(opts ...core.Node) core.Node { return core.VoidElement("input", opts...) }
+func Input(attrs ...attrib.Node) elem.Node { return elem.Void("input", attrs...) }

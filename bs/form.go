@@ -1,7 +1,8 @@
 package bs
 
 import (
-	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/label"
 	"github.com/protolambda/chord/html/group/div"
@@ -9,36 +10,36 @@ import (
 )
 
 // FormGroup creates a Bootstrap form group (mb-3 div wrapper).
-func FormGroup(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("mb-3"), opts...))
+func FormGroup(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("mb-3"), attrs...))
 }
 
 // FormLabel creates a Bootstrap form label.
-func FormLabel(opts ...core.Node) core.Node {
-	return label.Label(core.Compose(attr.Class("form-label"), opts...))
+func FormLabel(attrs ...attrib.Node) elem.Scope {
+	return label.Label(attrib.Cons(attr.Class("form-label"), attrs...))
 }
 
 // FormCheck creates a Bootstrap form check wrapper.
-func FormCheck(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("form-check"), opts...))
+func FormCheck(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("form-check"), attrs...))
 }
 
 // FormCheckLabel creates a Bootstrap form check label.
-func FormCheckLabel(opts ...core.Node) core.Node {
-	return label.Label(core.Compose(attr.Class("form-check-label"), opts...))
+func FormCheckLabel(attrs ...attrib.Node) elem.Scope {
+	return label.Label(attrib.Cons(attr.Class("form-check-label"), attrs...))
 }
 
 // FormText creates a Bootstrap form text helper.
-func FormText(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("form-text"), opts...))
+func FormText(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("form-text"), attrs...))
 }
 
 // InputGroup creates a Bootstrap input group.
-func InputGroup(opts ...core.Node) core.Node {
-	return div.Div(core.Compose(attr.Class("input-group"), opts...))
+func InputGroup(attrs ...attrib.Node) elem.Scope {
+	return div.Div(attrib.Cons(attr.Class("input-group"), attrs...))
 }
 
 // InputGroupText creates a Bootstrap input group text addon.
-func InputGroupText(opts ...core.Node) core.Node {
-	return text.Span(core.Compose(attr.Class("input-group-text"), opts...))
+func InputGroupText(attrs ...attrib.Node) elem.Scope {
+	return text.Span(attrib.Cons(attr.Class("input-group-text"), attrs...))
 }

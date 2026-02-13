@@ -1,17 +1,18 @@
 package bs
 
 import (
-	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/group/list"
 )
 
 // ListGroup creates a Bootstrap list group.
-func ListGroup(opts ...core.Node) core.Node {
-	return list.UL(core.Compose(attr.Class("list-group"), opts...))
+func ListGroup(attrs ...attrib.Node) elem.Scope {
+	return list.UL(attrib.Cons(attr.Class("list-group"), attrs...))
 }
 
 // ListGroupItem creates a Bootstrap list group item.
-func ListGroupItem(opts ...core.Node) core.Node {
-	return list.LI(core.Compose(attr.Class("list-group-item"), opts...))
+func ListGroupItem(attrs ...attrib.Node) elem.Scope {
+	return list.LI(attrib.Cons(attr.Class("list-group-item"), attrs...))
 }

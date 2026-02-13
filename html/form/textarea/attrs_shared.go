@@ -3,29 +3,29 @@ package textarea
 import (
 	"html"
 
-	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
 )
 
 // Name sets the name attribute.
-func Name(v string) core.Node { return core.Attribute("name", v) }
+func Name(v string) attrib.Node { return attrib.KV("name", v) }
 
 // Value sets the value attribute.
-func Value(v string) core.Node { return core.Attribute("value", v) }
+func Value(v string) attrib.Node { return attrib.KV("value", v) }
 
 // Placeholder sets the placeholder attribute.
-func Placeholder(v string) core.Node { return core.Attribute("placeholder", html.EscapeString(v)) }
+func Placeholder(v string) attrib.Node { return attrib.KV("placeholder", html.EscapeString(v)) }
 
 // Required sets the required boolean attribute.
-func Required() core.Node { return core.BoolAttribute("required") }
+func Required() attrib.Node { return attrib.Bool("required") }
 
 // Disabled sets the disabled boolean attribute.
-func Disabled() core.Node { return core.BoolAttribute("disabled") }
+func Disabled() attrib.Node { return attrib.Bool("disabled") }
 
 // Readonly sets the readonly boolean attribute.
-func Readonly() core.Node { return core.BoolAttribute("readonly") }
+func Readonly() attrib.Node { return attrib.Bool("readonly") }
 
 // Autofocus sets the autofocus boolean attribute.
-func Autofocus() core.Node { return core.BoolAttribute("autofocus") }
+func Autofocus() attrib.Node { return attrib.Bool("autofocus") }
 
 // Autocomplete sets the autocomplete attribute.
-func Autocomplete(v string) core.Node { return core.Attribute("autocomplete", v) }
+func Autocomplete(v string) attrib.Node { return attrib.KV("autocomplete", v) }

@@ -3,10 +3,10 @@ package text
 import (
 	"html"
 
-	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/elem"
 )
 
 // Text creates a node with text, no element wrapper. The text will be HTML-escaped.
-func Text(v string) core.Node {
-	return core.Raw(html.EscapeString(v))
+func Text(v string) elem.Node {
+	return elem.Raw(html.EscapeString(v))
 }

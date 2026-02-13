@@ -1,27 +1,29 @@
 package meta
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+)
 
 // Href sets the href attribute.
-func Href(v string) core.Node { return core.Attribute("href", v) }
+func Href(v string) attrib.Node { return attrib.KV("href", v) }
 
 // Rel sets the rel attribute.
-func Rel(v string) core.Node { return core.Attribute("rel", v) }
+func Rel(v string) attrib.Node { return attrib.KV("rel", v) }
 
 // Type sets the type attribute.
-func Type(v string) core.Node { return core.Attribute("type", v) }
+func Type(v string) attrib.Node { return attrib.KV("type", v) }
 
 // Media sets the media attribute.
-func Media(v string) core.Node { return core.Attribute("media", v) }
+func Media(v string) attrib.Node { return attrib.KV("media", v) }
 
 // Sizes sets the sizes attribute.
-func Sizes(v string) core.Node { return core.Attribute("sizes", v) }
+func Sizes(v string) attrib.Node { return attrib.KV("sizes", v) }
 
 // Crossorigin sets the crossorigin attribute.
-func Crossorigin(v string) core.Node { return core.Attribute("crossorigin", v) }
+func Crossorigin(v string) attrib.Node { return attrib.KV("crossorigin", v) }
 
 // Integrity sets the integrity attribute.
-func Integrity(v string) core.Node { return core.Attribute("integrity", v) }
+func Integrity(v string) attrib.Node { return attrib.KV("integrity", v) }
 
 // Referrerpolicy sets the referrerpolicy attribute.
-func Referrerpolicy(v string) core.Node { return core.Attribute("referrerpolicy", v) }
+func Referrerpolicy(v string) attrib.Node { return attrib.KV("referrerpolicy", v) }

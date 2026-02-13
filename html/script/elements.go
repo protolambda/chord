@@ -1,16 +1,19 @@
 // Package script provides HTML scripting elements.
 package script
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
+)
 
 // Script creates a script element.
-func Script(opts ...core.Node) core.Node { return core.Element("script", opts...) }
+func Script(attrs ...attrib.Node) elem.Scope { return elem.New("script", attrs...) }
 
 // Noscript creates a noscript element.
-func Noscript(opts ...core.Node) core.Node { return core.Element("noscript", opts...) }
+func Noscript(attrs ...attrib.Node) elem.Scope { return elem.New("noscript", attrs...) }
 
 // Template creates a template element.
-func Template(opts ...core.Node) core.Node { return core.Element("template", opts...) }
+func Template(attrs ...attrib.Node) elem.Scope { return elem.New("template", attrs...) }
 
 // Canvas creates a canvas element.
-func Canvas(opts ...core.Node) core.Node { return core.Element("canvas", opts...) }
+func Canvas(attrs ...attrib.Node) elem.Scope { return elem.New("canvas", attrs...) }

@@ -8,12 +8,12 @@ import (
 )
 
 func ExampleLabel() {
-	core.Dump(label.Label(label.For("email"), text.Text("Email:")))
+	core.Dump(label.Label(label.For("email"))(text.Text("Email:")))
 	// Output: <label for="email">Email:</label>
 }
 
 func ExampleLabel_wrapped() {
-	core.Dump(label.Label(
+	core.Dump(label.Label()(
 		text.Text("Name: "),
 		input.Input(input.Type("text"), input.Name("name")),
 	))

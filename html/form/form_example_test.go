@@ -9,16 +9,16 @@ import (
 )
 
 func ExampleForm() {
-	core.Dump(form.Form(form.Action("/submit"), form.Method("post"),
+	core.Dump(form.Form(form.Action("/submit"), form.Method("post"))(
 		input.Input(input.Type("text"), input.Name("name")),
-		button.Button(button.Type(button.TypeSubmit), text.Text("Submit")),
+		button.Button(button.Type(button.TypeSubmit))(text.Text("Submit")),
 	))
 	// Output: <form action="/submit" method="post"><input type="text" name="name"/><button type="submit">Submit</button></form>
 }
 
 func ExampleFieldset() {
-	core.Dump(form.Fieldset(
-		form.Legend(text.Text("Personal Info")),
+	core.Dump(form.Fieldset()(
+		form.Legend()(text.Text("Personal Info")),
 		input.Input(input.Type("text"), input.Name("name")),
 	))
 	// Output: <fieldset><legend>Personal Info</legend><input type="text" name="name"/></fieldset>

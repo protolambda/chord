@@ -4,7 +4,8 @@ package bi
 import (
 	"context"
 
-	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
 )
 
 // Icon is a bootstrap icon enum value, and can be used directly as element.
@@ -12,10 +13,10 @@ import (
 // This assumes the icons CSS is available.
 type Icon string
 
-var _ core.Node = Icon("")
+var _ elem.Node = Icon("")
 
-func (i Icon) Eval(ctx context.Context) (core.Obj, error) {
-	return core.Element("i", core.Attribute("class", "bi bi-"+string(i))).Eval(ctx)
+func (i Icon) Eval(ctx context.Context) (elem.Obj, error) {
+	return elem.New("i", attrib.KV("class", "bi bi-"+string(i)))().Eval(ctx)
 }
 
 // Icons can be found at:

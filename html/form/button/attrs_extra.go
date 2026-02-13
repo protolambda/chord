@@ -1,6 +1,8 @@
 package button
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+)
 
 // ButtonType represents valid button type values.
 type ButtonType string
@@ -12,4 +14,4 @@ const (
 )
 
 // Type sets the type attribute with a typed ButtonType.
-func Type(t ButtonType) core.Node { return core.Attribute("type", string(t)) }
+func Type(t ButtonType) attrib.Node { return attrib.KV("type", string(t)) }

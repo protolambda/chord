@@ -2,6 +2,8 @@ package script_test
 
 import (
 	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/script"
 	"github.com/protolambda/chord/html/text"
@@ -13,7 +15,7 @@ func ExampleScript() {
 }
 
 func ExampleScript_inline() {
-	core.Dump(script.Script(core.Raw("console.log('hello');")))
+	core.Dump(script.Script()(elem.Raw("console.log('hello');")))
 	// Output: <script>console.log('hello');</script>
 }
 
@@ -23,16 +25,16 @@ func ExampleScript_module() {
 }
 
 func ExampleNoscript() {
-	core.Dump(script.Noscript(text.Text("JavaScript required")))
+	core.Dump(script.Noscript()(text.Text("JavaScript required")))
 	// Output: <noscript>JavaScript required</noscript>
 }
 
 func ExampleTemplate() {
-	core.Dump(script.Template(attr.ID("item-tpl"), text.Span(text.Text("Item"))))
+	core.Dump(script.Template(attr.ID("item-tpl"))(text.Span()(text.Text("Item"))))
 	// Output: <template id="item-tpl"><span>Item</span></template>
 }
 
 func ExampleCanvas() {
-	core.Dump(script.Canvas(attr.ID("game"), core.Attribute("width", "800"), core.Attribute("height", "600")))
+	core.Dump(script.Canvas(attr.ID("game"), attrib.KV("width", "800"), attrib.KV("height", "600")))
 	// Output: <canvas id="game" width="800" height="600"></canvas>
 }

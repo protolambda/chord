@@ -1,13 +1,16 @@
 // Package object provides HTML object elements (object, param, embed).
 package object
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
+)
 
 // Object creates an object element.
-func Object(opts ...core.Node) core.Node { return core.Element("object", opts...) }
+func Object(attrs ...attrib.Node) elem.Scope { return elem.New("object", attrs...) }
 
 // Param creates a param element (void).
-func Param(opts ...core.Node) core.Node { return core.VoidElement("param", opts...) }
+func Param(attrs ...attrib.Node) elem.Node { return elem.Void("param", attrs...) }
 
 // Embed creates an embed element (void).
-func Embed(opts ...core.Node) core.Node { return core.VoidElement("embed", opts...) }
+func Embed(attrs ...attrib.Node) elem.Node { return elem.Void("embed", attrs...) }

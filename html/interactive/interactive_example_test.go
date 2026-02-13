@@ -8,22 +8,22 @@ import (
 )
 
 func ExampleDetails() {
-	core.Dump(interactive.Details(
-		interactive.Summary(text.Text("Click to expand")),
-		text.P(text.Text("Hidden content")),
+	core.Dump(interactive.Details()(
+		interactive.Summary()(text.Text("Click to expand")),
+		text.P()(text.Text("Hidden content")),
 	))
 	// Output: <details><summary>Click to expand</summary><p>Hidden content</p></details>
 }
 
 func ExampleDetails_open() {
-	core.Dump(interactive.Details(interactive.Open(),
-		interactive.Summary(text.Text("Expanded")),
+	core.Dump(interactive.Details(interactive.Open())(
+		interactive.Summary()(text.Text("Expanded")),
 	))
 	// Output: <details open><summary>Expanded</summary></details>
 }
 
 func ExampleDialog() {
-	core.Dump(interactive.Dialog(attr.ID("modal"), text.P(text.Text("Dialog content"))))
+	core.Dump(interactive.Dialog(attr.ID("modal"))(text.P()(text.Text("Dialog content"))))
 	// Output: <dialog id="modal"><p>Dialog content</p></dialog>
 }
 

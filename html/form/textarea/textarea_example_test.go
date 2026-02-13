@@ -7,7 +7,7 @@ import (
 )
 
 func ExampleTextarea() {
-	core.Dump(textarea.Textarea(textarea.Name("message"), text.Text("Default text")))
+	core.Dump(textarea.Textarea(textarea.Name("message"))(text.Text("Default text")))
 	// Output: <textarea name="message">Default text</textarea>
 }
 

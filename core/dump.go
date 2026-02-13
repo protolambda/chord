@@ -4,17 +4,19 @@ import (
 	"context"
 	"fmt"
 	"strings"
+
+	"github.com/protolambda/chord/core/elem"
 )
 
-// Dump prints the node to stdout,
+// Dump prints the element to stdout,
 // for convenience in testing and debugging.
-func Dump(v Node, opts ...Option) {
+func Dump(v elem.Node, opts ...Option) {
 	DumpCtx(context.Background(), v, opts...)
 }
 
-// DumpCtx prints the node (evaluated with ctx) to stdout,
+// DumpCtx prints the element (evaluated with ctx) to stdout,
 // for convenience in testing and debugging.
-func DumpCtx(ctx context.Context, v Node, opts ...Option) {
+func DumpCtx(ctx context.Context, v elem.Node, opts ...Option) {
 	var out strings.Builder
 	err := Render(ctx, v, &out, opts...)
 	if err != nil {

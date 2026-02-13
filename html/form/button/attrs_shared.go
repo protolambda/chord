@@ -1,15 +1,17 @@
 package button
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+)
 
 // Name sets the name attribute.
-func Name(v string) core.Node { return core.Attribute("name", v) }
+func Name(v string) attrib.Node { return attrib.KV("name", v) }
 
 // Value sets the value attribute.
-func Value(v string) core.Node { return core.Attribute("value", v) }
+func Value(v string) attrib.Node { return attrib.KV("value", v) }
 
 // Disabled sets the disabled boolean attribute.
-func Disabled() core.Node { return core.BoolAttribute("disabled") }
+func Disabled() attrib.Node { return attrib.Bool("disabled") }
 
 // Autofocus sets the autofocus boolean attribute.
-func Autofocus() core.Node { return core.BoolAttribute("autofocus") }
+func Autofocus() attrib.Node { return attrib.Bool("autofocus") }

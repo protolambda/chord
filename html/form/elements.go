@@ -1,13 +1,16 @@
 // Package form provides HTML form structure elements.
 package form
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
+)
 
 // Form creates a form element.
-func Form(opts ...core.Node) core.Node { return core.Element("form", opts...) }
+func Form(attrs ...attrib.Node) elem.Scope { return elem.New("form", attrs...) }
 
 // Fieldset creates a fieldset element.
-func Fieldset(opts ...core.Node) core.Node { return core.Element("fieldset", opts...) }
+func Fieldset(attrs ...attrib.Node) elem.Scope { return elem.New("fieldset", attrs...) }
 
 // Legend creates a legend element.
-func Legend(opts ...core.Node) core.Node { return core.Element("legend", opts...) }
+func Legend(attrs ...attrib.Node) elem.Scope { return elem.New("legend", attrs...) }

@@ -3,7 +3,8 @@ package bs
 import (
 	"context"
 
-	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
@@ -13,59 +14,60 @@ import (
 // Offcanvas represents a Bootstrap offcanvas component.
 type Offcanvas struct {
 	ID        string    // required for targeting
-	Title     core.Node // offcanvas-title
-	Body      core.Node // offcanvas-body
+	Title     elem.Node // offcanvas-title
+	Body      elem.Node // offcanvas-body
 	Placement string    // "start", "end", "top", "bottom"
 	Backdrop  bool      // show backdrop
 	Scroll    bool      // allow body scroll
-	Attrs     core.Node
+	Attrs     attrib.Node
 }
 
+func (Offcanvas) ChordNode() {}
+
 // Eval builds the offcanvas structure with proper Bootstrap markup.
-func (o Offcanvas) Eval(ctx context.Context) (core.Obj, error) {
+func (o Offcanvas) Eval(ctx context.Context) (elem.Obj, error) {
 	placement := o.Placement
 	if placement == "" {
 		placement = "start"
 	}
 
-	var children []core.Node
+	var attrs []attrib.Node
 	if o.Attrs != nil {
-		children = append(children, o.Attrs)
+		attrs = append(attrs, o.Attrs)
 	}
-	children = append(children,
+	attrs = append(attrs,
 		attr.Class("offcanvas offcanvas-"+placement),
 		attr.ID(o.ID),
 		attr.Tabindex("-1"),
 	)
 
 	if o.Scroll {
-		children = append(children, attr.Data("bs-scroll", "true"))
+		attrs = append(attrs, attr.Data("bs-scroll", "true"))
 	}
 	if !o.Backdrop {
-		children = append(children, attr.Data("bs-backdrop", "false"))
+		attrs = append(attrs, attr.Data("bs-backdrop", "false"))
 	}
 
-	header := div.Div(
-		attr.Class("offcanvas-header"),
-		section.H5(attr.Class("offcanvas-title"), o.Title),
+	header := div.Div(attr.Class("offcanvas-header"))(
+		section.H5(attr.Class("offcanvas-title"))(o.Title),
 		button.Button(
 			attr.Class("btn-close"),
 			button.Type(button.TypeButton),
 			attr.Data("bs-dismiss", "offcanvas"),
-		),
+		)(),
 	)
 
-	body := div.Div(attr.Class("offcanvas-body"), o.Body)
+	body := div.Div(attr.Class("offcanvas-body"))(o.Body)
 
-	children = append(children, header, body)
-	return div.Div(children...).Eval(ctx)
+	return div.Div(attrs...)(header, body).Eval(ctx)
 }
 
 // OffcanvasTrigger creates a button that triggers an offcanvas.
-func OffcanvasTrigger(targetID string, opts ...core.Node) core.Node {
-	return button.Button(core.Compose(
+func OffcanvasTrigger(targetID string, attrs ...attrib.Node) elem.Scope {
+	return button.Button(attrib.Cons(
 		button.Type(button.TypeButton),
 		attr.Data("bs-toggle", "offcanvas"),
 		attr.Data("bs-target", "#"+targetID),
-	), core.Bundle(opts...))
+		attrib.Bundle(attrs),
+	))
 }

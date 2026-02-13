@@ -1,6 +1,8 @@
 package hx2
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+)
 
 // On sets the hx-on:* attribute for HTMX v2 event binding.
 // This generates hx-on:event="handler" (e.g., hx-on:click="...").
@@ -11,7 +13,7 @@ import "github.com/protolambda/chord/core"
 // standard DOM event attributes like onclick="handler".
 // Use hx2.On for HTMX-specific event handling that integrates with
 // HTMX's event system and lifecycle.
-func On(event, handler string) core.Node { return core.Attribute("hx-on:"+event, handler) }
+func On(event, handler string) attrib.Node { return attrib.KV("hx-on:"+event, handler) }
 
 // Inherit sets the hx-inherit attribute to control attribute inheritance.
-func Inherit(v string) core.Node { return core.Attribute("hx-inherit", v) }
+func Inherit(v string) attrib.Node { return attrib.KV("hx-inherit", v) }

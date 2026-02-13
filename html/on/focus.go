@@ -1,15 +1,17 @@
 package on
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+)
 
 // Focus sets the onfocus event handler.
-func Focus(v string) core.Node { return core.Attribute("onfocus", v) }
+func Focus(v string) attrib.Node { return attrib.KV("onfocus", v) }
 
 // Blur sets the onblur event handler.
-func Blur(v string) core.Node { return core.Attribute("onblur", v) }
+func Blur(v string) attrib.Node { return attrib.KV("onblur", v) }
 
 // FocusIn sets the onfocusin event handler.
-func FocusIn(v string) core.Node { return core.Attribute("onfocusin", v) }
+func FocusIn(v string) attrib.Node { return attrib.KV("onfocusin", v) }
 
 // FocusOut sets the onfocusout event handler.
-func FocusOut(v string) core.Node { return core.Attribute("onfocusout", v) }
+func FocusOut(v string) attrib.Node { return attrib.KV("onfocusout", v) }

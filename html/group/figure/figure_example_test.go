@@ -8,14 +8,14 @@ import (
 )
 
 func ExampleFigure() {
-	core.Dump(figure.Figure(
+	core.Dump(figure.Figure()(
 		img.Img(img.Src("photo.jpg"), img.Alt("A photo")),
-		figure.Figcaption(text.Text("Photo caption")),
+		figure.Figcaption()(text.Text("Photo caption")),
 	))
 	// Output: <figure><img src="photo.jpg" alt="A photo"/><figcaption>Photo caption</figcaption></figure>
 }
 
 func ExampleFigcaption() {
-	core.Dump(figure.Figcaption(text.Text("Figure 1: Example")))
+	core.Dump(figure.Figcaption()(text.Text("Figure 1: Example")))
 	// Output: <figcaption>Figure 1: Example</figcaption>
 }

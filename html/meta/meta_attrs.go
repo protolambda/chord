@@ -1,15 +1,17 @@
 package meta
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+)
 
 // Charset sets the charset attribute.
-func Charset(v string) core.Node { return core.Attribute("charset", v) }
+func Charset(v string) attrib.Node { return attrib.KV("charset", v) }
 
 // Content sets the content attribute.
-func Content(v string) core.Node { return core.Attribute("content", v) }
+func Content(v string) attrib.Node { return attrib.KV("content", v) }
 
 // HttpEquiv sets the http-equiv attribute.
-func HttpEquiv(v string) core.Node { return core.Attribute("http-equiv", v) }
+func HttpEquiv(v string) attrib.Node { return attrib.KV("http-equiv", v) }
 
 // Name sets the name attribute.
-func Name(v string) core.Node { return core.Attribute("name", v) }
+func Name(v string) attrib.Node { return attrib.KV("name", v) }

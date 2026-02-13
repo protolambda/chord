@@ -2,6 +2,8 @@ package hx1_test
 
 import (
 	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
@@ -10,22 +12,22 @@ import (
 )
 
 func ExampleGet() {
-	core.Dump(button.Button(hx1.Get("/api/data"), text.Text("Load")))
+	core.Dump(button.Button(hx1.Get("/api/data"))(text.Text("Load")))
 	// Output: <button hx-get="/api/data">Load</button>
 }
 
 func ExamplePost() {
-	core.Dump(core.Element("form", hx1.Post("/api/submit")))
+	core.Dump(elem.New("form", hx1.Post("/api/submit")))
 	// Output: <form hx-post="/api/submit"></form>
 }
 
 func ExamplePut() {
-	core.Dump(button.Button(hx1.Put("/api/update"), text.Text("Update")))
+	core.Dump(button.Button(hx1.Put("/api/update"))(text.Text("Update")))
 	// Output: <button hx-put="/api/update">Update</button>
 }
 
 func ExampleDelete() {
-	core.Dump(button.Button(hx1.Delete("/api/item/1"), text.Text("Delete")))
+	core.Dump(button.Button(hx1.Delete("/api/item/1"))(text.Text("Delete")))
 	// Output: <button hx-delete="/api/item/1">Delete</button>
 }
 
@@ -50,7 +52,7 @@ func ExampleIndicator() {
 }
 
 func ExampleBoost() {
-	core.Dump(text.A(core.Attribute("href", "/page"), hx1.Boost("true")))
+	core.Dump(text.A(attrib.KV("href", "/page"), hx1.Boost("true")))
 	// Output: <a href="/page" hx-boost="true"></a>
 }
 

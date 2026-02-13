@@ -1,103 +1,106 @@
 // Package text provides HTML text-level semantic elements.
 package text
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
+)
 
 // A creates an a (anchor) element.
-func A(opts ...core.Node) core.Node { return core.Element("a", opts...) }
+func A(attrs ...attrib.Node) elem.Scope { return elem.New("a", attrs...) }
 
 // EM creates an em element.
-func EM(opts ...core.Node) core.Node { return core.Element("em", opts...) }
+func EM(attrs ...attrib.Node) elem.Scope { return elem.New("em", attrs...) }
 
 // Strong creates a strong element.
-func Strong(opts ...core.Node) core.Node { return core.Element("strong", opts...) }
+func Strong(attrs ...attrib.Node) elem.Scope { return elem.New("strong", attrs...) }
 
 // Small creates a small element.
-func Small(opts ...core.Node) core.Node { return core.Element("small", opts...) }
+func Small(attrs ...attrib.Node) elem.Scope { return elem.New("small", attrs...) }
 
 // S creates an s element.
-func S(opts ...core.Node) core.Node { return core.Element("s", opts...) }
+func S(attrs ...attrib.Node) elem.Scope { return elem.New("s", attrs...) }
 
 // Cite creates a cite element.
-func Cite(opts ...core.Node) core.Node { return core.Element("cite", opts...) }
+func Cite(attrs ...attrib.Node) elem.Scope { return elem.New("cite", attrs...) }
 
 // Q creates a q element.
-func Q(opts ...core.Node) core.Node { return core.Element("q", opts...) }
+func Q(attrs ...attrib.Node) elem.Scope { return elem.New("q", attrs...) }
 
 // Dfn creates a dfn element.
-func Dfn(opts ...core.Node) core.Node { return core.Element("dfn", opts...) }
+func Dfn(attrs ...attrib.Node) elem.Scope { return elem.New("dfn", attrs...) }
 
 // Abbr creates an abbr element.
-func Abbr(opts ...core.Node) core.Node { return core.Element("abbr", opts...) }
+func Abbr(attrs ...attrib.Node) elem.Scope { return elem.New("abbr", attrs...) }
 
 // Ruby creates a ruby element.
-func Ruby(opts ...core.Node) core.Node { return core.Element("ruby", opts...) }
+func Ruby(attrs ...attrib.Node) elem.Scope { return elem.New("ruby", attrs...) }
 
 // RT creates an rt element.
-func RT(opts ...core.Node) core.Node { return core.Element("rt", opts...) }
+func RT(attrs ...attrib.Node) elem.Scope { return elem.New("rt", attrs...) }
 
 // RP creates an rp element.
-func RP(opts ...core.Node) core.Node { return core.Element("rp", opts...) }
+func RP(attrs ...attrib.Node) elem.Scope { return elem.New("rp", attrs...) }
 
 // Data creates a data element.
-func Data(opts ...core.Node) core.Node { return core.Element("data", opts...) }
+func Data(attrs ...attrib.Node) elem.Scope { return elem.New("data", attrs...) }
 
 // Time creates a time element.
-func Time(opts ...core.Node) core.Node { return core.Element("time", opts...) }
+func Time(attrs ...attrib.Node) elem.Scope { return elem.New("time", attrs...) }
 
 // Code creates a code element.
-func Code(opts ...core.Node) core.Node { return core.Element("code", opts...) }
+func Code(attrs ...attrib.Node) elem.Scope { return elem.New("code", attrs...) }
 
 // Var creates a var element.
-func Var(opts ...core.Node) core.Node { return core.Element("var", opts...) }
+func Var(attrs ...attrib.Node) elem.Scope { return elem.New("var", attrs...) }
 
 // Samp creates a samp element.
-func Samp(opts ...core.Node) core.Node { return core.Element("samp", opts...) }
+func Samp(attrs ...attrib.Node) elem.Scope { return elem.New("samp", attrs...) }
 
 // Kbd creates a kbd element.
-func Kbd(opts ...core.Node) core.Node { return core.Element("kbd", opts...) }
+func Kbd(attrs ...attrib.Node) elem.Scope { return elem.New("kbd", attrs...) }
 
 // Sub creates a sub element.
-func Sub(opts ...core.Node) core.Node { return core.Element("sub", opts...) }
+func Sub(attrs ...attrib.Node) elem.Scope { return elem.New("sub", attrs...) }
 
 // Sup creates a sup element.
-func Sup(opts ...core.Node) core.Node { return core.Element("sup", opts...) }
+func Sup(attrs ...attrib.Node) elem.Scope { return elem.New("sup", attrs...) }
 
 // I creates an i element.
-func I(opts ...core.Node) core.Node { return core.Element("i", opts...) }
+func I(attrs ...attrib.Node) elem.Scope { return elem.New("i", attrs...) }
 
 // B creates a b element.
-func B(opts ...core.Node) core.Node { return core.Element("b", opts...) }
+func B(attrs ...attrib.Node) elem.Scope { return elem.New("b", attrs...) }
 
 // U creates a u element.
-func U(opts ...core.Node) core.Node { return core.Element("u", opts...) }
+func U(attrs ...attrib.Node) elem.Scope { return elem.New("u", attrs...) }
 
 // Mark creates a mark element.
-func Mark(opts ...core.Node) core.Node { return core.Element("mark", opts...) }
+func Mark(attrs ...attrib.Node) elem.Scope { return elem.New("mark", attrs...) }
 
 // Bdi creates a bdi element.
-func Bdi(opts ...core.Node) core.Node { return core.Element("bdi", opts...) }
+func Bdi(attrs ...attrib.Node) elem.Scope { return elem.New("bdi", attrs...) }
 
 // Bdo creates a bdo element.
-func Bdo(opts ...core.Node) core.Node { return core.Element("bdo", opts...) }
+func Bdo(attrs ...attrib.Node) elem.Scope { return elem.New("bdo", attrs...) }
 
 // Span creates a span element.
-func Span(opts ...core.Node) core.Node { return core.Element("span", opts...) }
+func Span(attrs ...attrib.Node) elem.Scope { return elem.New("span", attrs...) }
 
 // BR creates a br element (void).
-func BR(opts ...core.Node) core.Node { return core.VoidElement("br", opts...) }
+func BR(attrs ...attrib.Node) elem.Node { return elem.Void("br", attrs...) }
 
 // WBR creates a wbr element (void).
-func WBR(opts ...core.Node) core.Node { return core.VoidElement("wbr", opts...) }
+func WBR(attrs ...attrib.Node) elem.Node { return elem.Void("wbr", attrs...) }
 
 // P creates a p element.
-func P(opts ...core.Node) core.Node { return core.Element("p", opts...) }
+func P(attrs ...attrib.Node) elem.Scope { return elem.New("p", attrs...) }
 
 // HR creates an hr element (void).
-func HR(opts ...core.Node) core.Node { return core.VoidElement("hr", opts...) }
+func HR(attrs ...attrib.Node) elem.Node { return elem.Void("hr", attrs...) }
 
 // Pre creates a pre element.
-func Pre(opts ...core.Node) core.Node { return core.Element("pre", opts...) }
+func Pre(attrs ...attrib.Node) elem.Scope { return elem.New("pre", attrs...) }
 
 // Blockquote creates a blockquote element.
-func Blockquote(opts ...core.Node) core.Node { return core.Element("blockquote", opts...) }
+func Blockquote(attrs ...attrib.Node) elem.Scope { return elem.New("blockquote", attrs...) }

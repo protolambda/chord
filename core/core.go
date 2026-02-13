@@ -5,140 +5,146 @@ import (
 	"fmt"
 	"iter"
 	"strings"
+
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
 )
 
-// Obj represents a raw element/attribute (one of the two)
-type Obj struct {
-	// IsElement as attribute: false, as element: true.
-	IsElement bool
-	// Key as attribute: attribute-key, as element: element-type.
-	// If Key is empty, then Obj is just considered as a bundle of other Obj that all apply to the parent node.
-	// Assumed to be safe name/attribute format.
-	Key string
-	// Val as attribute: attribute value, as element: raw HTML (key/children/void are ignored).
-	// Assumed to be html-escaped already.
-	Val string
-	// Void as attribute: bool-style, as element: no children.
-	Void bool
-	// SubNodes as attribute: bundled attributes, as element: the child-elements.
-	SubNodes iter.Seq[Node]
-}
-
-// Eval for Obj just returns the Obj itself, as a valid but "static" node.
-func (obj Obj) Eval(ctx context.Context) (Obj, error) {
-	return obj, nil
-}
-
-// Node is a node in the rendering graph.
-// This can be an element-attribute or element-child.
-// It's basically an option that applies to the parent node.
-// Nodes can be nested and bundled further, see Bundle.
-type Node interface {
-	Eval(ctx context.Context) (Obj, error)
-}
-
-func Render(ctx context.Context, v Node, out *strings.Builder, opts ...Option) error {
+// Render renders an element tree to the given string builder.
+func Render(ctx context.Context, v elem.Node, out *strings.Builder, opts ...Option) error {
 	cfg := &renderConfig{}
 	for _, opt := range opts {
 		opt(cfg)
 	}
 
-	root, err := v.Eval(ctx)
+	obj, err := v.Eval(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to load root element: %w", err)
 	}
-	tmp := make(map[string]struct{})
 
-	// We open the root, since we can represent multiple adjacent HTML elements
-	// (no wrapping parent element)
-	for o, subErr := range squashOpenNodes(ctx, root) {
-		if subErr != nil {
-			return fmt.Errorf("failed to open: %w", subErr)
+	// We allocate this map once, and reuse it during rendering of every element.
+	seen := make(map[string]struct{})
+
+	// Squash the root to support rendering multiple adjacent elements.
+	for o, squashErr := range squashElemObj(ctx, obj) {
+		if squashErr != nil {
+			return fmt.Errorf("failed to open: %w", squashErr)
 		}
-		err := renderObj(ctx, o, out, tmp, cfg, 0)
-		if err != nil {
+		if err := renderElemObj(ctx, o, out, cfg, 0, seen); err != nil {
 			return fmt.Errorf("failed to render: %w", err)
 		}
 	}
 	return nil
 }
 
-func renderObj(ctx context.Context, root Obj, out *strings.Builder, tmpSeenAttribs map[string]struct{}, cfg *renderConfig, depth int) error {
-	if !root.IsElement {
-		return fmt.Errorf("expected node to be an element")
-	}
-
-	if root.Key == "" {
-		return fmt.Errorf("expected element to have a key")
-	}
-
+func renderElemObj(ctx context.Context, obj elem.Obj, out *strings.Builder, cfg *renderConfig, depth int, seen map[string]struct{}) error {
 	indent := ""
 	if cfg.Indent {
 		indent = strings.Repeat("  ", depth)
 	}
 
-	if root.Val != "" {
+	// Raw content (including comments).
+	if obj.Raw != "" {
 		out.WriteString(indent)
-		out.WriteString(root.Val)
+		out.WriteString(obj.Raw)
 		if cfg.Indent {
 			out.WriteString("\n")
 		}
 		return nil
 	}
 
+	if obj.Tag == "" {
+		return fmt.Errorf("expected element to have a tag")
+	}
+
 	out.WriteString(indent)
 	out.WriteString("<")
-	out.WriteString(root.Key)
+	out.WriteString(obj.Tag)
 
-	var classes string
-	var styles string
-	var attributes, children []Obj
+	// Flatten and render attributes.
+	if err := renderAttribs(ctx, obj.Attribs, out, seen); err != nil {
+		return err
+	}
 
-	clear(tmpSeenAttribs)
-
-	for o, subErr := range openSubNodes(ctx, root) {
-		if subErr != nil {
-			return fmt.Errorf("failed to open: %w", subErr)
+	if obj.Void {
+		out.WriteString("/>")
+		if cfg.Indent {
+			out.WriteString("\n")
 		}
-		childObj, err := o.Eval(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to load: %w", err)
-		}
-		if childObj.IsElement {
-			children = append(children, childObj)
-		} else {
-			if childObj.SubNodes != nil {
-				return fmt.Errorf("attribute (%q) cannot have sub-elements", childObj.Key)
+		return nil
+	}
+
+	out.WriteString(">")
+
+	// Disable indentation within <pre> tags.
+	cfgInner := cfg
+	if obj.Tag == "pre" {
+		cpy := *cfg
+		cpy.Indent = false
+		cfgInner = &cpy
+	}
+
+	// Collect and flatten children.
+	var children []elem.Obj
+	if obj.Children != nil {
+		for child := range obj.Children {
+			childObj, err := child.Eval(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to load child: %w", err)
 			}
-			_, seen := tmpSeenAttribs[childObj.Key]
-			if !seen {
-				tmpSeenAttribs[childObj.Key] = struct{}{}
-				attributes = append(attributes, childObj)
-			}
-			switch childObj.Key {
-			case "class":
-				if seen {
-					classes += " "
+			for o, squashErr := range squashElemObj(ctx, childObj) {
+				if squashErr != nil {
+					return fmt.Errorf("failed to open child: %w", squashErr)
 				}
-				classes += childObj.Val
-			case "style":
-				if seen {
-					styles += ";"
-				}
-				styles += childObj.Val
-			default:
-				if seen {
-					return fmt.Errorf("duplicate attribute %q", childObj.Key)
-				}
+				children = append(children, o)
 			}
 		}
 	}
-	clear(tmpSeenAttribs)
 
-	for _, attr := range attributes {
+	if cfgInner.Indent && len(children) > 0 {
+		out.WriteString("\n")
+	}
+	for i, child := range children {
+		if err := renderElemObj(ctx, child, out, cfgInner, depth+1, seen); err != nil {
+			return fmt.Errorf("failed to render child %d (tag %q): %w", i, child.Tag, err)
+		}
+	}
+	if cfgInner.Indent && len(children) > 0 {
+		out.WriteString(indent)
+	}
+
+	out.WriteString("</")
+	out.WriteString(obj.Tag)
+	out.WriteString(">")
+	if cfg.Indent {
+		out.WriteString("\n")
+	}
+	return nil
+}
+
+// renderAttribs flattens and renders all attributes.
+func renderAttribs(ctx context.Context, attribs attrib.Seq, out *strings.Builder, seen map[string]struct{}) error {
+	if attribs == nil {
+		return nil
+	}
+
+	// reset the attributes seen map
+	clear(seen)
+
+	var classes string
+	var styles string
+	var collected []attrib.Obj
+
+	for a := range attribs {
+		if err := flattenAttrib(ctx, a, &classes, &styles, &collected, seen); err != nil {
+			return err
+		}
+	}
+
+	for _, attr := range collected {
 		out.WriteString(" ")
 		out.WriteString(attr.Key)
-		if !attr.Void {
+		if !attr.Bool {
 			out.WriteString("=\"")
 			switch attr.Key {
 			case "class":
@@ -151,98 +157,83 @@ func renderObj(ctx context.Context, root Obj, out *strings.Builder, tmpSeenAttri
 			out.WriteString("\"")
 		}
 	}
-
-	if root.Void {
-		if len(children) > 0 {
-			return fmt.Errorf("unexpected sub-elements in void element: %v", children)
-		}
-		out.WriteString("/>")
-		if cfg.Indent {
-			out.WriteString("\n")
-		}
-	} else {
-		out.WriteString(">")
-
-		// Do not indent within <pre> tags.
-		if root.IsElement && root.Key == "pre" {
-			cpy := *cfg
-			cpy.Indent = false
-			cfg = &cpy
-		}
-
-		if cfg.Indent && len(children) > 0 {
-			out.WriteString("\n")
-		}
-		for i, child := range children {
-			if err := renderObj(ctx, child, out, tmpSeenAttribs, cfg, depth+1); err != nil {
-				return fmt.Errorf("failed to render sub-element %d (type %q): %w", i, child.Key, err)
-			}
-		}
-		if cfg.Indent && len(children) > 0 {
-			out.WriteString(indent)
-		}
-		out.WriteString("</")
-		out.WriteString(root.Key)
-		out.WriteString(">")
-		if cfg.Indent {
-			out.WriteString("\n")
-		}
-	}
 	return nil
 }
 
-// openSubNodes opens all sub-nodes
-func openSubNodes(ctx context.Context, from Obj) iter.Seq2[Obj, error] {
-	return func(yield func(Obj, error) bool) {
-		if from.Key == "" {
-			panic("cannot open sub nodes of a node without a key")
-		}
-		if from.SubNodes == nil {
-			return
-		}
-		for subNode := range from.SubNodes {
-			out, err := subNode.Eval(ctx)
-			if err != nil {
-				if !yield(Obj{}, err) {
-					return
-				}
-				return
+// flattenAttrib recursively flattens attribute bundles and collects attributes.
+func flattenAttrib(ctx context.Context, a attrib.Node, classes,
+	styles *string, collected *[]attrib.Obj, seen map[string]struct{}) error {
+	obj, err := a.Eval(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to eval attribute: %w", err)
+	}
+
+	// Noop.
+	if obj.Key == "" && obj.Sub == nil {
+		return nil
+	}
+
+	// Bundle: flatten sub-attributes.
+	if obj.Key == "" && obj.Sub != nil {
+		for sub := range obj.Sub {
+			if err := flattenAttrib(ctx, sub, classes, styles, collected, seen); err != nil {
+				return err
 			}
-			for got, err := range squashOpenNodes(ctx, out) {
-				if !yield(got, err) {
-					return
-				}
-			}
+		}
+		return nil
+	}
+
+	// Regular attribute.
+	_, alreadySeen := seen[obj.Key]
+	if !alreadySeen {
+		seen[obj.Key] = struct{}{}
+		*collected = append(*collected, obj)
+	}
+
+	switch obj.Key {
+	case "class":
+		if alreadySeen {
+			*classes += " "
+		}
+		*classes += obj.Val
+	case "style":
+		if alreadySeen {
+			*styles += ";"
+		}
+		*styles += obj.Val
+	default:
+		if alreadySeen {
+			return fmt.Errorf("duplicate attribute %q", obj.Key)
 		}
 	}
+
+	return nil
 }
 
-// squashOpenNodes squashes the object structure by yielding only objects with a non-empty Key.
-func squashOpenNodes(ctx context.Context, from Obj) iter.Seq2[Obj, error] {
-	return func(yield func(Obj, error) bool) {
-		if from.Key != "" {
-			// If Key is not empty, then this is a legitimate sub-node to handle.
-			if !yield(from, nil) {
-				return
-			}
-		} else {
-			if from.SubNodes == nil {
-				return
-			}
-			// If Key is empty, then squash,
-			// by evaluating the sub-nodes, and yielding the results of opening those.
-			for subNode := range from.SubNodes {
-				out, err := subNode.Eval(ctx)
-				if err != nil {
-					if !yield(Obj{}, err) {
-						return
-					}
+// squashElemObj yields non-bundle elem.Objs by recursively flattening bundles.
+func squashElemObj(ctx context.Context, obj elem.Obj) iter.Seq2[elem.Obj, error] {
+	return func(yield func(elem.Obj, error) bool) {
+		// Non-empty tag or raw content: this is a real element.
+		if obj.Tag != "" || obj.Raw != "" {
+			yield(obj, nil)
+			return
+		}
+		// Noop: no tag, no raw, no children.
+		if obj.Children == nil {
+			return
+		}
+		// Bundle: flatten children.
+		for child := range obj.Children {
+			childObj, err := child.Eval(ctx)
+			if err != nil {
+				if !yield(elem.Obj{}, err) {
 					return
 				}
-				for got, err := range squashOpenNodes(ctx, out) {
-					if !yield(got, err) {
-						return
-					}
+				return
+			}
+			for o, squashErr := range squashElemObj(ctx, childObj) {
+				if !yield(o, squashErr) {
+					return
 				}
 			}
 		}

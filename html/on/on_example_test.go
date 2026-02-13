@@ -2,6 +2,7 @@ package on_test
 
 import (
 	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/embed/img"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/form/input"
@@ -11,7 +12,7 @@ import (
 )
 
 func ExampleClick() {
-	core.Dump(button.Button(on.Click("handleClick()"), text.Text("Click me")))
+	core.Dump(button.Button(on.Click("handleClick()"))(text.Text("Click me")))
 	// Output: <button onclick="handleClick()">Click me</button>
 }
 
@@ -26,7 +27,7 @@ func ExampleMouseOver() {
 }
 
 func ExampleSubmit() {
-	core.Dump(core.Element("form", on.Submit("return validate()")))
+	core.Dump(elem.New("form", on.Submit("return validate()")))
 	// Output: <form onsubmit="return validate()"></form>
 }
 

@@ -1,18 +1,20 @@
 package textarea
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+)
 
 // Rows sets the rows attribute.
-func Rows(v string) core.Node { return core.Attribute("rows", v) }
+func Rows(v string) attrib.Node { return attrib.KV("rows", v) }
 
 // Cols sets the cols attribute.
-func Cols(v string) core.Node { return core.Attribute("cols", v) }
+func Cols(v string) attrib.Node { return attrib.KV("cols", v) }
 
 // Wrap sets the wrap attribute.
-func Wrap(v string) core.Node { return core.Attribute("wrap", v) }
+func Wrap(v string) attrib.Node { return attrib.KV("wrap", v) }
 
 // Minlength sets the minlength attribute.
-func Minlength(v string) core.Node { return core.Attribute("minlength", v) }
+func Minlength(v string) attrib.Node { return attrib.KV("minlength", v) }
 
 // Maxlength sets the maxlength attribute.
-func Maxlength(v string) core.Node { return core.Attribute("maxlength", v) }
+func Maxlength(v string) attrib.Node { return attrib.KV("maxlength", v) }

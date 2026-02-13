@@ -1,10 +1,13 @@
 // Package figure provides HTML figure elements (figure, figcaption).
 package figure
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
+)
 
 // Figure creates a figure element.
-func Figure(opts ...core.Node) core.Node { return core.Element("figure", opts...) }
+func Figure(attrs ...attrib.Node) elem.Scope { return elem.New("figure", attrs...) }
 
 // Figcaption creates a figcaption element.
-func Figcaption(opts ...core.Node) core.Node { return core.Element("figcaption", opts...) }
+func Figcaption(attrs ...attrib.Node) elem.Scope { return elem.New("figcaption", attrs...) }

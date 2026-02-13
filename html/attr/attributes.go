@@ -1,93 +1,93 @@
 package attr
 
 import (
-	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
 )
 
 // Global Attributes
 
 // Class sets the class attribute.
-func Class(v string) core.Node { return core.Attribute("class", v) }
+func Class(v string) attrib.Node { return attrib.KV("class", v) }
 
 // ID sets the id attribute.
-func ID(v string) core.Node { return core.Attribute("id", v) }
+func ID(v string) attrib.Node { return attrib.KV("id", v) }
 
 // Style sets the style attribute.
-func Style(v string) core.Node { return core.Attribute("style", v) }
+func Style(v string) attrib.Node { return attrib.KV("style", v) }
 
 // Slot sets the slot attribute.
-func Slot(v string) core.Node { return core.Attribute("slot", v) }
+func Slot(v string) attrib.Node { return attrib.KV("slot", v) }
 
 // Title sets the title attribute.
-func Title(v string) core.Node { return core.Attribute("title", v) }
+func Title(v string) attrib.Node { return attrib.KV("title", v) }
 
 // Accesskey sets the accesskey attribute.
-func Accesskey(v string) core.Node { return core.Attribute("accesskey", v) }
+func Accesskey(v string) attrib.Node { return attrib.KV("accesskey", v) }
 
 // Autocapitalize sets the autocapitalize attribute.
-func Autocapitalize(v string) core.Node { return core.Attribute("autocapitalize", v) }
+func Autocapitalize(v string) attrib.Node { return attrib.KV("autocapitalize", v) }
 
 // Autofocus sets the autofocus boolean attribute.
-func Autofocus() core.Node { return core.BoolAttribute("autofocus") }
+func Autofocus() attrib.Node { return attrib.Bool("autofocus") }
 
 // Contenteditable sets the contenteditable attribute.
-func Contenteditable(v string) core.Node { return core.Attribute("contenteditable", v) }
+func Contenteditable(v string) attrib.Node { return attrib.KV("contenteditable", v) }
 
 // Dir sets the dir attribute.
-func Dir(v string) core.Node { return core.Attribute("dir", v) }
+func Dir(v string) attrib.Node { return attrib.KV("dir", v) }
 
 // Draggable sets the draggable attribute.
-func Draggable(v string) core.Node { return core.Attribute("draggable", v) }
+func Draggable(v string) attrib.Node { return attrib.KV("draggable", v) }
 
 // Enterkeyhint sets the enterkeyhint attribute.
-func Enterkeyhint(v string) core.Node { return core.Attribute("enterkeyhint", v) }
+func Enterkeyhint(v string) attrib.Node { return attrib.KV("enterkeyhint", v) }
 
 // Hidden sets the hidden boolean attribute.
-func Hidden() core.Node { return core.BoolAttribute("hidden") }
+func Hidden() attrib.Node { return attrib.Bool("hidden") }
 
 // Inert sets the inert boolean attribute.
-func Inert() core.Node { return core.BoolAttribute("inert") }
+func Inert() attrib.Node { return attrib.Bool("inert") }
 
 // Inputmode sets the inputmode attribute.
-func Inputmode(v string) core.Node { return core.Attribute("inputmode", v) }
+func Inputmode(v string) attrib.Node { return attrib.KV("inputmode", v) }
 
 // Is sets the is attribute for custom elements.
-func Is(v string) core.Node { return core.Attribute("is", v) }
+func Is(v string) attrib.Node { return attrib.KV("is", v) }
 
 // Itemid sets the itemid attribute (microdata).
-func Itemid(v string) core.Node { return core.Attribute("itemid", v) }
+func Itemid(v string) attrib.Node { return attrib.KV("itemid", v) }
 
 // Itemprop sets the itemprop attribute (microdata).
-func Itemprop(v string) core.Node { return core.Attribute("itemprop", v) }
+func Itemprop(v string) attrib.Node { return attrib.KV("itemprop", v) }
 
 // Itemref sets the itemref attribute (microdata).
-func Itemref(v string) core.Node { return core.Attribute("itemref", v) }
+func Itemref(v string) attrib.Node { return attrib.KV("itemref", v) }
 
 // Itemscope sets the itemscope boolean attribute (microdata).
-func Itemscope() core.Node { return core.BoolAttribute("itemscope") }
+func Itemscope() attrib.Node { return attrib.Bool("itemscope") }
 
 // Itemtype sets the itemtype attribute (microdata).
-func Itemtype(v string) core.Node { return core.Attribute("itemtype", v) }
+func Itemtype(v string) attrib.Node { return attrib.KV("itemtype", v) }
 
 // Lang sets the lang attribute.
-func Lang(v string) core.Node { return core.Attribute("lang", v) }
+func Lang(v string) attrib.Node { return attrib.KV("lang", v) }
 
 // Nonce sets the nonce attribute.
-func Nonce(v string) core.Node { return core.Attribute("nonce", v) }
+func Nonce(v string) attrib.Node { return attrib.KV("nonce", v) }
 
 // Popover sets the popover attribute.
-func Popover(v string) core.Node { return core.Attribute("popover", v) }
+func Popover(v string) attrib.Node { return attrib.KV("popover", v) }
 
 // Spellcheck sets the spellcheck attribute.
-func Spellcheck(v string) core.Node { return core.Attribute("spellcheck", v) }
+func Spellcheck(v string) attrib.Node { return attrib.KV("spellcheck", v) }
 
 // Tabindex sets the tabindex attribute.
-func Tabindex(v string) core.Node { return core.Attribute("tabindex", v) }
+func Tabindex(v string) attrib.Node { return attrib.KV("tabindex", v) }
 
 // Translate sets the translate attribute.
-func Translate(v string) core.Node { return core.Attribute("translate", v) }
+func Translate(v string) attrib.Node { return attrib.KV("translate", v) }
 
 // Data Attributes
 
 // Data sets a data-* attribute.
-func Data(name, value string) core.Node { return core.Attribute("data-"+name, value) }
+func Data(name, value string) attrib.Node { return attrib.KV("data-"+name, value) }

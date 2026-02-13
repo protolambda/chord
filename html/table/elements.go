@@ -1,34 +1,37 @@
 // Package table provides HTML table elements.
 package table
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
+)
 
 // Table creates a table element.
-func Table(opts ...core.Node) core.Node { return core.Element("table", opts...) }
+func Table(attrs ...attrib.Node) elem.Scope { return elem.New("table", attrs...) }
 
 // Caption creates a caption element.
-func Caption(opts ...core.Node) core.Node { return core.Element("caption", opts...) }
+func Caption(attrs ...attrib.Node) elem.Scope { return elem.New("caption", attrs...) }
 
 // Colgroup creates a colgroup element.
-func Colgroup(opts ...core.Node) core.Node { return core.Element("colgroup", opts...) }
+func Colgroup(attrs ...attrib.Node) elem.Scope { return elem.New("colgroup", attrs...) }
 
 // Col creates a col element (void).
-func Col(opts ...core.Node) core.Node { return core.VoidElement("col", opts...) }
+func Col(attrs ...attrib.Node) elem.Node { return elem.Void("col", attrs...) }
 
 // Tbody creates a tbody element.
-func Tbody(opts ...core.Node) core.Node { return core.Element("tbody", opts...) }
+func Tbody(attrs ...attrib.Node) elem.Scope { return elem.New("tbody", attrs...) }
 
 // Thead creates a thead element.
-func Thead(opts ...core.Node) core.Node { return core.Element("thead", opts...) }
+func Thead(attrs ...attrib.Node) elem.Scope { return elem.New("thead", attrs...) }
 
 // Tfoot creates a tfoot element.
-func Tfoot(opts ...core.Node) core.Node { return core.Element("tfoot", opts...) }
+func Tfoot(attrs ...attrib.Node) elem.Scope { return elem.New("tfoot", attrs...) }
 
 // TR creates a tr element.
-func TR(opts ...core.Node) core.Node { return core.Element("tr", opts...) }
+func TR(attrs ...attrib.Node) elem.Scope { return elem.New("tr", attrs...) }
 
 // TD creates a td element.
-func TD(opts ...core.Node) core.Node { return core.Element("td", opts...) }
+func TD(attrs ...attrib.Node) elem.Scope { return elem.New("td", attrs...) }
 
 // TH creates a th element.
-func TH(opts ...core.Node) core.Node { return core.Element("th", opts...) }
+func TH(attrs ...attrib.Node) elem.Scope { return elem.New("th", attrs...) }

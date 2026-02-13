@@ -1,10 +1,13 @@
 // Package edit provides HTML edit elements (ins, del).
 package edit
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
+)
 
 // Ins creates an ins element.
-func Ins(opts ...core.Node) core.Node { return core.Element("ins", opts...) }
+func Ins(attrs ...attrib.Node) elem.Scope { return elem.New("ins", attrs...) }
 
 // Del creates a del element.
-func Del(opts ...core.Node) core.Node { return core.Element("del", opts...) }
+func Del(attrs ...attrib.Node) elem.Scope { return elem.New("del", attrs...) }

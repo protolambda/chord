@@ -2,6 +2,7 @@ package hx2_test
 
 import (
 	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
@@ -10,12 +11,12 @@ import (
 )
 
 func ExampleGet() {
-	core.Dump(button.Button(hx2.Get("/api/data"), text.Text("Load")))
+	core.Dump(button.Button(hx2.Get("/api/data"))(text.Text("Load")))
 	// Output: <button hx-get="/api/data">Load</button>
 }
 
 func ExamplePost() {
-	core.Dump(core.Element("form", hx2.Post("/api/submit")))
+	core.Dump(elem.New("form", hx2.Post("/api/submit")))
 	// Output: <form hx-post="/api/submit"></form>
 }
 
@@ -45,7 +46,7 @@ func ExampleInherit() {
 }
 
 func ExampleDisabledElt() {
-	core.Dump(button.Button(hx2.DisabledElt("this"), text.Text("Submit")))
+	core.Dump(button.Button(hx2.DisabledElt("this"))(text.Text("Submit")))
 	// Output: <button hx-disabled-elt="this">Submit</button>
 }
 

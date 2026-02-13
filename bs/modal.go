@@ -3,7 +3,8 @@ package bs
 import (
 	"context"
 
-	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
@@ -12,19 +13,21 @@ import (
 
 // Modal represents a Bootstrap modal component.
 type Modal struct {
-	ID         string    // required for targeting
-	Title      core.Node // modal-title content
-	Body       core.Node // modal-body content
-	Footer     core.Node // modal-footer content (typically buttons)
-	Size       string    // "", "sm", "lg", "xl"
-	Centered   bool      // vertically centered
-	Scrollable bool      // scrollable body
-	Static     bool      // static backdrop
-	Attrs      core.Node // additional attributes
+	ID         string      // required for targeting
+	Title      elem.Node   // modal-title content
+	Body       elem.Node   // modal-body content
+	Footer     elem.Node   // modal-footer content (typically buttons)
+	Size       string      // "", "sm", "lg", "xl"
+	Centered   bool        // vertically centered
+	Scrollable bool        // scrollable body
+	Static     bool        // static backdrop
+	Attrs      attrib.Node // additional attributes
 }
 
+func (Modal) ChordNode() {}
+
 // Eval builds the modal structure with proper Bootstrap markup.
-func (m Modal) Eval(ctx context.Context) (core.Obj, error) {
+func (m Modal) Eval(ctx context.Context) (elem.Obj, error) {
 	dialogClass := "modal-dialog"
 	if m.Size != "" {
 		dialogClass += " modal-" + m.Size
@@ -36,7 +39,7 @@ func (m Modal) Eval(ctx context.Context) (core.Obj, error) {
 		dialogClass += " modal-dialog-scrollable"
 	}
 
-	var modalAttrs []core.Node
+	var modalAttrs []attrib.Node
 	if m.Attrs != nil {
 		modalAttrs = append(modalAttrs, m.Attrs)
 	}
@@ -49,39 +52,42 @@ func (m Modal) Eval(ctx context.Context) (core.Obj, error) {
 		modalAttrs = append(modalAttrs, attr.Data("bs-backdrop", "static"))
 	}
 
-	var headerContent []core.Node
+	// Header
+	var headerChildren []elem.Node
 	if m.Title != nil {
-		headerContent = append(headerContent, section.H1(attr.Class("modal-title fs-5"), m.Title))
+		headerChildren = append(headerChildren, section.H1(attr.Class("modal-title fs-5"))(m.Title))
 	}
-	headerContent = append(headerContent, button.Button(
+	closeBtn := button.Button(
 		attr.Class("btn-close"),
 		button.Type(button.TypeButton),
 		attr.Data("bs-dismiss", "modal"),
-	))
+	)()
+	headerChildren = append(headerChildren, closeBtn)
 
-	var contentChildren []core.Node
+	// Content
+	var contentChildren []elem.Node
 	contentChildren = append(contentChildren,
-		attr.Class("modal-content"),
-		div.Div(core.Compose(attr.Class("modal-header"), headerContent...)),
+		div.Div(attr.Class("modal-header"))(headerChildren...),
 	)
 	if m.Body != nil {
-		contentChildren = append(contentChildren, div.Div(attr.Class("modal-body"), m.Body))
+		contentChildren = append(contentChildren, div.Div(attr.Class("modal-body"))(m.Body))
 	}
 	if m.Footer != nil {
-		contentChildren = append(contentChildren, div.Div(attr.Class("modal-footer"), m.Footer))
+		contentChildren = append(contentChildren, div.Div(attr.Class("modal-footer"))(m.Footer))
 	}
 
-	modalContent := div.Div(contentChildren...)
-	modalDialog := div.Div(attr.Class(dialogClass), modalContent)
+	modalContent := div.Div(attr.Class("modal-content"))(contentChildren...)
+	modalDialog := div.Div(attr.Class(dialogClass))(modalContent)
 
-	return div.Div(append(modalAttrs, modalDialog)...).Eval(ctx)
+	return div.Div(modalAttrs...)(modalDialog).Eval(ctx)
 }
 
 // ModalTrigger creates a button that triggers a modal.
-func ModalTrigger(targetID string, opts ...core.Node) core.Node {
-	return button.Button(core.Compose(
+func ModalTrigger(targetID string, attrs ...attrib.Node) elem.Scope {
+	return button.Button(attrib.Cons(
 		button.Type(button.TypeButton),
 		attr.Data("bs-toggle", "modal"),
 		attr.Data("bs-target", "#"+targetID),
-	), core.Bundle(opts...))
+		attrib.Bundle(attrs),
+	))
 }

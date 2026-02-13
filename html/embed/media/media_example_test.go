@@ -2,6 +2,7 @@ package media_test
 
 import (
 	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attrib"
 	"github.com/protolambda/chord/html/embed/media"
 	"github.com/protolambda/chord/html/text"
 )
@@ -12,9 +13,9 @@ func ExampleVideo() {
 }
 
 func ExampleVideo_sources() {
-	core.Dump(media.Video(media.Controls(),
-		media.Source(core.Attribute("src", "movie.webm"), core.Attribute("type", "video/webm")),
-		media.Source(core.Attribute("src", "movie.mp4"), core.Attribute("type", "video/mp4")),
+	core.Dump(media.Video(media.Controls())(
+		media.Source(attrib.KV("src", "movie.webm"), attrib.KV("type", "video/webm")),
+		media.Source(attrib.KV("src", "movie.mp4"), attrib.KV("type", "video/mp4")),
 	))
 	// Output: <video controls><source src="movie.webm" type="video/webm"/><source src="movie.mp4" type="video/mp4"/></video>
 }
@@ -25,13 +26,13 @@ func ExampleAudio() {
 }
 
 func ExampleTrack() {
-	core.Dump(media.Video(media.Src("movie.mp4"),
-		media.Track(core.Attribute("src", "subs.vtt"), core.Attribute("kind", "subtitles"), core.Attribute("srclang", "en")),
+	core.Dump(media.Video(media.Src("movie.mp4"))(
+		media.Track(attrib.KV("src", "subs.vtt"), attrib.KV("kind", "subtitles"), attrib.KV("srclang", "en")),
 	))
 	// Output: <video src="movie.mp4"><track src="subs.vtt" kind="subtitles" srclang="en"/></video>
 }
 
 func ExampleVideo_fallback() {
-	core.Dump(media.Video(media.Src("movie.mp4"), text.Text("Video not supported")))
+	core.Dump(media.Video(media.Src("movie.mp4"))(text.Text("Video not supported")))
 	// Output: <video src="movie.mp4">Video not supported</video>
 }

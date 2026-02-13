@@ -9,7 +9,7 @@ import (
 )
 
 func ExampleLabel() {
-	core.Dump(button.Button(aria.Label("Close dialog"), text.Text("X")))
+	core.Dump(button.Button(aria.Label("Close dialog"))(text.Text("X")))
 	// Output: <button aria-label="Close dialog">X</button>
 }
 
@@ -19,12 +19,12 @@ func ExampleHidden() {
 }
 
 func ExampleExpanded() {
-	core.Dump(button.Button(aria.Expanded("false"), text.Text("Menu")))
+	core.Dump(button.Button(aria.Expanded("false"))(text.Text("Menu")))
 	// Output: <button aria-expanded="false">Menu</button>
 }
 
 func ExampleRole() {
-	core.Dump(div.Div(aria.Role("alert"), text.Text("Error!")))
+	core.Dump(div.Div(aria.Role("alert"))(text.Text("Error!")))
 	// Output: <div role="alert">Error!</div>
 }
 

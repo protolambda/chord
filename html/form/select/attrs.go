@@ -1,12 +1,14 @@
 package selectel
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+)
 
 // Selected sets the selected boolean attribute.
-func Selected() core.Node { return core.BoolAttribute("selected") }
+func Selected() attrib.Node { return attrib.Bool("selected") }
 
 // Multiple sets the multiple boolean attribute.
-func Multiple() core.Node { return core.BoolAttribute("multiple") }
+func Multiple() attrib.Node { return attrib.Bool("multiple") }
 
 // Label sets the label attribute for optgroup/option elements.
-func Label(v string) core.Node { return core.Attribute("label", v) }
+func Label(v string) attrib.Node { return attrib.KV("label", v) }

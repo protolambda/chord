@@ -1,13 +1,16 @@
 // Package output provides HTML output elements (output, progress, meter).
 package output
 
-import "github.com/protolambda/chord/core"
+import (
+	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/elem"
+)
 
 // Output creates an output element.
-func Output(opts ...core.Node) core.Node { return core.Element("output", opts...) }
+func Output(attrs ...attrib.Node) elem.Scope { return elem.New("output", attrs...) }
 
 // Progress creates a progress element.
-func Progress(opts ...core.Node) core.Node { return core.Element("progress", opts...) }
+func Progress(attrs ...attrib.Node) elem.Scope { return elem.New("progress", attrs...) }
 
 // Meter creates a meter element.
-func Meter(opts ...core.Node) core.Node { return core.Element("meter", opts...) }
+func Meter(attrs ...attrib.Node) elem.Scope { return elem.New("meter", attrs...) }

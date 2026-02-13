@@ -15,26 +15,47 @@ Structures are lazily evaluated, allowing reuse and context-aware rendering.
 
 ### Core Types
 
-- `core.Node`: A lazy-evaluated piece of the document graph
-- `core.Obj`: A static representation of evaluated content
+- `attrib.Node`: A lazy-evaluated attribute (key-value, boolean, or bundle)
+- `elem.Node`: A lazy-evaluated element (tag, text, raw HTML, or bundle)
+- `elem.Scope`: A `func(...Elem) Elem`, a scope of sub-elements (`<div>`, etc.)
 
-Node types include:
-- `core.Raw`: Raw document content (text, HTML)
-- `core.Element`: An HTML element with children
-- `core.VoidElement`: A self-closing element (e.g., `<br/>`, `<img/>`)
-- `core.Attribute`: An attribute key-value pair
-- `core.BoolAttribute`: A boolean attribute (no value)
-- `core.Bundle`: A combination of multiple nodes
-- `core.Noop`: An empty node
+Constructors:
+- `attrib.KV(k, v)`: An attribute key-value pair
+- `attrib.Bool(k)`: A boolean attribute (no value)
+- `elem.New(tag, attrs...)`: A non-void HTML element (returns `Scope`)
+- `elem.Void(tag, attrs...)`: A self-closing element (returns `Elem`)
+- `elem.Raw(v)`: Raw HTML content (no escaping)
+- `elem.Comment(v)`: An HTML comment
+- `elem.Noop()`, `attrib.Noop()`: Empty no-op
 
-Nodes can be either attributes or elements, and bundles can mix both for easy composition.
+Core utils:
+- `text.Text(v)`: HTML-escaped text content (returns `Elem`)
+- `elem.If(bool, elem)`, `attrib.If(bool, attr)`: Conditional content
+- `elem.Fn(func(ctx) (elem, error))`, `attrib.Fn(func(ctx) (attr, error))`: Dynamic content
+- `core.Fallback(node, fallback func(ctx, err) elem)`: Element with recovery
+
+
+Non-void elements use a two-step call: first attributes, then children:
+
+```go
+div.Div(attr.Class("outer"))(        // attributes
+    text.P()(text.Text("content")),   // children
+)
+```
+
+`Scope` also implements `Elem`, so elements without children don't need a trailing `()`:
+
+```go
+div.Div(attr.Class("empty"))  // renders as: <div class="empty></div>
+```
 
 ## Package Structure
 
 ```
 chord/
-├── core/             # Core types (Node, Obj) and rendering
-├── util/             # Utilities (If, Fn, Fallback)
+├── core/             # Core rendering
+│   ├── elem/         # Element core types and functions
+│   └── attrib/       # Attribute core types and functions
 ├── html/             # HTML elements and attributes
 │   ├── attr/         # Global attributes (class, id, style, data, etc.)
 │   ├── aria/         # ARIA accessibility attributes
@@ -83,6 +104,8 @@ import (
     "strings"
 
     "github.com/protolambda/chord/core"
+    "github.com/protolambda/chord/core/elem"
+    "github.com/protolambda/chord/core/attrib"
     "github.com/protolambda/chord/html/attr"
     "github.com/protolambda/chord/html/group/div"
     "github.com/protolambda/chord/html/meta"
@@ -97,23 +120,23 @@ const isLoggedInKey ctxKey = "isLoggedIn"
 
 func main() {
     // Build the page structure (can be reused with different contexts)
-    page := meta.HTML(
-        meta.Head(
-            meta.Title(text.Text("My Page")),
+    page := meta.HTML()(
+        meta.Head()(
+            meta.Title()(text.Text("My Page")),
         ),
-        section.Body(
-            section.Header(
-                section.H1(text.Text("Welcome")),
+        section.Body()(
+            section.Header()(
+                section.H1()(text.Text("Welcome")),
                 // Use Fn to read from context and conditionally render
-                util.Fn(func(ctx context.Context) (core.Node, error) {
+                elem.Fn(func(ctx context.Context) (elem.Node, error) {
                     if loggedIn, _ := ctx.Value(isLoggedInKey).(bool); loggedIn {
-                        return div.Div(attr.Class("user-menu"), text.Text("Logged in")), nil
+                        return div.Div(attr.Class("user-menu"))(text.Text("Logged in")), nil
                     }
-                    return core.Noop(), nil
+                    return elem.Noop(), nil
                 }),
             ),
-            section.Main(
-                text.P(text.Text("Hello, world!")),
+            section.Main()(
+                text.P()(text.Text("Hello, world!")),
             ),
         ),
     )
@@ -128,13 +151,6 @@ func main() {
 }
 ```
 
-## Utilities
-
-- `text.Text(v)`: HTML-escaped text content
-- `util.If(cond, node)`: Conditional rendering
-- `util.Fn(func)`: Dynamic content generation
-- `util.Fallback(node, fallback)`: Error recovery
-
 ## Extensions
 
 ### HTMX
@@ -143,14 +159,17 @@ func main() {
 import "github.com/protolambda/chord/hx1" // HTMX v1
 import "github.com/protolambda/chord/hx2" // HTMX v2
 
-button.Button(hx1.Post("/api/submit"), hx1.Target("#result"))
+// Attributes go in the first call, children in the second
+button.Button(hx1.Post("/api/submit"), hx1.Target("#result"))(
+    text.Text("Submit"),
+)
 ```
 
 ### Bootstrap 5.3
 
 Bootstrap support is split into two packages:
-- `bs`: Element components that create HTML elements
-- `ba`: Attribute utilities that add classes to elements
+- `bs`: Element components that create HTML elements (return `Scope`)
+- `ba`: Attribute utilities that add classes to elements (return `Attrib`)
 
 This separation prevents confusion: `bs.Row()` creates a `<div class="row">`,
 while `ba.Row()` returns a class attribute you can apply to any element.
@@ -160,26 +179,26 @@ while `ba.Row()` returns a class attribute you can apply to any element.
 ```go
 import "github.com/protolambda/chord/bs"
 
-// Grid elements
-bs.Container(...)           // <div class="container">
-bs.ContainerFluid(...)      // <div class="container-fluid">
-bs.Row(...)                 // <div class="row">
-bs.Col(...)                 // <div class="col">
-bs.Col6(...)                // <div class="col-6">
-bs.ColMD(4, ...)            // <div class="col-md-4">
+// Grid elements (attrs...)(children...)
+bs.Container(attrs...)(children...)   // <div class="container">
+bs.ContainerFluid(attrs...)(...)      // <div class="container-fluid">
+bs.Row(attrs...)(children...)         // <div class="row">
+bs.Col(attrs...)(children...)         // <div class="col">
+bs.Col6(attrs...)(children...)        // <div class="col-6">
+bs.ColMD(4, attrs...)(children...)    // <div class="col-md-4">
 
 // Buttons
-bs.Btn(...)                 // <button class="btn">
-bs.BtnPrimary(...)          // <button class="btn btn-primary">
-bs.BtnOutlineSecondary(...) // <button class="btn btn-outline-secondary">
+bs.Btn(attrs...)(children...)                 // <button class="btn">
+bs.BtnPrimary(attrs...)(children...)          // <button class="btn btn-primary">
+bs.BtnOutlineSecondary(attrs...)(children...) // <button class="btn btn-outline-secondary">
 
 // Components
-bs.Card{Header: ..., Body: ...}
-bs.Alert(...), bs.AlertDanger(...)
-bs.Badge(...), bs.BadgeSuccess(...)
-bs.Nav(...), bs.Navbar(...)
+bs.Card{Header: ..., Body: ...}     // struct implementing Elem
 bs.Modal{ID: "...", Title: ..., Body: ...}
 bs.Dropdown{Toggle: ..., Items: ...}
+bs.AlertDanger()(children...)
+bs.BadgeSuccess()(children...)
+bs.Nav()(children...), bs.Navbar(attrs...)(children...)
 ```
 
 #### Attributes (ba package)
@@ -224,23 +243,22 @@ ba.FormControl(), ba.FormSelect(), ba.FormCheckInput()
 #### Combined Example
 
 ```go
-bs.Container(
-    ba.MT(4),
-    bs.Row(
-        bs.ColMD(6, ba.MB(3),
+bs.Container(ba.MT(4))(
+    bs.Row()(
+        bs.ColMD(6, ba.MB(3))(
             bs.Card{
                 Header: text.Text("Users"),
                 Body:   text.Text("42 active"),
             },
         ),
-        bs.ColMD(6, ba.MB(3),
-            div.Div(ba.DFlex(), ba.JustifyContentBetween(),
-                text.Span(text.Text("Status")),
-                bs.BadgeSuccess(text.Text("Online")),
+        bs.ColMD(6, ba.MB(3))(
+            div.Div(ba.DFlex(), ba.JustifyContentBetween())(
+                text.Span()(text.Text("Status")),
+                bs.BadgeSuccess()(text.Text("Online")),
             ),
         ),
     ),
-    bs.BtnPrimary(ba.MT(3), text.Text("Refresh")),
+    bs.BtnPrimary(ba.MT(3))(text.Text("Refresh")),
 )
 ```
 
