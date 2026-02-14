@@ -6,7 +6,7 @@ import (
 	"iter"
 	"slices"
 
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // Obj is the evaluated representation of an element.
@@ -19,7 +19,7 @@ type Obj struct {
 	// Void indicates a self-closing element (e.g. <br/>, <input/>).
 	Void bool
 	// Attribs holds the element's attributes.
-	Attribs attrib.Seq
+	Attribs attr.Seq
 	// Children holds the element's child elements.
 	Children iter.Seq[Node]
 }
@@ -37,22 +37,22 @@ type Node interface {
 
 // New creates a non-void element constructor (e.g. <div>scope content</div>).
 // Returns a Scope: call it with child elements to produce an Elem.
-func New(name string, attrs ...attrib.Node) Scope {
+func New(name string, attrs ...attr.Node) Scope {
 	return func(children ...Node) Node {
 		return Obj{
 			Tag:      name,
-			Attribs:  attrib.Seq(slices.Values(attrs)),
+			Attribs:  attr.Seq(slices.Values(attrs)),
 			Children: slices.Values(children),
 		}
 	}
 }
 
 // Void creates a self-closing void element (e.g. <br/>, <input/>).
-func Void(name string, attrs ...attrib.Node) Node {
+func Void(name string, attrs ...attr.Node) Node {
 	return Obj{
 		Tag:     name,
 		Void:    true,
-		Attribs: attrib.Seq(slices.Values(attrs)),
+		Attribs: attr.Seq(slices.Values(attrs)),
 	}
 }
 

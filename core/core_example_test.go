@@ -1,7 +1,7 @@
 package core
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
 )
 
@@ -36,12 +36,12 @@ func ExampleCons_single() {
 }
 
 func ExampleBool() {
-	Dump(elem.Void("input", attrib.KV("type", "checkbox"), attrib.Bool("checked")))
+	Dump(elem.Void("input", attr.KV("type", "checkbox"), attr.Bool("checked")))
 	// Output: <input type="checkbox" checked/>
 }
 
 func ExampleKV() {
-	Dump(elem.New("div", attrib.KV("data-x", "123")))
+	Dump(elem.New("div", attr.KV("data-x", "123")))
 	// Output: <div data-x="123"></div>
 }
 
@@ -52,9 +52,9 @@ func ExampleComment() {
 
 func ExampleWithIndent() {
 	Dump(
-		elem.New("div", attrib.KV("class", "outer"), attrib.KV("id", "root"))(
-			elem.New("div", attrib.KV("class", "middle"))(
-				elem.New("div", attrib.KV("class", "inner"))(
+		elem.New("div", attr.KV("class", "outer"), attr.KV("id", "root"))(
+			elem.New("div", attr.KV("class", "middle"))(
+				elem.New("div", attr.KV("class", "inner"))(
 					elem.Raw("Hello"),
 				),
 				elem.New("span")(elem.Raw("World")),
@@ -73,4 +73,54 @@ func ExampleWithIndent() {
 	//     </span>
 	//   </div>
 	// </div>
+}
+
+func ExampleClass() {
+	Dump(elem.New("div", attr.Class("container")))
+	// Output: <div class="container"></div>
+}
+
+func ExampleClass_multiple() {
+	Dump(elem.New("div", attr.Class("foo"), attr.Class("bar")))
+	// Output: <div class="foo bar"></div>
+}
+
+func ExampleID() {
+	Dump(elem.New("div", attr.ID("main")))
+	// Output: <div id="main"></div>
+}
+
+func ExampleStyle() {
+	Dump(elem.New("div", attr.Style("color:red")))
+	// Output: <div style="color:red"></div>
+}
+
+func ExampleStyle_multiple() {
+	Dump(elem.New("div", attr.Style("color:red"), attr.Style("font-size:12px")))
+	// Output: <div style="color:red;font-size:12px"></div>
+}
+
+func ExampleData() {
+	Dump(elem.New("div", attr.Data("id", "123"), attr.Data("name", "test")))
+	// Output: <div data-id="123" data-name="test"></div>
+}
+
+func ExampleHidden() {
+	Dump(elem.New("div", attr.Hidden()))
+	// Output: <div hidden></div>
+}
+
+func ExampleTitle() {
+	Dump(elem.New("div", attr.Title("Tooltip text")))
+	// Output: <div title="Tooltip text"></div>
+}
+
+func ExampleTabindex() {
+	Dump(elem.New("div", attr.Tabindex("0")))
+	// Output: <div tabindex="0"></div>
+}
+
+func ExampleLang() {
+	Dump(elem.New("div", attr.Lang("en")))
+	// Output: <div lang="en"></div>
 }

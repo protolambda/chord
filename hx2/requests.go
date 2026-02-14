@@ -3,20 +3,20 @@
 package hx2
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // Get sets the hx-get attribute for HTTP GET requests.
-func Get(v string) attrib.Node { return attrib.KV("hx-get", v) }
+func Get(v string) attr.Node { return attr.KV("hx-get", v) }
 
 // Post sets the hx-post attribute for HTTP POST requests.
-func Post(v string) attrib.Node { return attrib.KV("hx-post", v) }
+func Post(v string) attr.Node { return attr.KV("hx-post", v) }
 
 // Put sets the hx-put attribute for HTTP PUT requests.
-func Put(v string) attrib.Node { return attrib.KV("hx-put", v) }
+func Put(v string) attr.Node { return attr.KV("hx-put", v) }
 
 // Patch sets the hx-patch attribute for HTTP PATCH requests.
-func Patch(v string) attrib.Node { return attrib.KV("hx-patch", v) }
+func Patch(v string) attr.Node { return attr.KV("hx-patch", v) }
 
 // Delete sets the hx-delete attribute for HTTP DELETE requests.
-func Delete(v string) attrib.Node { return attrib.KV("hx-delete", v) }
+func Delete(v string) attr.Node { return attr.KV("hx-delete", v) }

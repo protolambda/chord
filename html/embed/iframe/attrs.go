@@ -1,35 +1,35 @@
 package iframe
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // Src sets the src attribute.
-func Src(v string) attrib.Node { return attrib.KV("src", v) }
+func Src(v string) attr.Node { return attr.KV("src", v) }
 
 // Srcdoc sets the srcdoc attribute.
-func Srcdoc(v string) attrib.Node { return attrib.KV("srcdoc", v) }
+func Srcdoc(v string) attr.Node { return attr.KV("srcdoc", v) }
 
 // Name sets the name attribute.
-func Name(v string) attrib.Node { return attrib.KV("name", v) }
+func Name(v string) attr.Node { return attr.KV("name", v) }
 
 // Width sets the width attribute.
-func Width(v string) attrib.Node { return attrib.KV("width", v) }
+func Width(v string) attr.Node { return attr.KV("width", v) }
 
 // Height sets the height attribute.
-func Height(v string) attrib.Node { return attrib.KV("height", v) }
+func Height(v string) attr.Node { return attr.KV("height", v) }
 
 // Loading sets the loading attribute.
-func Loading(v string) attrib.Node { return attrib.KV("loading", v) }
+func Loading(v string) attr.Node { return attr.KV("loading", v) }
 
 // Sandbox sets the sandbox attribute.
-func Sandbox(v string) attrib.Node { return attrib.KV("sandbox", v) }
+func Sandbox(v string) attr.Node { return attr.KV("sandbox", v) }
 
 // Allow sets the allow attribute.
-func Allow(v string) attrib.Node { return attrib.KV("allow", v) }
+func Allow(v string) attr.Node { return attr.KV("allow", v) }
 
 // Allowfullscreen sets the allowfullscreen boolean attribute.
-func Allowfullscreen() attrib.Node { return attrib.Bool("allowfullscreen") }
+func Allowfullscreen() attr.Node { return attr.Bool("allowfullscreen") }
 
 // Referrerpolicy sets the referrerpolicy attribute.
-func Referrerpolicy(v string) attrib.Node { return attrib.KV("referrerpolicy", v) }
+func Referrerpolicy(v string) attr.Node { return attr.KV("referrerpolicy", v) }

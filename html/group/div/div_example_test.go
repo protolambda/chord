@@ -2,7 +2,7 @@ package div_test
 
 import (
 	"github.com/protolambda/chord/core"
-	"github.com/protolambda/chord/html/attr"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/html/group/div"
 	"github.com/protolambda/chord/html/text"
 )

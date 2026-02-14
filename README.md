@@ -15,23 +15,23 @@ Structures are lazily evaluated, allowing reuse and context-aware rendering.
 
 ### Core Types
 
-- `attrib.Node`: A lazy-evaluated attribute (key-value, boolean, or bundle)
+- `attr.Node`: A lazy-evaluated attribute (key-value, boolean, or bundle)
 - `elem.Node`: A lazy-evaluated element (tag, text, raw HTML, or bundle)
 - `elem.Scope`: A `func(...Elem) Elem`, a scope of sub-elements (`<div>`, etc.)
 
 Constructors:
-- `attrib.KV(k, v)`: An attribute key-value pair
-- `attrib.Bool(k)`: A boolean attribute (no value)
+- `attr.KV(k, v)`: An attribute key-value pair
+- `attr.Bool(k)`: A boolean attribute (no value)
 - `elem.New(tag, attrs...)`: A non-void HTML element (returns `Scope`)
 - `elem.Void(tag, attrs...)`: A self-closing element (returns `Elem`)
 - `elem.Raw(v)`: Raw HTML content (no escaping)
 - `elem.Comment(v)`: An HTML comment
-- `elem.Noop()`, `attrib.Noop()`: Empty no-op
+- `elem.Noop()`, `attr.Noop()`: Empty no-op
 
 Core utils:
 - `text.Text(v)`: HTML-escaped text content (returns `Elem`)
-- `elem.If(bool, elem)`, `attrib.If(bool, attr)`: Conditional content
-- `elem.Fn(func(ctx) (elem, error))`, `attrib.Fn(func(ctx) (attr, error))`: Dynamic content
+- `elem.If(bool, elem)`, `attr.If(bool, attr)`: Conditional content
+- `elem.Fn(func(ctx) (elem, error))`, `attr.Fn(func(ctx) (attr, error))`: Dynamic content
 - `core.Fallback(node, fallback func(ctx, err) elem)`: Element with recovery
 
 
@@ -99,55 +99,56 @@ chord/
 package main
 
 import (
-    "context"
-    "log"
-    "strings"
+	"context"
+	"log"
+	"strings"
 
-    "github.com/protolambda/chord/core"
-    "github.com/protolambda/chord/core/elem"
-    "github.com/protolambda/chord/core/attrib"
-    "github.com/protolambda/chord/html/attr"
-    "github.com/protolambda/chord/html/group/div"
-    "github.com/protolambda/chord/html/meta"
-    "github.com/protolambda/chord/html/section"
-    "github.com/protolambda/chord/html/text"
-    "github.com/protolambda/chord/util"
+	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/elem"
+	"github.com/protolambda/chord/core/attr"
+	"github.com/protolambda/chord/core/attr"
+	"github.com/protolambda/chord/html/group/div"
+	"github.com/protolambda/chord/html/meta"
+	"github.com/protolambda/chord/html/section"
+	"github.com/protolambda/chord/html/text"
+	"github.com/protolambda/chord/util"
 )
 
 // Context key for authentication state
 type ctxKey string
+
 const isLoggedInKey ctxKey = "isLoggedIn"
 
 func main() {
-    // Build the page structure (can be reused with different contexts)
-    page := meta.HTML()(
-        meta.Head()(
-            meta.Title()(text.Text("My Page")),
-        ),
-        section.Body()(
-            section.Header()(
-                section.H1()(text.Text("Welcome")),
-                // Use Fn to read from context and conditionally render
-                elem.Fn(func(ctx context.Context) (elem.Node, error) {
-                    if loggedIn, _ := ctx.Value(isLoggedInKey).(bool); loggedIn {
-                        return div.Div(attr.Class("user-menu"))(text.Text("Logged in")), nil
-                    }
-                    return elem.Noop(), nil
-                }),
-            ),
-            section.Main()(
-                text.P()(text.Text("Hello, world!")),
-            ),
-        ),
-    )
+	// Build the page structure (can be reused with different contexts)
+	page := meta.HTML()(
+		meta.Head()(
+			meta.Title()(text.Text("My Page")),
+		),
+		section.Body()(
+			section.Header()(
+				section.H1()(text.Text("Welcome")),
+				// Use Fn to read from context and conditionally render
+				elem.Fn(func(ctx context.Context) (elem.Node, error) {
+					if loggedIn, _ := ctx.Value(isLoggedInKey).(bool); loggedIn {
+						return div.Div(attr.Class("user-menu"))(text.Text("Logged in")), nil
+					}
+					return elem.Noop(), nil
+				}),
+			),
+			section.Main()(
+				text.P()(text.Text("Hello, world!")),
+			),
+		),
+	)
 
-    // Attach state to context and render
-    ctx := context.WithValue(context.Background(), isLoggedInKey, true)
-    var out strings.Builder
-    if err := core.Render(ctx, page, &out, core.WithIndent()); err != nil {
-        log.Fatal(err)
-    }
-    // out.String() contains the rendered HTML
+	// Attach state to context and render
+	ctx := context.WithValue(context.Background(), isLoggedInKey, true)
+	var out strings.Builder
+	if err := core.Render(ctx, page, &out, core.WithIndent()); err != nil {
+		log.Fatal(err)
+	}
+	// out.String() contains the rendered HTML
 }
 ```
 

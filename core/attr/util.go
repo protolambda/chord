@@ -1,4 +1,4 @@
-package attrib
+package attr
 
 import (
 	"context"

@@ -1,7 +1,7 @@
 package hx2
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // SSE Extension Attributes
@@ -12,15 +12,15 @@ import (
 
 // SSEConnect sets the sse-connect attribute to establish an SSE connection.
 // Use with hx-ext="sse" on the element or a parent.
-func SSEConnect(url string) attrib.Node { return attrib.KV("sse-connect", url) }
+func SSEConnect(url string) attr.Node { return attr.KV("sse-connect", url) }
 
 // SSESwap sets the sse-swap attribute to specify which SSE message triggers a swap.
 // Use with hx-ext="sse" on the element or a parent.
-func SSESwap(messageName string) attrib.Node { return attrib.KV("sse-swap", messageName) }
+func SSESwap(messageName string) attr.Node { return attr.KV("sse-swap", messageName) }
 
 // SSEClose sets the sse-close attribute to close the connection on a specific message.
 // Use with hx-ext="sse" on the element or a parent.
-func SSEClose(messageName string) attrib.Node { return attrib.KV("sse-close", messageName) }
+func SSEClose(messageName string) attr.Node { return attr.KV("sse-close", messageName) }
 
 // WebSocket Extension Attributes
 //
@@ -30,8 +30,8 @@ func SSEClose(messageName string) attrib.Node { return attrib.KV("sse-close", me
 
 // WSConnect sets the ws-connect attribute to establish a WebSocket connection.
 // Use with hx-ext="ws" on the element or a parent.
-func WSConnect(url string) attrib.Node { return attrib.KV("ws-connect", url) }
+func WSConnect(url string) attr.Node { return attr.KV("ws-connect", url) }
 
 // WSSend sets the ws-send attribute to mark an element that sends data over WebSocket.
 // Use with hx-ext="ws" on the element or a parent. Typically used on forms.
-func WSSend() attrib.Node { return attrib.Bool("ws-send") }
+func WSSend() attr.Node { return attr.Bool("ws-send") }

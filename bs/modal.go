@@ -3,9 +3,8 @@ package bs
 import (
 	"context"
 
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
 	"github.com/protolambda/chord/html/section"
@@ -13,15 +12,15 @@ import (
 
 // Modal represents a Bootstrap modal component.
 type Modal struct {
-	ID         string      // required for targeting
-	Title      elem.Node   // modal-title content
-	Body       elem.Node   // modal-body content
-	Footer     elem.Node   // modal-footer content (typically buttons)
-	Size       string      // "", "sm", "lg", "xl"
-	Centered   bool        // vertically centered
-	Scrollable bool        // scrollable body
-	Static     bool        // static backdrop
-	Attrs      attrib.Node // additional attributes
+	ID         string    // required for targeting
+	Title      elem.Node // modal-title content
+	Body       elem.Node // modal-body content
+	Footer     elem.Node // modal-footer content (typically buttons)
+	Size       string    // "", "sm", "lg", "xl"
+	Centered   bool      // vertically centered
+	Scrollable bool      // scrollable body
+	Static     bool      // static backdrop
+	Attrs      attr.Node // additional attributes
 }
 
 func (Modal) ChordNode() {}
@@ -39,7 +38,7 @@ func (m Modal) Eval(ctx context.Context) (elem.Obj, error) {
 		dialogClass += " modal-dialog-scrollable"
 	}
 
-	var modalAttrs []attrib.Node
+	var modalAttrs []attr.Node
 	if m.Attrs != nil {
 		modalAttrs = append(modalAttrs, m.Attrs)
 	}
@@ -83,11 +82,11 @@ func (m Modal) Eval(ctx context.Context) (elem.Obj, error) {
 }
 
 // ModalTrigger creates a button that triggers a modal.
-func ModalTrigger(targetID string, attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(
+func ModalTrigger(targetID string, attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(
 		button.Type(button.TypeButton),
 		attr.Data("bs-toggle", "modal"),
 		attr.Data("bs-target", "#"+targetID),
-		attrib.Bundle(attrs),
+		attr.Bundle(attrs),
 	))
 }

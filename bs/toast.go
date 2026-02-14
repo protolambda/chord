@@ -3,9 +3,8 @@ package bs
 import (
 	"context"
 
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
 )
@@ -14,14 +13,14 @@ import (
 type Toast struct {
 	Header elem.Node // toast-header content
 	Body   elem.Node // toast-body content
-	Attrs  attrib.Node
+	Attrs  attr.Node
 }
 
 func (Toast) ChordNode() {}
 
 // Eval builds the toast structure with proper Bootstrap markup.
 func (t Toast) Eval(ctx context.Context) (elem.Obj, error) {
-	var attrs []attrib.Node
+	var attrs []attr.Node
 	if t.Attrs != nil {
 		attrs = append(attrs, t.Attrs)
 	}

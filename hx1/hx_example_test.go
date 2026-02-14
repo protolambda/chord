@@ -2,9 +2,8 @@ package hx1_test
 
 import (
 	"github.com/protolambda/chord/core"
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
 	"github.com/protolambda/chord/html/text"
@@ -52,7 +51,7 @@ func ExampleIndicator() {
 }
 
 func ExampleBoost() {
-	core.Dump(text.A(attrib.KV("href", "/page"), hx1.Boost("true")))
+	core.Dump(text.A(attr.KV("href", "/page"), hx1.Boost("true")))
 	// Output: <a href="/page" hx-boost="true"></a>
 }
 

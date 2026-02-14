@@ -2,15 +2,15 @@
 package object
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
 )
 
 // Object creates an object element.
-func Object(attrs ...attrib.Node) elem.Scope { return elem.New("object", attrs...) }
+func Object(attrs ...attr.Node) elem.Scope { return elem.New("object", attrs...) }
 
 // Param creates a param element (void).
-func Param(attrs ...attrib.Node) elem.Node { return elem.Void("param", attrs...) }
+func Param(attrs ...attr.Node) elem.Node { return elem.Void("param", attrs...) }
 
 // Embed creates an embed element (void).
-func Embed(attrs ...attrib.Node) elem.Node { return elem.Void("embed", attrs...) }
+func Embed(attrs ...attr.Node) elem.Node { return elem.Void("embed", attrs...) }

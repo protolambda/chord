@@ -4,7 +4,7 @@ package bi
 import (
 	"context"
 
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
 )
 
@@ -16,7 +16,7 @@ type Icon string
 var _ elem.Node = Icon("")
 
 func (i Icon) Eval(ctx context.Context) (elem.Obj, error) {
-	return elem.New("i", attrib.KV("class", "bi bi-"+string(i)))().Eval(ctx)
+	return elem.New("i", attr.KV("class", "bi bi-"+string(i)))().Eval(ctx)
 }
 
 // Icons can be found at:

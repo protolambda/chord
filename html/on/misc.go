@@ -1,17 +1,17 @@
 package on
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // Wheel sets the onwheel event handler.
-func Wheel(v string) attrib.Node { return attrib.KV("onwheel", v) }
+func Wheel(v string) attr.Node { return attr.KV("onwheel", v) }
 
 // BeforeInput sets the onbeforeinput event handler.
-func BeforeInput(v string) attrib.Node { return attrib.KV("onbeforeinput", v) }
+func BeforeInput(v string) attr.Node { return attr.KV("onbeforeinput", v) }
 
 // FullscreenChange sets the onfullscreenchange event handler.
-func FullscreenChange(v string) attrib.Node { return attrib.KV("onfullscreenchange", v) }
+func FullscreenChange(v string) attr.Node { return attr.KV("onfullscreenchange", v) }
 
 // FullscreenError sets the onfullscreenerror event handler.
-func FullscreenError(v string) attrib.Node { return attrib.KV("onfullscreenerror", v) }
+func FullscreenError(v string) attr.Node { return attr.KV("onfullscreenerror", v) }

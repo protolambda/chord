@@ -2,8 +2,8 @@ package hx2_test
 
 import (
 	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
 	"github.com/protolambda/chord/html/text"

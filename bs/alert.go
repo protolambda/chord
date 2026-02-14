@@ -1,50 +1,49 @@
 package bs
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
 )
 
 // Alert creates a basic Bootstrap alert.
-func Alert(attrs ...attrib.Node) elem.Scope {
-	return div.Div(attrib.Cons(attr.Class("alert"), attrs...))
+func Alert(attrs ...attr.Node) elem.Scope {
+	return div.Div(attr.Cons(attr.Class("alert"), attrs...))
 }
 
 // AlertPrimary creates a primary Bootstrap alert.
-func AlertPrimary(attrs ...attrib.Node) elem.Scope {
-	return div.Div(attrib.Cons(attr.Class("alert alert-primary"), attrs...))
+func AlertPrimary(attrs ...attr.Node) elem.Scope {
+	return div.Div(attr.Cons(attr.Class("alert alert-primary"), attrs...))
 }
 
 // AlertSecondary creates a secondary Bootstrap alert.
-func AlertSecondary(attrs ...attrib.Node) elem.Scope {
-	return div.Div(attrib.Cons(attr.Class("alert alert-secondary"), attrs...))
+func AlertSecondary(attrs ...attr.Node) elem.Scope {
+	return div.Div(attr.Cons(attr.Class("alert alert-secondary"), attrs...))
 }
 
 // AlertSuccess creates a success Bootstrap alert.
-func AlertSuccess(attrs ...attrib.Node) elem.Scope {
-	return div.Div(attrib.Cons(attr.Class("alert alert-success"), attrs...))
+func AlertSuccess(attrs ...attr.Node) elem.Scope {
+	return div.Div(attr.Cons(attr.Class("alert alert-success"), attrs...))
 }
 
 // AlertDanger creates a danger Bootstrap alert.
-func AlertDanger(attrs ...attrib.Node) elem.Scope {
-	return div.Div(attrib.Cons(attr.Class("alert alert-danger"), attrs...))
+func AlertDanger(attrs ...attr.Node) elem.Scope {
+	return div.Div(attr.Cons(attr.Class("alert alert-danger"), attrs...))
 }
 
 // AlertWarning creates a warning Bootstrap alert.
-func AlertWarning(attrs ...attrib.Node) elem.Scope {
-	return div.Div(attrib.Cons(attr.Class("alert alert-warning"), attrs...))
+func AlertWarning(attrs ...attr.Node) elem.Scope {
+	return div.Div(attr.Cons(attr.Class("alert alert-warning"), attrs...))
 }
 
 // AlertInfo creates an info Bootstrap alert.
-func AlertInfo(attrs ...attrib.Node) elem.Scope {
-	return div.Div(attrib.Cons(attr.Class("alert alert-info"), attrs...))
+func AlertInfo(attrs ...attr.Node) elem.Scope {
+	return div.Div(attr.Cons(attr.Class("alert alert-info"), attrs...))
 }
 
 // AlertDismissible creates a dismissible Bootstrap alert.
-func AlertDismissible(attrs ...attrib.Node) elem.Scope {
+func AlertDismissible(attrs ...attr.Node) elem.Scope {
 	return func(children ...elem.Node) elem.Node {
 		closeBtn := button.Button(
 			attr.Class("btn-close"),
@@ -54,9 +53,9 @@ func AlertDismissible(attrs ...attrib.Node) elem.Scope {
 		allChildren := make([]elem.Node, 0, 1+len(children))
 		allChildren = append(allChildren, closeBtn)
 		allChildren = append(allChildren, children...)
-		return div.Div(attrib.Cons(
+		return div.Div(attr.Cons(
 			attr.Class("alert alert-dismissible fade show"),
-			attrib.Bundle(attrs),
+			attr.Bundle(attrs),
 		))(allChildren...)
 	}
 }

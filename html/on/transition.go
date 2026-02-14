@@ -1,17 +1,17 @@
 package on
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // TransitionStart sets the ontransitionstart event handler.
-func TransitionStart(v string) attrib.Node { return attrib.KV("ontransitionstart", v) }
+func TransitionStart(v string) attr.Node { return attr.KV("ontransitionstart", v) }
 
 // TransitionEnd sets the ontransitionend event handler.
-func TransitionEnd(v string) attrib.Node { return attrib.KV("ontransitionend", v) }
+func TransitionEnd(v string) attr.Node { return attr.KV("ontransitionend", v) }
 
 // TransitionRun sets the ontransitionrun event handler.
-func TransitionRun(v string) attrib.Node { return attrib.KV("ontransitionrun", v) }
+func TransitionRun(v string) attr.Node { return attr.KV("ontransitionrun", v) }
 
 // TransitionCancel sets the ontransitioncancel event handler.
-func TransitionCancel(v string) attrib.Node { return attrib.KV("ontransitioncancel", v) }
+func TransitionCancel(v string) attr.Node { return attr.KV("ontransitioncancel", v) }

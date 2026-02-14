@@ -2,9 +2,8 @@ package text_test
 
 import (
 	"github.com/protolambda/chord/core"
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/text"
 )
 
@@ -95,7 +94,7 @@ func ExampleAbbr() {
 }
 
 func ExampleTime() {
-	core.Dump(text.Time(attrib.KV("datetime", "2024-01-15"))(text.Text("January 15")))
+	core.Dump(text.Time(attr.KV("datetime", "2024-01-15"))(text.Text("January 15")))
 	// Output: <time datetime="2024-01-15">January 15</time>
 }
 

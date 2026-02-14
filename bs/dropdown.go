@@ -3,9 +3,8 @@ package bs
 import (
 	"context"
 
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
 	"github.com/protolambda/chord/html/group/list"
@@ -17,14 +16,14 @@ import (
 type Dropdown struct {
 	Toggle elem.Node   // toggle button content
 	Items  []elem.Node // dropdown items
-	Attrs  attrib.Node
+	Attrs  attr.Node
 }
 
 func (Dropdown) ChordNode() {}
 
 // Eval builds the dropdown structure with proper Bootstrap markup.
 func (d Dropdown) Eval(ctx context.Context) (elem.Obj, error) {
-	var dropdownAttrs []attrib.Node
+	var dropdownAttrs []attr.Node
 	if d.Attrs != nil {
 		dropdownAttrs = append(dropdownAttrs, d.Attrs)
 	}
@@ -42,10 +41,10 @@ func (d Dropdown) Eval(ctx context.Context) (elem.Obj, error) {
 }
 
 // DropdownItem creates a Bootstrap dropdown item.
-func DropdownItem(attrs ...attrib.Node) elem.Scope {
+func DropdownItem(attrs ...attr.Node) elem.Scope {
 	return func(children ...elem.Node) elem.Node {
 		return list.LI()(
-			text.A(attrib.Cons(attr.Class("dropdown-item"), attrs...))(children...),
+			text.A(attr.Cons(attr.Class("dropdown-item"), attrs...))(children...),
 		)
 	}
 }
@@ -56,10 +55,10 @@ func DropdownDivider() elem.Node {
 }
 
 // DropdownHeader creates a Bootstrap dropdown header.
-func DropdownHeader(attrs ...attrib.Node) elem.Scope {
+func DropdownHeader(attrs ...attr.Node) elem.Scope {
 	return func(children ...elem.Node) elem.Node {
 		return list.LI()(
-			section.H6(attrib.Cons(attr.Class("dropdown-header"), attrs...))(children...),
+			section.H6(attr.Cons(attr.Class("dropdown-header"), attrs...))(children...),
 		)
 	}
 }

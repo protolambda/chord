@@ -1,7 +1,7 @@
 // Package html is an umbrella package that re-exports commonly used HTML elements.
 //
 // For more specific elements and attributes, use the subpackages:
-//   - [github.com/protolambda/chord/html/attr]: Global HTML attributes
+//   - [github.com/protolambda/chord/core/attr]: Global HTML attributes
 //   - [github.com/protolambda/chord/html/aria]: ARIA accessibility attributes
 //   - [github.com/protolambda/chord/html/on]: DOM event handler attributes
 //   - [github.com/protolambda/chord/html/meta]: Document metadata (html, head, title, meta, link)

@@ -6,7 +6,7 @@ import (
 	"iter"
 	"strings"
 
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
 )
 
@@ -123,7 +123,7 @@ func renderElemObj(ctx context.Context, obj elem.Obj, out *strings.Builder, cfg 
 }
 
 // renderAttribs flattens and renders all attributes.
-func renderAttribs(ctx context.Context, attribs attrib.Seq, out *strings.Builder, seen map[string]struct{}) error {
+func renderAttribs(ctx context.Context, attribs attr.Seq, out *strings.Builder, seen map[string]struct{}) error {
 	if attribs == nil {
 		return nil
 	}
@@ -133,7 +133,7 @@ func renderAttribs(ctx context.Context, attribs attrib.Seq, out *strings.Builder
 
 	var classes string
 	var styles string
-	var collected []attrib.Obj
+	var collected []attr.Obj
 
 	for a := range attribs {
 		if err := flattenAttrib(ctx, a, &classes, &styles, &collected, seen); err != nil {
@@ -161,8 +161,8 @@ func renderAttribs(ctx context.Context, attribs attrib.Seq, out *strings.Builder
 }
 
 // flattenAttrib recursively flattens attribute bundles and collects attributes.
-func flattenAttrib(ctx context.Context, a attrib.Node, classes,
-	styles *string, collected *[]attrib.Obj, seen map[string]struct{}) error {
+func flattenAttrib(ctx context.Context, a attr.Node, classes,
+	styles *string, collected *[]attr.Obj, seen map[string]struct{}) error {
 	obj, err := a.Eval(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to eval attribute: %w", err)

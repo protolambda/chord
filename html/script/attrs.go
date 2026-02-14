@@ -1,32 +1,32 @@
 package script
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // Src sets the src attribute.
-func Src(v string) attrib.Node { return attrib.KV("src", v) }
+func Src(v string) attr.Node { return attr.KV("src", v) }
 
 // Type sets the type attribute.
-func Type(v string) attrib.Node { return attrib.KV("type", v) }
+func Type(v string) attr.Node { return attr.KV("type", v) }
 
 // Async sets the async boolean attribute.
-func Async() attrib.Node { return attrib.Bool("async") }
+func Async() attr.Node { return attr.Bool("async") }
 
 // Defer sets the defer boolean attribute.
-func Defer() attrib.Node { return attrib.Bool("defer") }
+func Defer() attr.Node { return attr.Bool("defer") }
 
 // Crossorigin sets the crossorigin attribute.
-func Crossorigin(v string) attrib.Node { return attrib.KV("crossorigin", v) }
+func Crossorigin(v string) attr.Node { return attr.KV("crossorigin", v) }
 
 // Integrity sets the integrity attribute.
-func Integrity(v string) attrib.Node { return attrib.KV("integrity", v) }
+func Integrity(v string) attr.Node { return attr.KV("integrity", v) }
 
 // Nomodule sets the nomodule boolean attribute.
-func Nomodule() attrib.Node { return attrib.Bool("nomodule") }
+func Nomodule() attr.Node { return attr.Bool("nomodule") }
 
 // Referrerpolicy sets the referrerpolicy attribute.
-func Referrerpolicy(v string) attrib.Node { return attrib.KV("referrerpolicy", v) }
+func Referrerpolicy(v string) attr.Node { return attr.KV("referrerpolicy", v) }
 
 // Blocking sets the blocking attribute.
-func Blocking(v string) attrib.Node { return attrib.KV("blocking", v) }
+func Blocking(v string) attr.Node { return attr.KV("blocking", v) }

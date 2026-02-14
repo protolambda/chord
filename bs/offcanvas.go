@@ -3,9 +3,8 @@ package bs
 import (
 	"context"
 
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
 	"github.com/protolambda/chord/html/section"
@@ -19,7 +18,7 @@ type Offcanvas struct {
 	Placement string    // "start", "end", "top", "bottom"
 	Backdrop  bool      // show backdrop
 	Scroll    bool      // allow body scroll
-	Attrs     attrib.Node
+	Attrs     attr.Node
 }
 
 func (Offcanvas) ChordNode() {}
@@ -31,7 +30,7 @@ func (o Offcanvas) Eval(ctx context.Context) (elem.Obj, error) {
 		placement = "start"
 	}
 
-	var attrs []attrib.Node
+	var attrs []attr.Node
 	if o.Attrs != nil {
 		attrs = append(attrs, o.Attrs)
 	}
@@ -63,11 +62,11 @@ func (o Offcanvas) Eval(ctx context.Context) (elem.Obj, error) {
 }
 
 // OffcanvasTrigger creates a button that triggers an offcanvas.
-func OffcanvasTrigger(targetID string, attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(
+func OffcanvasTrigger(targetID string, attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(
 		button.Type(button.TypeButton),
 		attr.Data("bs-toggle", "offcanvas"),
 		attr.Data("bs-target", "#"+targetID),
-		attrib.Bundle(attrs),
+		attr.Bundle(attrs),
 	))
 }

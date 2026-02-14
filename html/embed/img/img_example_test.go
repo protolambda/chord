@@ -2,7 +2,7 @@ package img_test
 
 import (
 	"github.com/protolambda/chord/core"
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/html/embed/img"
 )
 
@@ -23,7 +23,7 @@ func ExampleImg_lazy() {
 
 func ExamplePicture() {
 	core.Dump(img.Picture()(
-		img.Source(attrib.KV("media", "(min-width: 800px)"), attrib.KV("srcset", "large.jpg")),
+		img.Source(attr.KV("media", "(min-width: 800px)"), attr.KV("srcset", "large.jpg")),
 		img.Img(img.Src("small.jpg"), img.Alt("Art directed")),
 	))
 	// Output: <picture><source media="(min-width: 800px)" srcset="large.jpg"/><img src="small.jpg" alt="Art directed"/></picture>

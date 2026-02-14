@@ -1,26 +1,26 @@
 package button
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // Popovertarget sets the popovertarget attribute.
-func Popovertarget(v string) attrib.Node { return attrib.KV("popovertarget", v) }
+func Popovertarget(v string) attr.Node { return attr.KV("popovertarget", v) }
 
 // Popovertargetaction sets the popovertargetaction attribute.
-func Popovertargetaction(v string) attrib.Node { return attrib.KV("popovertargetaction", v) }
+func Popovertargetaction(v string) attr.Node { return attr.KV("popovertargetaction", v) }
 
 // Formaction sets the formaction attribute.
-func Formaction(v string) attrib.Node { return attrib.KV("formaction", v) }
+func Formaction(v string) attr.Node { return attr.KV("formaction", v) }
 
 // Formenctype sets the formenctype attribute.
-func Formenctype(v string) attrib.Node { return attrib.KV("formenctype", v) }
+func Formenctype(v string) attr.Node { return attr.KV("formenctype", v) }
 
 // Formmethod sets the formmethod attribute.
-func Formmethod(v string) attrib.Node { return attrib.KV("formmethod", v) }
+func Formmethod(v string) attr.Node { return attr.KV("formmethod", v) }
 
 // Formnovalidate sets the formnovalidate boolean attribute.
-func Formnovalidate() attrib.Node { return attrib.Bool("formnovalidate") }
+func Formnovalidate() attr.Node { return attr.Bool("formnovalidate") }
 
 // Formtarget sets the formtarget attribute.
-func Formtarget(v string) attrib.Node { return attrib.KV("formtarget", v) }
+func Formtarget(v string) attr.Node { return attr.KV("formtarget", v) }

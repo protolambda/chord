@@ -1,8 +1,8 @@
 package text
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // Value sets the value attribute for data elements.
-func Value(v string) attrib.Node { return attrib.KV("value", v) }
+func Value(v string) attr.Node { return attr.KV("value", v) }

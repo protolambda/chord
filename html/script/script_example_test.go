@@ -2,9 +2,8 @@ package script_test
 
 import (
 	"github.com/protolambda/chord/core"
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/script"
 	"github.com/protolambda/chord/html/text"
 )
@@ -35,6 +34,6 @@ func ExampleTemplate() {
 }
 
 func ExampleCanvas() {
-	core.Dump(script.Canvas(attr.ID("game"), attrib.KV("width", "800"), attrib.KV("height", "600")))
+	core.Dump(script.Canvas(attr.ID("game"), attr.KV("width", "800"), attr.KV("height", "600")))
 	// Output: <canvas id="game" width="800" height="600"></canvas>
 }

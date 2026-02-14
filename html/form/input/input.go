@@ -2,9 +2,9 @@
 package input
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
 )
 
 // Input creates an input element (void).
-func Input(attrs ...attrib.Node) elem.Node { return elem.Void("input", attrs...) }
+func Input(attrs ...attr.Node) elem.Node { return elem.Void("input", attrs...) }

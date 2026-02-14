@@ -3,74 +3,73 @@
 package bs
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
 )
 
 // Btn creates a basic Bootstrap button.
-func Btn(attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(attr.Class("btn"), attrs...))
+func Btn(attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(attr.Class("btn"), attrs...))
 }
 
 // BtnPrimary creates a primary Bootstrap button.
-func BtnPrimary(attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(attr.Class("btn btn-primary"), attrs...))
+func BtnPrimary(attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(attr.Class("btn btn-primary"), attrs...))
 }
 
 // BtnSecondary creates a secondary Bootstrap button.
-func BtnSecondary(attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(attr.Class("btn btn-secondary"), attrs...))
+func BtnSecondary(attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(attr.Class("btn btn-secondary"), attrs...))
 }
 
 // BtnSuccess creates a success Bootstrap button.
-func BtnSuccess(attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(attr.Class("btn btn-success"), attrs...))
+func BtnSuccess(attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(attr.Class("btn btn-success"), attrs...))
 }
 
 // BtnDanger creates a danger Bootstrap button.
-func BtnDanger(attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(attr.Class("btn btn-danger"), attrs...))
+func BtnDanger(attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(attr.Class("btn btn-danger"), attrs...))
 }
 
 // BtnWarning creates a warning Bootstrap button.
-func BtnWarning(attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(attr.Class("btn btn-warning"), attrs...))
+func BtnWarning(attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(attr.Class("btn btn-warning"), attrs...))
 }
 
 // BtnInfo creates an info Bootstrap button.
-func BtnInfo(attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(attr.Class("btn btn-info"), attrs...))
+func BtnInfo(attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(attr.Class("btn btn-info"), attrs...))
 }
 
 // BtnLight creates a light Bootstrap button.
-func BtnLight(attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(attr.Class("btn btn-light"), attrs...))
+func BtnLight(attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(attr.Class("btn btn-light"), attrs...))
 }
 
 // BtnDark creates a dark Bootstrap button.
-func BtnDark(attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(attr.Class("btn btn-dark"), attrs...))
+func BtnDark(attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(attr.Class("btn btn-dark"), attrs...))
 }
 
 // BtnLink creates a link-styled Bootstrap button.
-func BtnLink(attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(attr.Class("btn btn-link"), attrs...))
+func BtnLink(attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(attr.Class("btn btn-link"), attrs...))
 }
 
 // BtnOutlinePrimary creates an outline primary Bootstrap button.
-func BtnOutlinePrimary(attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(attr.Class("btn btn-outline-primary"), attrs...))
+func BtnOutlinePrimary(attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(attr.Class("btn btn-outline-primary"), attrs...))
 }
 
 // BtnOutlineSecondary creates an outline secondary Bootstrap button.
-func BtnOutlineSecondary(attrs ...attrib.Node) elem.Scope {
-	return button.Button(attrib.Cons(attr.Class("btn btn-outline-secondary"), attrs...))
+func BtnOutlineSecondary(attrs ...attr.Node) elem.Scope {
+	return button.Button(attr.Cons(attr.Class("btn btn-outline-secondary"), attrs...))
 }
 
 // BtnGroup creates a Bootstrap button group wrapper.
-func BtnGroup(attrs ...attrib.Node) elem.Scope {
-	return div.Div(attrib.Cons(attr.Class("btn-group"), attrs...))
+func BtnGroup(attrs ...attr.Node) elem.Scope {
+	return div.Div(attr.Cons(attr.Class("btn-group"), attrs...))
 }

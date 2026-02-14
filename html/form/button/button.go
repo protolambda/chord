@@ -2,9 +2,9 @@
 package button
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
 )
 
 // Button creates a button element.
-func Button(attrs ...attrib.Node) elem.Scope { return elem.New("button", attrs...) }
+func Button(attrs ...attr.Node) elem.Scope { return elem.New("button", attrs...) }

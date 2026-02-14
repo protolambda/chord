@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
 	"github.com/protolambda/chord/html/section"
@@ -18,7 +17,7 @@ type Accordion struct {
 	Items      []AccordionItem // accordion items
 	Flush      bool            // flush style (no borders)
 	AlwaysOpen bool            // allow multiple open
-	Attrs      attrib.Node
+	Attrs      attr.Node
 }
 
 // AccordionItem represents a single accordion item.
@@ -37,7 +36,7 @@ func (a Accordion) Eval(ctx context.Context) (elem.Obj, error) {
 		accordionClass += " accordion-flush"
 	}
 
-	var accordionAttrs []attrib.Node
+	var accordionAttrs []attr.Node
 	if a.Attrs != nil {
 		accordionAttrs = append(accordionAttrs, a.Attrs)
 	}
@@ -65,7 +64,7 @@ func (a Accordion) Eval(ctx context.Context) (elem.Obj, error) {
 			)(item.Header),
 		)
 
-		collapseAttrs := []attrib.Node{
+		collapseAttrs := []attr.Node{
 			attr.ID(collapseID),
 			attr.Class(collapseClass),
 		}

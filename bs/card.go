@@ -3,9 +3,8 @@ package bs
 import (
 	"context"
 
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/group/div"
 	"github.com/protolambda/chord/html/section"
 	"github.com/protolambda/chord/html/text"
@@ -13,18 +12,18 @@ import (
 
 // Card represents a Bootstrap card component with named fields for clarity.
 type Card struct {
-	Header elem.Node   // optional card-header content
-	Img    elem.Node   // optional card-img-top
-	Body   elem.Node   // card-body content (use CardBody for structured body)
-	Footer elem.Node   // optional card-footer content
-	Attrs  attrib.Node // additional attributes
+	Header elem.Node // optional card-header content
+	Img    elem.Node // optional card-img-top
+	Body   elem.Node // card-body content (use CardBody for structured body)
+	Footer elem.Node // optional card-footer content
+	Attrs  attr.Node // additional attributes
 }
 
 func (Card) ChordNode() {}
 
 // Eval builds the card structure with proper Bootstrap markup.
 func (c Card) Eval(ctx context.Context) (elem.Obj, error) {
-	var cardAttrs []attrib.Node
+	var cardAttrs []attr.Node
 	if c.Attrs != nil {
 		cardAttrs = append(cardAttrs, c.Attrs)
 	}
@@ -78,6 +77,6 @@ func (cb CardBody) Eval(ctx context.Context) (elem.Obj, error) {
 }
 
 // CardImgOverlay creates a card image overlay wrapper.
-func CardImgOverlay(attrs ...attrib.Node) elem.Scope {
-	return div.Div(attrib.Cons(attr.Class("card-img-overlay"), attrs...))
+func CardImgOverlay(attrs ...attr.Node) elem.Scope {
+	return div.Div(attr.Cons(attr.Class("card-img-overlay"), attrs...))
 }

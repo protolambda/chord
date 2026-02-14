@@ -1,17 +1,17 @@
 package on
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // TouchStart sets the ontouchstart event handler.
-func TouchStart(v string) attrib.Node { return attrib.KV("ontouchstart", v) }
+func TouchStart(v string) attr.Node { return attr.KV("ontouchstart", v) }
 
 // TouchMove sets the ontouchmove event handler.
-func TouchMove(v string) attrib.Node { return attrib.KV("ontouchmove", v) }
+func TouchMove(v string) attr.Node { return attr.KV("ontouchmove", v) }
 
 // TouchEnd sets the ontouchend event handler.
-func TouchEnd(v string) attrib.Node { return attrib.KV("ontouchend", v) }
+func TouchEnd(v string) attr.Node { return attr.KV("ontouchend", v) }
 
 // TouchCancel sets the ontouchcancel event handler.
-func TouchCancel(v string) attrib.Node { return attrib.KV("ontouchcancel", v) }
+func TouchCancel(v string) attr.Node { return attr.KV("ontouchcancel", v) }

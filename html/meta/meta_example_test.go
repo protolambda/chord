@@ -2,14 +2,14 @@ package meta_test
 
 import (
 	"github.com/protolambda/chord/core"
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/meta"
 	"github.com/protolambda/chord/html/text"
 )
 
 func ExampleHTML() {
-	core.Dump(meta.HTML(attrib.KV("lang", "en")))
+	core.Dump(meta.HTML(attr.KV("lang", "en")))
 	// Output: <html lang="en"></html>
 }
 

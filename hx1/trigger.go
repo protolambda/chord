@@ -1,8 +1,8 @@
 package hx1
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // Trigger sets the hx-trigger attribute to specify what triggers the request.
-func Trigger(v string) attrib.Node { return attrib.KV("hx-trigger", v) }
+func Trigger(v string) attr.Node { return attr.KV("hx-trigger", v) }

@@ -1,20 +1,20 @@
 package form
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // Action sets the action attribute.
-func Action(v string) attrib.Node { return attrib.KV("action", v) }
+func Action(v string) attr.Node { return attr.KV("action", v) }
 
 // Target sets the target attribute.
-func Target(v string) attrib.Node { return attrib.KV("target", v) }
+func Target(v string) attr.Node { return attr.KV("target", v) }
 
 // Novalidate sets the novalidate boolean attribute.
-func Novalidate() attrib.Node { return attrib.Bool("novalidate") }
+func Novalidate() attr.Node { return attr.Bool("novalidate") }
 
 // Accept sets the accept attribute.
-func Accept(v string) attrib.Node { return attrib.KV("accept", v) }
+func Accept(v string) attr.Node { return attr.KV("accept", v) }
 
 // Acceptcharset sets the accept-charset attribute.
-func Acceptcharset(v string) attrib.Node { return attrib.KV("accept-charset", v) }
+func Acceptcharset(v string) attr.Node { return attr.KV("accept-charset", v) }

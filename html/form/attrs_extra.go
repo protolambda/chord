@@ -1,7 +1,7 @@
 package form
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // FormMethod represents valid form method values.
@@ -13,7 +13,7 @@ const (
 )
 
 // Method sets the method attribute with a typed FormMethod.
-func Method(m FormMethod) attrib.Node { return attrib.KV("method", string(m)) }
+func Method(m FormMethod) attr.Node { return attr.KV("method", string(m)) }
 
 // FormEnctype represents valid form enctype values.
 type FormEnctype string
@@ -25,4 +25,4 @@ const (
 )
 
 // Enctype sets the enctype attribute with a typed FormEnctype.
-func Enctype(e FormEnctype) attrib.Node { return attrib.KV("enctype", string(e)) }
+func Enctype(e FormEnctype) attr.Node { return attr.KV("enctype", string(e)) }

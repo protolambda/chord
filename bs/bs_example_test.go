@@ -4,7 +4,7 @@ import (
 	"github.com/protolambda/chord/ba"
 	"github.com/protolambda/chord/bs"
 	"github.com/protolambda/chord/core"
-	"github.com/protolambda/chord/html/attr"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/html/form/input"
 	"github.com/protolambda/chord/html/form/label"
 	selectel "github.com/protolambda/chord/html/form/select"

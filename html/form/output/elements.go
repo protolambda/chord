@@ -2,15 +2,15 @@
 package output
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
 )
 
 // Output creates an output element.
-func Output(attrs ...attrib.Node) elem.Scope { return elem.New("output", attrs...) }
+func Output(attrs ...attr.Node) elem.Scope { return elem.New("output", attrs...) }
 
 // Progress creates a progress element.
-func Progress(attrs ...attrib.Node) elem.Scope { return elem.New("progress", attrs...) }
+func Progress(attrs ...attr.Node) elem.Scope { return elem.New("progress", attrs...) }
 
 // Meter creates a meter element.
-func Meter(attrs ...attrib.Node) elem.Scope { return elem.New("meter", attrs...) }
+func Meter(attrs ...attr.Node) elem.Scope { return elem.New("meter", attrs...) }

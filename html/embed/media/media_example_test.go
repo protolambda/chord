@@ -2,7 +2,7 @@ package media_test
 
 import (
 	"github.com/protolambda/chord/core"
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/html/embed/media"
 	"github.com/protolambda/chord/html/text"
 )
@@ -14,8 +14,8 @@ func ExampleVideo() {
 
 func ExampleVideo_sources() {
 	core.Dump(media.Video(media.Controls())(
-		media.Source(attrib.KV("src", "movie.webm"), attrib.KV("type", "video/webm")),
-		media.Source(attrib.KV("src", "movie.mp4"), attrib.KV("type", "video/mp4")),
+		media.Source(attr.KV("src", "movie.webm"), attr.KV("type", "video/webm")),
+		media.Source(attr.KV("src", "movie.mp4"), attr.KV("type", "video/mp4")),
 	))
 	// Output: <video controls><source src="movie.webm" type="video/webm"/><source src="movie.mp4" type="video/mp4"/></video>
 }
@@ -27,7 +27,7 @@ func ExampleAudio() {
 
 func ExampleTrack() {
 	core.Dump(media.Video(media.Src("movie.mp4"))(
-		media.Track(attrib.KV("src", "subs.vtt"), attrib.KV("kind", "subtitles"), attrib.KV("srclang", "en")),
+		media.Track(attr.KV("src", "subs.vtt"), attr.KV("kind", "subtitles"), attr.KV("srclang", "en")),
 	))
 	// Output: <video src="movie.mp4"><track src="subs.vtt" kind="subtitles" srclang="en"/></video>
 }

@@ -2,9 +2,9 @@
 package label
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
 )
 
 // Label creates a label element.
-func Label(attrs ...attrib.Node) elem.Scope { return elem.New("label", attrs...) }
+func Label(attrs ...attr.Node) elem.Scope { return elem.New("label", attrs...) }

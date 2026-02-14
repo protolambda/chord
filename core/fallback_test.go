@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/protolambda/chord/core"
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/text"
 )
@@ -20,7 +20,7 @@ func Example_fallback() {
 	core.Dump(core.Fallback(
 		elem.New("div")(unreliable),
 		func(ctx context.Context, err error) elem.Node {
-			return elem.New("div", attrib.KV("class", "error"))(
+			return elem.New("div", attr.KV("class", "error"))(
 				text.Text("Failed to load content"))
 		},
 	))

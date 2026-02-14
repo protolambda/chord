@@ -2,7 +2,7 @@ package table_test
 
 import (
 	"github.com/protolambda/chord/core"
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/html/table"
 	"github.com/protolambda/chord/html/text"
 )
@@ -21,7 +21,7 @@ func ExampleCaption() {
 }
 
 func ExampleColgroup() {
-	core.Dump(table.Colgroup()(table.Col(attrib.KV("span", "2"))))
+	core.Dump(table.Colgroup()(table.Col(attr.KV("span", "2"))))
 	// Output: <colgroup><col span="2"/></colgroup>
 }
 

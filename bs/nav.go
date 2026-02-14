@@ -1,9 +1,8 @@
 package bs
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
 	"github.com/protolambda/chord/html/group/list"
@@ -12,47 +11,47 @@ import (
 )
 
 // Nav creates a Bootstrap nav container.
-func Nav(attrs ...attrib.Node) elem.Scope {
-	return list.UL(attrib.Cons(attr.Class("nav"), attrs...))
+func Nav(attrs ...attr.Node) elem.Scope {
+	return list.UL(attr.Cons(attr.Class("nav"), attrs...))
 }
 
 // NavItem creates a Bootstrap nav item.
-func NavItem(attrs ...attrib.Node) elem.Scope {
-	return list.LI(attrib.Cons(attr.Class("nav-item"), attrs...))
+func NavItem(attrs ...attr.Node) elem.Scope {
+	return list.LI(attr.Cons(attr.Class("nav-item"), attrs...))
 }
 
 // NavLink creates a Bootstrap nav link.
-func NavLink(attrs ...attrib.Node) elem.Scope {
-	return text.A(attrib.Cons(attr.Class("nav-link"), attrs...))
+func NavLink(attrs ...attr.Node) elem.Scope {
+	return text.A(attr.Cons(attr.Class("nav-link"), attrs...))
 }
 
 // Navbar creates a Bootstrap navbar.
-func Navbar(attrs ...attrib.Node) elem.Scope {
-	return section.Nav(attrib.Cons(attr.Class("navbar"), attrs...))
+func Navbar(attrs ...attr.Node) elem.Scope {
+	return section.Nav(attr.Cons(attr.Class("navbar"), attrs...))
 }
 
 // NavbarBrand creates a Bootstrap navbar brand.
-func NavbarBrand(attrs ...attrib.Node) elem.Scope {
-	return text.A(attrib.Cons(attr.Class("navbar-brand"), attrs...))
+func NavbarBrand(attrs ...attr.Node) elem.Scope {
+	return text.A(attr.Cons(attr.Class("navbar-brand"), attrs...))
 }
 
 // NavbarToggler creates a Bootstrap navbar toggler button.
 // The toggler icon span is automatically included as a child.
-func NavbarToggler(attrs ...attrib.Node) elem.Node {
-	return button.Button(attrib.Cons(
+func NavbarToggler(attrs ...attr.Node) elem.Node {
+	return button.Button(attr.Cons(
 		attr.Class("navbar-toggler"),
 		button.Type(button.TypeButton),
 		attr.Data("bs-toggle", "collapse"),
-		attrib.Bundle(attrs),
+		attr.Bundle(attrs),
 	))(text.Span(attr.Class("navbar-toggler-icon"))())
 }
 
 // NavbarCollapse creates a Bootstrap navbar collapse container.
-func NavbarCollapse(attrs ...attrib.Node) elem.Scope {
-	return div.Div(attrib.Cons(attr.Class("collapse navbar-collapse"), attrs...))
+func NavbarCollapse(attrs ...attr.Node) elem.Scope {
+	return div.Div(attr.Cons(attr.Class("collapse navbar-collapse"), attrs...))
 }
 
 // NavbarNav creates a Bootstrap navbar nav container.
-func NavbarNav(attrs ...attrib.Node) elem.Scope {
-	return list.UL(attrib.Cons(attr.Class("navbar-nav"), attrs...))
+func NavbarNav(attrs ...attr.Node) elem.Scope {
+	return list.UL(attr.Cons(attr.Class("navbar-nav"), attrs...))
 }

@@ -2,7 +2,7 @@ package selectel_test
 
 import (
 	"github.com/protolambda/chord/core"
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	selectel "github.com/protolambda/chord/html/form/select"
 	"github.com/protolambda/chord/html/text"
 )
@@ -25,7 +25,7 @@ func ExampleSelect_named() {
 
 func ExampleOptgroup() {
 	core.Dump(selectel.Select()(
-		selectel.Optgroup(attrib.KV("label", "Fruits"))(
+		selectel.Optgroup(attr.KV("label", "Fruits"))(
 			selectel.Option()(text.Text("Apple")),
 			selectel.Option()(text.Text("Banana")),
 		),
@@ -34,7 +34,7 @@ func ExampleOptgroup() {
 }
 
 func ExampleDatalist() {
-	core.Dump(selectel.Datalist(attrib.KV("id", "browsers"))(
+	core.Dump(selectel.Datalist(attr.KV("id", "browsers"))(
 		selectel.Option(selectel.Value("Chrome")),
 		selectel.Option(selectel.Value("Firefox")),
 	))

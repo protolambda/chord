@@ -8,9 +8,8 @@ import (
 	"github.com/protolambda/chord/bi"
 	"github.com/protolambda/chord/bs"
 	"github.com/protolambda/chord/core"
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/attr"
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/form/input"
 	"github.com/protolambda/chord/html/form/label"
@@ -98,7 +97,7 @@ func Example_duplicateAttribute() {
 // Bundle combines multiple nodes into one, useful for reusable attribute sets.
 func Example_attributeBundle() {
 	// Define a reusable style bundle
-	cardStyle := attrib.Bundle{attr.Class("card"), attr.Class("shadow"), attr.Style("padding:1rem")}
+	cardStyle := attr.Bundle{attr.Class("card"), attr.Class("shadow"), attr.Style("padding:1rem")}
 	core.Dump(div.Div(cardStyle)(text.Text("Card content")))
 	// Output: <div class="card shadow" style="padding:1rem">Card content</div>
 }

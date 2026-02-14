@@ -1,23 +1,23 @@
 package on
 
 import (
-	"github.com/protolambda/chord/core/attrib"
+	"github.com/protolambda/chord/core/attr"
 )
 
 // Submit sets the onsubmit event handler.
-func Submit(v string) attrib.Node { return attrib.KV("onsubmit", v) }
+func Submit(v string) attr.Node { return attr.KV("onsubmit", v) }
 
 // Reset sets the onreset event handler.
-func Reset(v string) attrib.Node { return attrib.KV("onreset", v) }
+func Reset(v string) attr.Node { return attr.KV("onreset", v) }
 
 // Change sets the onchange event handler.
-func Change(v string) attrib.Node { return attrib.KV("onchange", v) }
+func Change(v string) attr.Node { return attr.KV("onchange", v) }
 
 // Input sets the oninput event handler.
-func Input(v string) attrib.Node { return attrib.KV("oninput", v) }
+func Input(v string) attr.Node { return attr.KV("oninput", v) }
 
 // Invalid sets the oninvalid event handler.
-func Invalid(v string) attrib.Node { return attrib.KV("oninvalid", v) }
+func Invalid(v string) attr.Node { return attr.KV("oninvalid", v) }
 
 // Select sets the onselect event handler.
-func Select(v string) attrib.Node { return attrib.KV("onselect", v) }
+func Select(v string) attr.Node { return attr.KV("onselect", v) }
