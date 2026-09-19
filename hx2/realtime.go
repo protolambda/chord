@@ -12,15 +12,15 @@ import (
 
 // SSEConnect sets the sse-connect attribute to establish an SSE connection.
 // Use with hx-ext="sse" on the element or a parent.
-func SSEConnect(url string) attr.Node { return attr.KV("sse-connect", url) }
+func SSEConnect(url string) attr.Node { return attr.Name("sse-connect").Value(url) }
 
 // SSESwap sets the sse-swap attribute to specify which SSE message triggers a swap.
 // Use with hx-ext="sse" on the element or a parent.
-func SSESwap(messageName string) attr.Node { return attr.KV("sse-swap", messageName) }
+func SSESwap(messageName string) attr.Node { return attr.Name("sse-swap").Value(messageName) }
 
 // SSEClose sets the sse-close attribute to close the connection on a specific message.
 // Use with hx-ext="sse" on the element or a parent.
-func SSEClose(messageName string) attr.Node { return attr.KV("sse-close", messageName) }
+func SSEClose(messageName string) attr.Node { return attr.Name("sse-close").Value(messageName) }
 
 // WebSocket Extension Attributes
 //
@@ -30,8 +30,8 @@ func SSEClose(messageName string) attr.Node { return attr.KV("sse-close", messag
 
 // WSConnect sets the ws-connect attribute to establish a WebSocket connection.
 // Use with hx-ext="ws" on the element or a parent.
-func WSConnect(url string) attr.Node { return attr.KV("ws-connect", url) }
+func WSConnect(url string) attr.Node { return attr.Name("ws-connect").Value(url) }
 
 // WSSend sets the ws-send attribute to mark an element that sends data over WebSocket.
 // Use with hx-ext="ws" on the element or a parent. Typically used on forms.
-func WSSend() attr.Node { return attr.Bool("ws-send") }
+func WSSend() attr.Node { return attr.Name("ws-send").Bool() }

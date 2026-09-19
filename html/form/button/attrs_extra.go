@@ -14,4 +14,11 @@ const (
 )
 
 // Type sets the type attribute with a typed ButtonType.
-func Type(t ButtonType) attr.Node { return attr.KV("type", string(t)) }
+func Type(t ButtonType) attr.Node {
+	switch t {
+	case TypeSubmit, TypeReset, TypeButton:
+		return attr.Name("type").Raw(string(t))
+	default:
+		return attr.Name("type").Value(string(t))
+	}
+}

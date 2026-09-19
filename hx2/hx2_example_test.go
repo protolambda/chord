@@ -16,7 +16,7 @@ func ExampleGet() {
 }
 
 func ExamplePost() {
-	core.Dump(elem.New("form", hx2.Post("/api/submit")))
+	core.Dump(elem.Name("form").New(hx2.Post("/api/submit")))
 	// Output: <form hx-post="/api/submit"></form>
 }
 
@@ -32,12 +32,12 @@ func ExampleSwap() {
 
 func ExampleOn() {
 	core.Dump(button.Button(hx2.On("click", "alert('clicked')")))
-	// Output: <button hx-on:click="alert('clicked')"></button>
+	// Output: <button hx-on:click="alert(&#39;clicked&#39;)"></button>
 }
 
 func ExampleOn_htmxEvent() {
 	core.Dump(div.Div(hx2.On("htmx:afterSwap", "console.log('swapped')")))
-	// Output: <div hx-on:htmx:afterSwap="console.log('swapped')"></div>
+	// Output: <div hx-on:htmx:afterSwap="console.log(&#39;swapped&#39;)"></div>
 }
 
 func ExampleInherit() {

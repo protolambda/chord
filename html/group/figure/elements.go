@@ -7,7 +7,7 @@ import (
 )
 
 // Figure creates a figure element.
-func Figure(attrs ...attr.Node) elem.Scope { return elem.New("figure", attrs...) }
+func Figure(attrs ...attr.Node) elem.Scope { return elem.Name("figure").New(attrs...) }
 
 // Figcaption creates a figcaption element.
-func Figcaption(attrs ...attr.Node) elem.Scope { return elem.New("figcaption", attrs...) }
+func Figcaption(attrs ...attr.Node) elem.Scope { return elem.Name("figcaption").New(attrs...) }

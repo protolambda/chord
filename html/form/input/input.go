@@ -7,4 +7,4 @@ import (
 )
 
 // Input creates an input element (void).
-func Input(attrs ...attr.Node) elem.Node { return elem.Void("input", attrs...) }
+func Input(attrs ...attr.Node) elem.Node { return elem.Name("input").Void(attrs...) }

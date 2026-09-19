@@ -5,16 +5,16 @@ import (
 )
 
 // Action sets the action attribute.
-func Action(v string) attr.Node { return attr.KV("action", v) }
+func Action(v string) attr.Node { return attr.Name("action").Value(v) }
 
 // Target sets the target attribute.
-func Target(v string) attr.Node { return attr.KV("target", v) }
+func Target(v string) attr.Node { return attr.Name("target").Value(v) }
 
 // Novalidate sets the novalidate boolean attribute.
-func Novalidate() attr.Node { return attr.Bool("novalidate") }
+func Novalidate() attr.Node { return attr.Name("novalidate").Bool() }
 
 // Accept sets the accept attribute.
-func Accept(v string) attr.Node { return attr.KV("accept", v) }
+func Accept(v string) attr.Node { return attr.Name("accept").Value(v) }
 
 // Acceptcharset sets the accept-charset attribute.
-func Acceptcharset(v string) attr.Node { return attr.KV("accept-charset", v) }
+func Acceptcharset(v string) attr.Node { return attr.Name("accept-charset").Value(v) }

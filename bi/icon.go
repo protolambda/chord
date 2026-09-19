@@ -16,7 +16,24 @@ type Icon string
 var _ elem.Node = Icon("")
 
 func (i Icon) Eval(ctx context.Context) (elem.Obj, error) {
-	return elem.New("i", attr.KV("class", "bi bi-"+string(i)))().Eval(ctx)
+	name := string(i)
+	value := "bi bi-" + name
+	if validIconName(name) {
+		return elem.Name("i").New(attr.Name("class").Raw(value))().Eval(ctx)
+	}
+	return elem.Name("i").New(attr.Name("class").Value(value))().Eval(ctx)
+}
+
+func validIconName(name string) bool {
+	if name == "" {
+		return false
+	}
+	for _, c := range name {
+		if (c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '-' {
+			return false
+		}
+	}
+	return true
 }
 
 // Icons can be found at:

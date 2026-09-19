@@ -5,4 +5,4 @@ import (
 )
 
 // Indicator sets the hx-indicator attribute to specify loading indicator element.
-func Indicator(v string) attr.Node { return attr.KV("hx-indicator", v) }
+func Indicator(v string) attr.Node { return attr.Name("hx-indicator").Value(v) }

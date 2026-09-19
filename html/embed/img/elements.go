@@ -7,10 +7,10 @@ import (
 )
 
 // Img creates an img element (void).
-func Img(attrs ...attr.Node) elem.Node { return elem.Void("img", attrs...) }
+func Img(attrs ...attr.Node) elem.Node { return elem.Name("img").Void(attrs...) }
 
 // Picture creates a picture element.
-func Picture(attrs ...attr.Node) elem.Scope { return elem.New("picture", attrs...) }
+func Picture(attrs ...attr.Node) elem.Scope { return elem.Name("picture").New(attrs...) }
 
 // Source creates a source element (void).
-func Source(attrs ...attr.Node) elem.Node { return elem.Void("source", attrs...) }
+func Source(attrs ...attr.Node) elem.Node { return elem.Name("source").Void(attrs...) }

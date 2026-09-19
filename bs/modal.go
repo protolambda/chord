@@ -23,8 +23,6 @@ type Modal struct {
 	Attrs      attr.Node // additional attributes
 }
 
-func (Modal) ChordNode() {}
-
 // Eval builds the modal structure with proper Bootstrap markup.
 func (m Modal) Eval(ctx context.Context) (elem.Obj, error) {
 	dialogClass := "modal-dialog"
@@ -43,39 +41,39 @@ func (m Modal) Eval(ctx context.Context) (elem.Obj, error) {
 		modalAttrs = append(modalAttrs, m.Attrs)
 	}
 	modalAttrs = append(modalAttrs,
-		attr.Class("modal fade"),
+		rawClass("modal fade"),
 		attr.ID(m.ID),
-		attr.Tabindex("-1"),
+		attr.Name("tabindex").Raw("-1"),
 	)
 	if m.Static {
-		modalAttrs = append(modalAttrs, attr.Data("bs-backdrop", "static"))
+		modalAttrs = append(modalAttrs, attr.Name("data-bs-backdrop").Raw("static"))
 	}
 
 	// Header
 	var headerChildren []elem.Node
 	if m.Title != nil {
-		headerChildren = append(headerChildren, section.H1(attr.Class("modal-title fs-5"))(m.Title))
+		headerChildren = append(headerChildren, section.H1(rawClass("modal-title fs-5"))(m.Title))
 	}
 	closeBtn := button.Button(
-		attr.Class("btn-close"),
+		rawClass("btn-close"),
 		button.Type(button.TypeButton),
-		attr.Data("bs-dismiss", "modal"),
+		attr.Name("data-bs-dismiss").Raw("modal"),
 	)()
 	headerChildren = append(headerChildren, closeBtn)
 
 	// Content
 	var contentChildren []elem.Node
 	contentChildren = append(contentChildren,
-		div.Div(attr.Class("modal-header"))(headerChildren...),
+		div.Div(rawClass("modal-header"))(headerChildren...),
 	)
 	if m.Body != nil {
-		contentChildren = append(contentChildren, div.Div(attr.Class("modal-body"))(m.Body))
+		contentChildren = append(contentChildren, div.Div(rawClass("modal-body"))(m.Body))
 	}
 	if m.Footer != nil {
-		contentChildren = append(contentChildren, div.Div(attr.Class("modal-footer"))(m.Footer))
+		contentChildren = append(contentChildren, div.Div(rawClass("modal-footer"))(m.Footer))
 	}
 
-	modalContent := div.Div(attr.Class("modal-content"))(contentChildren...)
+	modalContent := div.Div(rawClass("modal-content"))(contentChildren...)
 	modalDialog := div.Div(attr.Class(dialogClass))(modalContent)
 
 	return div.Div(modalAttrs...)(modalDialog).Eval(ctx)
@@ -85,7 +83,7 @@ func (m Modal) Eval(ctx context.Context) (elem.Obj, error) {
 func ModalTrigger(targetID string, attrs ...attr.Node) elem.Scope {
 	return button.Button(attr.Cons(
 		button.Type(button.TypeButton),
-		attr.Data("bs-toggle", "modal"),
+		attr.Name("data-bs-toggle").Raw("modal"),
 		attr.Data("bs-target", "#"+targetID),
 		attr.Bundle(attrs),
 	))

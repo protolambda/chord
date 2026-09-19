@@ -7,13 +7,13 @@ import (
 )
 
 // OL creates an ol element.
-func OL(attrs ...attr.Node) elem.Scope { return elem.New("ol", attrs...) }
+func OL(attrs ...attr.Node) elem.Scope { return elem.Name("ol").New(attrs...) }
 
 // UL creates a ul element.
-func UL(attrs ...attr.Node) elem.Scope { return elem.New("ul", attrs...) }
+func UL(attrs ...attr.Node) elem.Scope { return elem.Name("ul").New(attrs...) }
 
 // Menu creates a menu element.
-func Menu(attrs ...attr.Node) elem.Scope { return elem.New("menu", attrs...) }
+func Menu(attrs ...attr.Node) elem.Scope { return elem.Name("menu").New(attrs...) }
 
 // LI creates an li element.
-func LI(attrs ...attr.Node) elem.Scope { return elem.New("li", attrs...) }
+func LI(attrs ...attr.Node) elem.Scope { return elem.Name("li").New(attrs...) }

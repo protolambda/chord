@@ -7,31 +7,31 @@ import (
 )
 
 // Table creates a table element.
-func Table(attrs ...attr.Node) elem.Scope { return elem.New("table", attrs...) }
+func Table(attrs ...attr.Node) elem.Scope { return elem.Name("table").New(attrs...) }
 
 // Caption creates a caption element.
-func Caption(attrs ...attr.Node) elem.Scope { return elem.New("caption", attrs...) }
+func Caption(attrs ...attr.Node) elem.Scope { return elem.Name("caption").New(attrs...) }
 
 // Colgroup creates a colgroup element.
-func Colgroup(attrs ...attr.Node) elem.Scope { return elem.New("colgroup", attrs...) }
+func Colgroup(attrs ...attr.Node) elem.Scope { return elem.Name("colgroup").New(attrs...) }
 
 // Col creates a col element (void).
-func Col(attrs ...attr.Node) elem.Node { return elem.Void("col", attrs...) }
+func Col(attrs ...attr.Node) elem.Node { return elem.Name("col").Void(attrs...) }
 
 // Tbody creates a tbody element.
-func Tbody(attrs ...attr.Node) elem.Scope { return elem.New("tbody", attrs...) }
+func Tbody(attrs ...attr.Node) elem.Scope { return elem.Name("tbody").New(attrs...) }
 
 // Thead creates a thead element.
-func Thead(attrs ...attr.Node) elem.Scope { return elem.New("thead", attrs...) }
+func Thead(attrs ...attr.Node) elem.Scope { return elem.Name("thead").New(attrs...) }
 
 // Tfoot creates a tfoot element.
-func Tfoot(attrs ...attr.Node) elem.Scope { return elem.New("tfoot", attrs...) }
+func Tfoot(attrs ...attr.Node) elem.Scope { return elem.Name("tfoot").New(attrs...) }
 
 // TR creates a tr element.
-func TR(attrs ...attr.Node) elem.Scope { return elem.New("tr", attrs...) }
+func TR(attrs ...attr.Node) elem.Scope { return elem.Name("tr").New(attrs...) }
 
 // TD creates a td element.
-func TD(attrs ...attr.Node) elem.Scope { return elem.New("td", attrs...) }
+func TD(attrs ...attr.Node) elem.Scope { return elem.Name("td").New(attrs...) }
 
 // TH creates a th element.
-func TH(attrs ...attr.Node) elem.Scope { return elem.New("th", attrs...) }
+func TH(attrs ...attr.Node) elem.Scope { return elem.Name("th").New(attrs...) }

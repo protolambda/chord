@@ -5,19 +5,19 @@ import (
 )
 
 // Href sets the href attribute for anchor elements.
-func Href(v string) attr.Node { return attr.KV("href", v) }
+func Href(v string) attr.Node { return attr.Name("href").Value(v) }
 
 // Target sets the target attribute for anchor elements.
-func Target(v string) attr.Node { return attr.KV("target", v) }
+func Target(v string) attr.Node { return attr.Name("target").Value(v) }
 
 // Rel sets the rel attribute for anchor elements.
-func Rel(v string) attr.Node { return attr.KV("rel", v) }
+func Rel(v string) attr.Node { return attr.Name("rel").Value(v) }
 
 // Download sets the download attribute for anchor elements.
-func Download(v string) attr.Node { return attr.KV("download", v) }
+func Download(v string) attr.Node { return attr.Name("download").Value(v) }
 
 // Hreflang sets the hreflang attribute for anchor elements.
-func Hreflang(v string) attr.Node { return attr.KV("hreflang", v) }
+func Hreflang(v string) attr.Node { return attr.Name("hreflang").Value(v) }
 
 // Ping sets the ping attribute for anchor elements.
-func Ping(v string) attr.Node { return attr.KV("ping", v) }
+func Ping(v string) attr.Node { return attr.Name("ping").Value(v) }

@@ -9,52 +9,52 @@ import (
 
 // Alert creates a basic Bootstrap alert.
 func Alert(attrs ...attr.Node) elem.Scope {
-	return div.Div(attr.Cons(attr.Class("alert"), attrs...))
+	return div.Div(attr.Cons(rawClass("alert"), attrs...))
 }
 
 // AlertPrimary creates a primary Bootstrap alert.
 func AlertPrimary(attrs ...attr.Node) elem.Scope {
-	return div.Div(attr.Cons(attr.Class("alert alert-primary"), attrs...))
+	return div.Div(attr.Cons(rawClass("alert alert-primary"), attrs...))
 }
 
 // AlertSecondary creates a secondary Bootstrap alert.
 func AlertSecondary(attrs ...attr.Node) elem.Scope {
-	return div.Div(attr.Cons(attr.Class("alert alert-secondary"), attrs...))
+	return div.Div(attr.Cons(rawClass("alert alert-secondary"), attrs...))
 }
 
 // AlertSuccess creates a success Bootstrap alert.
 func AlertSuccess(attrs ...attr.Node) elem.Scope {
-	return div.Div(attr.Cons(attr.Class("alert alert-success"), attrs...))
+	return div.Div(attr.Cons(rawClass("alert alert-success"), attrs...))
 }
 
 // AlertDanger creates a danger Bootstrap alert.
 func AlertDanger(attrs ...attr.Node) elem.Scope {
-	return div.Div(attr.Cons(attr.Class("alert alert-danger"), attrs...))
+	return div.Div(attr.Cons(rawClass("alert alert-danger"), attrs...))
 }
 
 // AlertWarning creates a warning Bootstrap alert.
 func AlertWarning(attrs ...attr.Node) elem.Scope {
-	return div.Div(attr.Cons(attr.Class("alert alert-warning"), attrs...))
+	return div.Div(attr.Cons(rawClass("alert alert-warning"), attrs...))
 }
 
 // AlertInfo creates an info Bootstrap alert.
 func AlertInfo(attrs ...attr.Node) elem.Scope {
-	return div.Div(attr.Cons(attr.Class("alert alert-info"), attrs...))
+	return div.Div(attr.Cons(rawClass("alert alert-info"), attrs...))
 }
 
 // AlertDismissible creates a dismissible Bootstrap alert.
 func AlertDismissible(attrs ...attr.Node) elem.Scope {
 	return func(children ...elem.Node) elem.Node {
 		closeBtn := button.Button(
-			attr.Class("btn-close"),
+			rawClass("btn-close"),
 			button.Type(button.TypeButton),
-			attr.Data("bs-dismiss", "alert"),
+			attr.Name("data-bs-dismiss").Raw("alert"),
 		)()
 		allChildren := make([]elem.Node, 0, 1+len(children))
 		allChildren = append(allChildren, closeBtn)
 		allChildren = append(allChildren, children...)
 		return div.Div(attr.Cons(
-			attr.Class("alert alert-dismissible fade show"),
+			rawClass("alert alert-dismissible fade show"),
 			attr.Bundle(attrs),
 		))(allChildren...)
 	}

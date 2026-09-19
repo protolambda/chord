@@ -7,7 +7,7 @@ import (
 )
 
 // Ins creates an ins element.
-func Ins(attrs ...attr.Node) elem.Scope { return elem.New("ins", attrs...) }
+func Ins(attrs ...attr.Node) elem.Scope { return elem.Name("ins").New(attrs...) }
 
 // Del creates a del element.
-func Del(attrs ...attr.Node) elem.Scope { return elem.New("del", attrs...) }
+func Del(attrs ...attr.Node) elem.Scope { return elem.Name("del").New(attrs...) }

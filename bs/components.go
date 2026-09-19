@@ -12,56 +12,56 @@ import (
 func Breadcrumb(attrs ...attr.Node) elem.Scope {
 	return func(children ...elem.Node) elem.Node {
 		return section.Nav()(
-			list.OL(attr.Cons(attr.Class("breadcrumb"), attrs...))(children...),
+			list.OL(attr.Cons(rawClass("breadcrumb"), attrs...))(children...),
 		)
 	}
 }
 
 // BreadcrumbItem creates a Bootstrap breadcrumb item.
 func BreadcrumbItem(attrs ...attr.Node) elem.Scope {
-	return list.LI(attr.Cons(attr.Class("breadcrumb-item"), attrs...))
+	return list.LI(attr.Cons(rawClass("breadcrumb-item"), attrs...))
 }
 
 // Carousel creates a Bootstrap carousel.
 func Carousel(attrs ...attr.Node) elem.Scope {
-	return div.Div(attr.Cons(attr.Class("carousel slide"), attrs...))
+	return div.Div(attr.Cons(rawClass("carousel slide"), attrs...))
 }
 
 // Pagination creates a Bootstrap pagination container.
 func Pagination(attrs ...attr.Node) elem.Scope {
 	return func(children ...elem.Node) elem.Node {
 		return section.Nav()(
-			list.UL(attr.Cons(attr.Class("pagination"), attrs...))(children...),
+			list.UL(attr.Cons(rawClass("pagination"), attrs...))(children...),
 		)
 	}
 }
 
 // PageItem creates a Bootstrap pagination item.
 func PageItem(attrs ...attr.Node) elem.Scope {
-	return list.LI(attr.Cons(attr.Class("page-item"), attrs...))
+	return list.LI(attr.Cons(rawClass("page-item"), attrs...))
 }
 
 // PageLink creates a Bootstrap pagination link.
 func PageLink(attrs ...attr.Node) elem.Scope {
-	return list.LI(attr.Cons(attr.Class("page-link"), attrs...))
+	return list.LI(attr.Cons(rawClass("page-link"), attrs...))
 }
 
 // Progress creates a Bootstrap progress container.
 func Progress(attrs ...attr.Node) elem.Scope {
-	return div.Div(attr.Cons(attr.Class("progress"), attrs...))
+	return div.Div(attr.Cons(rawClass("progress"), attrs...))
 }
 
 // ProgressBar creates a Bootstrap progress bar.
 func ProgressBar(attrs ...attr.Node) elem.Scope {
-	return div.Div(attr.Cons(attr.Class("progress-bar"), attrs...))
+	return div.Div(attr.Cons(rawClass("progress-bar"), attrs...))
 }
 
 // Spinner creates a Bootstrap spinner.
 func Spinner(attrs ...attr.Node) elem.Scope {
-	return div.Div(attr.Cons(attr.Class("spinner-border"), attrs...))
+	return div.Div(attr.Cons(rawClass("spinner-border"), attrs...))
 }
 
 // Collapse creates a Bootstrap collapse container.
 func Collapse(attrs ...attr.Node) elem.Scope {
-	return div.Div(attr.Cons(attr.Class("collapse"), attrs...))
+	return div.Div(attr.Cons(rawClass("collapse"), attrs...))
 }

@@ -27,8 +27,6 @@ type AccordionItem struct {
 	Show   bool      // initially expanded
 }
 
-func (Accordion) ChordNode() {}
-
 // Eval builds the accordion structure with proper Bootstrap markup.
 func (a Accordion) Eval(ctx context.Context) (elem.Obj, error) {
 	accordionClass := "accordion"
@@ -40,7 +38,7 @@ func (a Accordion) Eval(ctx context.Context) (elem.Obj, error) {
 	if a.Attrs != nil {
 		accordionAttrs = append(accordionAttrs, a.Attrs)
 	}
-	accordionAttrs = append(accordionAttrs, attr.Class(accordionClass), attr.ID(a.ID))
+	accordionAttrs = append(accordionAttrs, rawClass(accordionClass), attr.ID(a.ID))
 
 	var items []elem.Node
 	for i, item := range a.Items {
@@ -55,29 +53,29 @@ func (a Accordion) Eval(ctx context.Context) (elem.Obj, error) {
 			buttonClass += " collapsed"
 		}
 
-		header := section.H2(attr.Class("accordion-header"))(
+		header := section.H2(rawClass("accordion-header"))(
 			button.Button(
-				attr.Class(buttonClass),
+				rawClass(buttonClass),
 				button.Type(button.TypeButton),
-				attr.Data("bs-toggle", "collapse"),
+				attr.Name("data-bs-toggle").Raw("collapse"),
 				attr.Data("bs-target", "#"+collapseID),
 			)(item.Header),
 		)
 
 		collapseAttrs := []attr.Node{
 			attr.ID(collapseID),
-			attr.Class(collapseClass),
+			rawClass(collapseClass),
 		}
 		if !a.AlwaysOpen {
 			collapseAttrs = append(collapseAttrs, attr.Data("bs-parent", "#"+a.ID))
 		}
 
 		collapse := div.Div(collapseAttrs...)(
-			div.Div(attr.Class("accordion-body"))(item.Body),
+			div.Div(rawClass("accordion-body"))(item.Body),
 		)
 
 		items = append(items, div.Div(
-			attr.Class("accordion-item"),
+			rawClass("accordion-item"),
 			attr.ID(itemID),
 		)(header, collapse))
 	}

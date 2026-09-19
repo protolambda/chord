@@ -5,4 +5,4 @@ import (
 )
 
 // Trigger sets the hx-trigger attribute to specify what triggers the request.
-func Trigger(v string) attr.Node { return attr.KV("hx-trigger", v) }
+func Trigger(v string) attr.Node { return attr.Name("hx-trigger").Value(v) }

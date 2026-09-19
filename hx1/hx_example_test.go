@@ -16,7 +16,7 @@ func ExampleGet() {
 }
 
 func ExamplePost() {
-	core.Dump(elem.New("form", hx1.Post("/api/submit")))
+	core.Dump(elem.Name("form").New(hx1.Post("/api/submit")))
 	// Output: <form hx-post="/api/submit"></form>
 }
 
@@ -62,7 +62,7 @@ func ExamplePushURL() {
 
 func ExampleVals() {
 	core.Dump(button.Button(hx1.Post("/api"), hx1.Vals(`{"key":"value"}`)))
-	// Output: <button hx-post="/api" hx-vals="{"key":"value"}"></button>
+	// Output: <button hx-post="/api" hx-vals="{&#34;key&#34;:&#34;value&#34;}"></button>
 }
 
 func ExampleConfirm() {

@@ -33,4 +33,12 @@ const (
 )
 
 // Type sets the type attribute with a typed InputType.
-func Type(t InputType) attr.Node { return attr.KV("type", string(t)) }
+func Type(t InputType) attr.Node {
+	switch t {
+	case Text, Password, Email, Number, Tel, URL, Search, Date, Time, DatetimeLocal,
+		Month, Week, Color, File, Checkbox, Radio, Range, Hidden, Submit, Reset, Button, Image:
+		return attr.Name("type").Raw(string(t))
+	default:
+		return attr.Name("type").Value(string(t))
+	}
+}

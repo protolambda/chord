@@ -5,7 +5,7 @@ import (
 )
 
 // Visible creates a Bootstrap visible class.
-func Visible() attr.Node { return attr.Class("visible") }
+func Visible() attr.Node { return rawClass("visible") }
 
 // Invisible creates a Bootstrap invisible class.
-func Invisible() attr.Node { return attr.Class("invisible") }
+func Invisible() attr.Node { return rawClass("invisible") }

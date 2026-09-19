@@ -240,7 +240,7 @@ func Example_htmxBasic() {
 // hx2.On() uses v2 syntax: hx-on:event="handler"
 func Example_htmxEvents() {
 	core.Dump(div.Div(hx2.On("htmx:after-swap", "console.log('swapped')")))
-	// Output: <div hx-on:htmx:after-swap="console.log('swapped')"></div>
+	// Output: <div hx-on:htmx:after-swap="console.log(&#39;swapped&#39;)"></div>
 }
 
 // SSE in v2 requires the extension: hx-ext="sse"

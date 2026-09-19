@@ -5,9 +5,38 @@ import (
 	"html"
 	"iter"
 	"slices"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/protolambda/chord/core/attr"
 )
+
+// Name is a trusted, statically known HTML element tag name.
+// Converting runtime input to Name bypasses tag-name validation.
+type Name string
+
+// ParseName validates a runtime HTML element tag name.
+// The first character must be an ASCII letter. Subsequent characters may
+// include Unicode, but not characters that can reshape HTML tag syntax.
+func ParseName(v string) (out Name, ok bool) {
+	if v == "" || !utf8.ValidString(v) || !asciiLetter(v[0]) {
+		return "", false
+	}
+	for _, r := range v[1:] {
+		if unicode.IsSpace(r) || unicode.IsControl(r) {
+			return "", false
+		}
+		switch r {
+		case '"', '\'', '<', '>', '/', '=':
+			return "", false
+		}
+	}
+	return Name(v), true
+}
+
+func asciiLetter(c byte) bool {
+	return c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z'
+}
 
 // Obj is the evaluated representation of an element.
 type Obj struct {
@@ -35,22 +64,22 @@ type Node interface {
 	Eval(ctx context.Context) (Obj, error)
 }
 
-// New creates a non-void element constructor (e.g. <div>scope content</div>).
-// Returns a Scope: call it with child elements to produce an Elem.
-func New(name string, attrs ...attr.Node) Scope {
+// New creates a non-void element constructor for this trusted tag.
+// Call the returned Scope with child elements to produce a Node.
+func (n Name) New(attrs ...attr.Node) Scope {
 	return func(children ...Node) Node {
 		return Obj{
-			Tag:      name,
+			Tag:      string(n),
 			Attribs:  attr.Seq(slices.Values(attrs)),
 			Children: slices.Values(children),
 		}
 	}
 }
 
-// Void creates a self-closing void element (e.g. <br/>, <input/>).
-func Void(name string, attrs ...attr.Node) Node {
+// Void creates a self-closing element for this trusted tag.
+func (n Name) Void(attrs ...attr.Node) Node {
 	return Obj{
-		Tag:     name,
+		Tag:     string(n),
 		Void:    true,
 		Attribs: attr.Seq(slices.Values(attrs)),
 	}

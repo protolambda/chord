@@ -19,23 +19,21 @@ type Dropdown struct {
 	Attrs  attr.Node
 }
 
-func (Dropdown) ChordNode() {}
-
 // Eval builds the dropdown structure with proper Bootstrap markup.
 func (d Dropdown) Eval(ctx context.Context) (elem.Obj, error) {
 	var dropdownAttrs []attr.Node
 	if d.Attrs != nil {
 		dropdownAttrs = append(dropdownAttrs, d.Attrs)
 	}
-	dropdownAttrs = append(dropdownAttrs, attr.Class("dropdown"))
+	dropdownAttrs = append(dropdownAttrs, rawClass("dropdown"))
 
 	toggleBtn := button.Button(
-		attr.Class("btn btn-secondary dropdown-toggle"),
+		rawClass("btn btn-secondary dropdown-toggle"),
 		button.Type(button.TypeButton),
-		attr.Data("bs-toggle", "dropdown"),
+		attr.Name("data-bs-toggle").Raw("dropdown"),
 	)(d.Toggle)
 
-	menu := list.UL(attr.Class("dropdown-menu"))(d.Items...)
+	menu := list.UL(rawClass("dropdown-menu"))(d.Items...)
 
 	return div.Div(dropdownAttrs...)(toggleBtn, menu).Eval(ctx)
 }
@@ -44,21 +42,21 @@ func (d Dropdown) Eval(ctx context.Context) (elem.Obj, error) {
 func DropdownItem(attrs ...attr.Node) elem.Scope {
 	return func(children ...elem.Node) elem.Node {
 		return list.LI()(
-			text.A(attr.Cons(attr.Class("dropdown-item"), attrs...))(children...),
+			text.A(attr.Cons(rawClass("dropdown-item"), attrs...))(children...),
 		)
 	}
 }
 
 // DropdownDivider creates a Bootstrap dropdown divider.
 func DropdownDivider() elem.Node {
-	return list.LI()(text.HR(attr.Class("dropdown-divider")))
+	return list.LI()(text.HR(rawClass("dropdown-divider")))
 }
 
 // DropdownHeader creates a Bootstrap dropdown header.
 func DropdownHeader(attrs ...attr.Node) elem.Scope {
 	return func(children ...elem.Node) elem.Node {
 		return list.LI()(
-			section.H6(attr.Cons(attr.Class("dropdown-header"), attrs...))(children...),
+			section.H6(attr.Cons(rawClass("dropdown-header"), attrs...))(children...),
 		)
 	}
 }

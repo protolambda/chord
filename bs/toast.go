@@ -16,31 +16,29 @@ type Toast struct {
 	Attrs  attr.Node
 }
 
-func (Toast) ChordNode() {}
-
 // Eval builds the toast structure with proper Bootstrap markup.
 func (t Toast) Eval(ctx context.Context) (elem.Obj, error) {
 	var attrs []attr.Node
 	if t.Attrs != nil {
 		attrs = append(attrs, t.Attrs)
 	}
-	attrs = append(attrs, attr.Class("toast"))
+	attrs = append(attrs, rawClass("toast"))
 
 	var children []elem.Node
 	if t.Header != nil {
-		header := div.Div(attr.Class("toast-header"))(
+		header := div.Div(rawClass("toast-header"))(
 			t.Header,
 			button.Button(
-				attr.Class("btn-close"),
+				rawClass("btn-close"),
 				button.Type(button.TypeButton),
-				attr.Data("bs-dismiss", "toast"),
+				attr.Name("data-bs-dismiss").Raw("toast"),
 			)(),
 		)
 		children = append(children, header)
 	}
 
 	if t.Body != nil {
-		children = append(children, div.Div(attr.Class("toast-body"))(t.Body))
+		children = append(children, div.Div(rawClass("toast-body"))(t.Body))
 	}
 
 	return div.Div(attrs...)(children...).Eval(ctx)

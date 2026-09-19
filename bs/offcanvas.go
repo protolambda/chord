@@ -21,8 +21,6 @@ type Offcanvas struct {
 	Attrs     attr.Node
 }
 
-func (Offcanvas) ChordNode() {}
-
 // Eval builds the offcanvas structure with proper Bootstrap markup.
 func (o Offcanvas) Eval(ctx context.Context) (elem.Obj, error) {
 	placement := o.Placement
@@ -37,26 +35,26 @@ func (o Offcanvas) Eval(ctx context.Context) (elem.Obj, error) {
 	attrs = append(attrs,
 		attr.Class("offcanvas offcanvas-"+placement),
 		attr.ID(o.ID),
-		attr.Tabindex("-1"),
+		attr.Name("tabindex").Raw("-1"),
 	)
 
 	if o.Scroll {
-		attrs = append(attrs, attr.Data("bs-scroll", "true"))
+		attrs = append(attrs, attr.Name("data-bs-scroll").Raw("true"))
 	}
 	if !o.Backdrop {
-		attrs = append(attrs, attr.Data("bs-backdrop", "false"))
+		attrs = append(attrs, attr.Name("data-bs-backdrop").Raw("false"))
 	}
 
-	header := div.Div(attr.Class("offcanvas-header"))(
-		section.H5(attr.Class("offcanvas-title"))(o.Title),
+	header := div.Div(rawClass("offcanvas-header"))(
+		section.H5(rawClass("offcanvas-title"))(o.Title),
 		button.Button(
-			attr.Class("btn-close"),
+			rawClass("btn-close"),
 			button.Type(button.TypeButton),
-			attr.Data("bs-dismiss", "offcanvas"),
+			attr.Name("data-bs-dismiss").Raw("offcanvas"),
 		)(),
 	)
 
-	body := div.Div(attr.Class("offcanvas-body"))(o.Body)
+	body := div.Div(rawClass("offcanvas-body"))(o.Body)
 
 	return div.Div(attrs...)(header, body).Eval(ctx)
 }
@@ -65,7 +63,7 @@ func (o Offcanvas) Eval(ctx context.Context) (elem.Obj, error) {
 func OffcanvasTrigger(targetID string, attrs ...attr.Node) elem.Scope {
 	return button.Button(attr.Cons(
 		button.Type(button.TypeButton),
-		attr.Data("bs-toggle", "offcanvas"),
+		attr.Name("data-bs-toggle").Raw("offcanvas"),
 		attr.Data("bs-target", "#"+targetID),
 		attr.Bundle(attrs),
 	))

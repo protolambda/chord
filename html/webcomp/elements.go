@@ -7,4 +7,4 @@ import (
 )
 
 // Slot creates a slot element.
-func Slot(attrs ...attr.Node) elem.Scope { return elem.New("slot", attrs...) }
+func Slot(attrs ...attr.Node) elem.Scope { return elem.Name("slot").New(attrs...) }

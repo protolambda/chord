@@ -7,4 +7,4 @@ import (
 )
 
 // Label creates a label element.
-func Label(attrs ...attr.Node) elem.Scope { return elem.New("label", attrs...) }
+func Label(attrs ...attr.Node) elem.Scope { return elem.Name("label").New(attrs...) }

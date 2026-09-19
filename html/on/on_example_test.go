@@ -27,7 +27,7 @@ func ExampleMouseOver() {
 }
 
 func ExampleSubmit() {
-	core.Dump(elem.New("form", on.Submit("return validate()")))
+	core.Dump(elem.Name("form").New(on.Submit("return validate()")))
 	// Output: <form onsubmit="return validate()"></form>
 }
 

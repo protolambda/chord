@@ -5,4 +5,4 @@ import (
 )
 
 // For sets the for attribute.
-func For(v string) attr.Node { return attr.KV("for", v) }
+func For(v string) attr.Node { return attr.Name("for").Value(v) }

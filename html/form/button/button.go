@@ -7,4 +7,4 @@ import (
 )
 
 // Button creates a button element.
-func Button(attrs ...attr.Node) elem.Scope { return elem.New("button", attrs...) }
+func Button(attrs ...attr.Node) elem.Scope { return elem.Name("button").New(attrs...) }

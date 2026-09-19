@@ -5,10 +5,10 @@ import (
 )
 
 // Reversed sets the reversed boolean attribute for ol elements.
-func Reversed() attr.Node { return attr.Bool("reversed") }
+func Reversed() attr.Node { return attr.Name("reversed").Bool() }
 
 // Start sets the start attribute for ol elements.
-func Start(v string) attr.Node { return attr.KV("start", v) }
+func Start(v string) attr.Node { return attr.Name("start").Value(v) }
 
 // Type sets the type attribute for ol elements.
-func Type(v string) attr.Node { return attr.KV("type", v) }
+func Type(v string) attr.Node { return attr.Name("type").Value(v) }

@@ -16,20 +16,26 @@ Structures are lazily evaluated, allowing reuse and context-aware rendering.
 ### Core Types
 
 - `attr.Node`: A lazy-evaluated attribute (key-value, boolean, or bundle)
+- `attr.Name`: A trusted, statically known attribute name
 - `elem.Node`: A lazy-evaluated element (tag, text, raw HTML, or bundle)
-- `elem.Scope`: A `func(...Elem) Elem`, a scope of sub-elements (`<div>`, etc.)
+- `elem.Name`: A trusted, statically known element tag name
+- `elem.Scope`: A `func(...elem.Node) elem.Node`, a scope of sub-elements (`<div>`, etc.)
 
 Constructors:
-- `attr.KV(k, v)`: An attribute key-value pair
-- `attr.Bool(k)`: A boolean attribute (no value)
-- `elem.New(tag, attrs...)`: A non-void HTML element (returns `Scope`)
-- `elem.Void(tag, attrs...)`: A self-closing element (returns `Elem`)
+- `attr.KV(k, v)`: A validated runtime name with an HTML-escaped value
+- `attr.Bool(k)`: A validated runtime name for a boolean attribute
+- `attr.ParseName(v)`: Validate a runtime attribute name
+- `attr.Name("key").Value(v)`: A trusted name with an HTML-escaped value
+- `attr.Name("key").Raw(v)`: A trusted name and output-ready value (no escaping)
+- `elem.ParseName(v)`: Validate a runtime element tag name
+- `elem.Name("div").New(attrs...)`: A non-void HTML element (returns `Scope`)
+- `elem.Name("input").Void(attrs...)`: A self-closing element (returns `elem.Node`)
 - `elem.Raw(v)`: Raw HTML content (no escaping)
 - `elem.Comment(v)`: An HTML comment
 - `elem.Noop()`, `attr.Noop()`: Empty no-op
 
 Core utils:
-- `text.Text(v)`: HTML-escaped text content (returns `Elem`)
+- `text.Text(v)`: HTML-escaped text content (returns `elem.Node`)
 - `elem.If(bool, elem)`, `attr.If(bool, attr)`: Conditional content
 - `elem.Fn(func(ctx) (elem, error))`, `attr.Fn(func(ctx) (attr, error))`: Dynamic content
 - `core.Fallback(node, fallback func(ctx, err) elem)`: Element with recovery
@@ -43,10 +49,10 @@ div.Div(attr.Class("outer"))(        // attributes
 )
 ```
 
-`Scope` also implements `Elem`, so elements without children don't need a trailing `()`:
+`Scope` also implements `elem.Node`, so elements without children don't need a trailing `()`:
 
 ```go
-div.Div(attr.Class("empty"))  // renders as: <div class="empty></div>
+div.Div(attr.Class("empty"))  // renders as: <div class="empty"></div>
 ```
 
 ## Package Structure
@@ -55,9 +61,8 @@ div.Div(attr.Class("empty"))  // renders as: <div class="empty></div>
 chord/
 ├── core/             # Core rendering
 │   ├── elem/         # Element core types and functions
-│   └── attrib/       # Attribute core types and functions
+│   └── attr/         # Attribute core types, functions, and global attributes
 ├── html/             # HTML elements and attributes
-│   ├── attr/         # Global attributes (class, id, style, data, etc.)
 │   ├── aria/         # ARIA accessibility attributes
 │   ├── on/           # DOM event handlers (onclick, onsubmit, etc.)
 │   ├── meta/         # Document metadata (html, head, title, meta, link, style)
@@ -79,7 +84,7 @@ chord/
 │   ├── form/         # Form elements
 │   │   ├── input/    # Input element
 │   │   ├── button/   # Button element
-│   │   ├── select/   # Select, option, optgroup
+│   │   ├── select/   # Select, option, optgroup, datalist
 │   │   ├── textarea/ # Textarea element
 │   │   ├── label/    # Label element
 │   │   └── output/   # Output, progress, meter
@@ -88,8 +93,8 @@ chord/
 │   └── webcomp/      # Web components (slot)
 ├── hx1/              # HTMX v1 attributes
 ├── hx2/              # HTMX v2 attributes
-├── bs/               # Bootstrap 5.3 element components (buttons, cards, grids, etc.)
-├── ba/               # Bootstrap 5.3 attribute utilities (spacing, colors, flexbox, etc.)
+├── bs/               # Bootstrap 5.3 element components
+├── ba/               # Bootstrap 5.3 attribute utilities
 └── bi/               # Bootstrap Icons
 ```
 
@@ -104,14 +109,12 @@ import (
 	"strings"
 
 	"github.com/protolambda/chord/core"
+	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/core/attr"
-	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/html/group/div"
 	"github.com/protolambda/chord/html/meta"
 	"github.com/protolambda/chord/html/section"
 	"github.com/protolambda/chord/html/text"
-	"github.com/protolambda/chord/util"
 )
 
 // Context key for authentication state
@@ -194,7 +197,7 @@ bs.BtnPrimary(attrs...)(children...)          // <button class="btn btn-primary"
 bs.BtnOutlineSecondary(attrs...)(children...) // <button class="btn btn-outline-secondary">
 
 // Components
-bs.Card{Header: ..., Body: ...}     // struct implementing Elem
+bs.Card{Header: ..., Body: ...}     // struct implementing elem.Node
 bs.Modal{ID: "...", Title: ..., Body: ...}
 bs.Dropdown{Toggle: ..., Items: ...}
 bs.AlertDanger()(children...)

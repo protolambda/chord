@@ -12,46 +12,46 @@ import (
 
 // Nav creates a Bootstrap nav container.
 func Nav(attrs ...attr.Node) elem.Scope {
-	return list.UL(attr.Cons(attr.Class("nav"), attrs...))
+	return list.UL(attr.Cons(rawClass("nav"), attrs...))
 }
 
 // NavItem creates a Bootstrap nav item.
 func NavItem(attrs ...attr.Node) elem.Scope {
-	return list.LI(attr.Cons(attr.Class("nav-item"), attrs...))
+	return list.LI(attr.Cons(rawClass("nav-item"), attrs...))
 }
 
 // NavLink creates a Bootstrap nav link.
 func NavLink(attrs ...attr.Node) elem.Scope {
-	return text.A(attr.Cons(attr.Class("nav-link"), attrs...))
+	return text.A(attr.Cons(rawClass("nav-link"), attrs...))
 }
 
 // Navbar creates a Bootstrap navbar.
 func Navbar(attrs ...attr.Node) elem.Scope {
-	return section.Nav(attr.Cons(attr.Class("navbar"), attrs...))
+	return section.Nav(attr.Cons(rawClass("navbar"), attrs...))
 }
 
 // NavbarBrand creates a Bootstrap navbar brand.
 func NavbarBrand(attrs ...attr.Node) elem.Scope {
-	return text.A(attr.Cons(attr.Class("navbar-brand"), attrs...))
+	return text.A(attr.Cons(rawClass("navbar-brand"), attrs...))
 }
 
 // NavbarToggler creates a Bootstrap navbar toggler button.
 // The toggler icon span is automatically included as a child.
 func NavbarToggler(attrs ...attr.Node) elem.Node {
 	return button.Button(attr.Cons(
-		attr.Class("navbar-toggler"),
+		rawClass("navbar-toggler"),
 		button.Type(button.TypeButton),
-		attr.Data("bs-toggle", "collapse"),
+		attr.Name("data-bs-toggle").Raw("collapse"),
 		attr.Bundle(attrs),
-	))(text.Span(attr.Class("navbar-toggler-icon"))())
+	))(text.Span(rawClass("navbar-toggler-icon"))())
 }
 
 // NavbarCollapse creates a Bootstrap navbar collapse container.
 func NavbarCollapse(attrs ...attr.Node) elem.Scope {
-	return div.Div(attr.Cons(attr.Class("collapse navbar-collapse"), attrs...))
+	return div.Div(attr.Cons(rawClass("collapse navbar-collapse"), attrs...))
 }
 
 // NavbarNav creates a Bootstrap navbar nav container.
 func NavbarNav(attrs ...attr.Node) elem.Scope {
-	return list.UL(attr.Cons(attr.Class("navbar-nav"), attrs...))
+	return list.UL(attr.Cons(rawClass("navbar-nav"), attrs...))
 }

@@ -3,10 +3,12 @@
 // The core abstractions are:
 //   - [Node]: A lazy-evaluated attribute.
 //   - [Obj]: A static representation of evaluated content.
+//   - [Name]: A trusted, statically known attribute name with escaped and raw value constructors.
 //
 // Attribute utils include:
-//   - [KV]: An attribute key-value pair.
-//   - [Bool]: A boolean attribute (no value).
+//   - [ParseName]: Validates a runtime attribute name.
+//   - [KV]: A validated runtime name and HTML-escaped value.
+//   - [Bool]: A validated runtime name for a boolean attribute (no value).
 //   - [Bundle]: A slice of multiple attributes.
 //   - [Seq]: A sequence of multiple attributes.
 //   - [Cons]: A head attribute followed by a tail of attributes.
@@ -14,6 +16,10 @@
 //   - [If]: A conditional attribute.
 //   - [IfElse]: A choice between attributes.
 //   - [Fn]: A dynamically produced attribute.
+//
+// Values from callers should use [KV], [Name.Value], or the attribute helpers in
+// this package. Chord internals may use [Name.Raw] for values already known to be
+// safe; Raw does not escape its value.
 //
 // This package also provides global HTML attributes that can be applied to any element.
 //

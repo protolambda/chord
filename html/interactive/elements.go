@@ -7,10 +7,10 @@ import (
 )
 
 // Details creates a details element.
-func Details(attrs ...attr.Node) elem.Scope { return elem.New("details", attrs...) }
+func Details(attrs ...attr.Node) elem.Scope { return elem.Name("details").New(attrs...) }
 
 // Summary creates a summary element.
-func Summary(attrs ...attr.Node) elem.Scope { return elem.New("summary", attrs...) }
+func Summary(attrs ...attr.Node) elem.Scope { return elem.Name("summary").New(attrs...) }
 
 // Dialog creates a dialog element.
-func Dialog(attrs ...attr.Node) elem.Scope { return elem.New("dialog", attrs...) }
+func Dialog(attrs ...attr.Node) elem.Scope { return elem.Name("dialog").New(attrs...) }

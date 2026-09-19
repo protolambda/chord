@@ -8,10 +8,10 @@ import (
 
 // ListGroup creates a Bootstrap list group.
 func ListGroup(attrs ...attr.Node) elem.Scope {
-	return list.UL(attr.Cons(attr.Class("list-group"), attrs...))
+	return list.UL(attr.Cons(rawClass("list-group"), attrs...))
 }
 
 // ListGroupItem creates a Bootstrap list group item.
 func ListGroupItem(attrs ...attr.Node) elem.Scope {
-	return list.LI(attr.Cons(attr.Class("list-group-item"), attrs...))
+	return list.LI(attr.Cons(rawClass("list-group-item"), attrs...))
 }

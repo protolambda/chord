@@ -5,13 +5,13 @@ import (
 )
 
 // Charset sets the charset attribute.
-func Charset(v string) attr.Node { return attr.KV("charset", v) }
+func Charset(v string) attr.Node { return attr.Name("charset").Value(v) }
 
 // Content sets the content attribute.
-func Content(v string) attr.Node { return attr.KV("content", v) }
+func Content(v string) attr.Node { return attr.Name("content").Value(v) }
 
 // HttpEquiv sets the http-equiv attribute.
-func HttpEquiv(v string) attr.Node { return attr.KV("http-equiv", v) }
+func HttpEquiv(v string) attr.Node { return attr.Name("http-equiv").Value(v) }
 
 // Name sets the name attribute.
-func Name(v string) attr.Node { return attr.KV("name", v) }
+func Name(v string) attr.Node { return attr.Name("name").Value(v) }

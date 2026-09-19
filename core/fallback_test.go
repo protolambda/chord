@@ -18,9 +18,9 @@ func Example_fallback() {
 	})
 
 	core.Dump(core.Fallback(
-		elem.New("div")(unreliable),
+		elem.Name("div").New()(unreliable),
 		func(ctx context.Context, err error) elem.Node {
-			return elem.New("div", attr.KV("class", "error"))(
+			return elem.Name("div").New(attr.KV("class", "error"))(
 				text.Text("Failed to load content"))
 		},
 	))

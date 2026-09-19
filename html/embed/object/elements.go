@@ -7,10 +7,10 @@ import (
 )
 
 // Object creates an object element.
-func Object(attrs ...attr.Node) elem.Scope { return elem.New("object", attrs...) }
+func Object(attrs ...attr.Node) elem.Scope { return elem.Name("object").New(attrs...) }
 
 // Param creates a param element (void).
-func Param(attrs ...attr.Node) elem.Node { return elem.Void("param", attrs...) }
+func Param(attrs ...attr.Node) elem.Node { return elem.Name("param").Void(attrs...) }
 
 // Embed creates an embed element (void).
-func Embed(attrs ...attr.Node) elem.Node { return elem.Void("embed", attrs...) }
+func Embed(attrs ...attr.Node) elem.Node { return elem.Name("embed").Void(attrs...) }

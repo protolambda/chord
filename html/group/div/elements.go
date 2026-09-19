@@ -7,4 +7,4 @@ import (
 )
 
 // Div creates a div element.
-func Div(attrs ...attr.Node) elem.Scope { return elem.New("div", attrs...) }
+func Div(attrs ...attr.Node) elem.Scope { return elem.Name("div").New(attrs...) }

@@ -5,16 +5,16 @@ import (
 )
 
 // UserSelectAll creates a Bootstrap user-select-all class.
-func UserSelectAll() attr.Node { return attr.Class("user-select-all") }
+func UserSelectAll() attr.Node { return rawClass("user-select-all") }
 
 // UserSelectAuto creates a Bootstrap user-select-auto class.
-func UserSelectAuto() attr.Node { return attr.Class("user-select-auto") }
+func UserSelectAuto() attr.Node { return rawClass("user-select-auto") }
 
 // UserSelectNone creates a Bootstrap user-select-none class.
-func UserSelectNone() attr.Node { return attr.Class("user-select-none") }
+func UserSelectNone() attr.Node { return rawClass("user-select-none") }
 
 // PENone creates a Bootstrap pe-none (pointer-events) class.
-func PENone() attr.Node { return attr.Class("pe-none") }
+func PENone() attr.Node { return rawClass("pe-none") }
 
 // PEAuto creates a Bootstrap pe-auto (pointer-events) class.
-func PEAuto() attr.Node { return attr.Class("pe-auto") }
+func PEAuto() attr.Node { return rawClass("pe-auto") }

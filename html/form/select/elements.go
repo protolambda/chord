@@ -7,13 +7,13 @@ import (
 )
 
 // Select creates a select element.
-func Select(attrs ...attr.Node) elem.Scope { return elem.New("select", attrs...) }
+func Select(attrs ...attr.Node) elem.Scope { return elem.Name("select").New(attrs...) }
 
 // Optgroup creates an optgroup element.
-func Optgroup(attrs ...attr.Node) elem.Scope { return elem.New("optgroup", attrs...) }
+func Optgroup(attrs ...attr.Node) elem.Scope { return elem.Name("optgroup").New(attrs...) }
 
 // Option creates an option element.
-func Option(attrs ...attr.Node) elem.Scope { return elem.New("option", attrs...) }
+func Option(attrs ...attr.Node) elem.Scope { return elem.Name("option").New(attrs...) }
 
 // Datalist creates a datalist element.
-func Datalist(attrs ...attr.Node) elem.Scope { return elem.New("datalist", attrs...) }
+func Datalist(attrs ...attr.Node) elem.Scope { return elem.Name("datalist").New(attrs...) }

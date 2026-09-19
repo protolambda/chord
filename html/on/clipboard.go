@@ -5,10 +5,10 @@ import (
 )
 
 // Copy sets the oncopy event handler.
-func Copy(v string) attr.Node { return attr.KV("oncopy", v) }
+func Copy(v string) attr.Node { return attr.Name("oncopy").Value(v) }
 
 // Cut sets the oncut event handler.
-func Cut(v string) attr.Node { return attr.KV("oncut", v) }
+func Cut(v string) attr.Node { return attr.Name("oncut").Value(v) }
 
 // Paste sets the onpaste event handler.
-func Paste(v string) attr.Node { return attr.KV("onpaste", v) }
+func Paste(v string) attr.Node { return attr.Name("onpaste").Value(v) }

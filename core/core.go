@@ -2,7 +2,9 @@ package core
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"iter"
 	"strings"
 
@@ -10,8 +12,11 @@ import (
 	"github.com/protolambda/chord/core/elem"
 )
 
-// Render renders an element tree to the given string builder.
-func Render(ctx context.Context, v elem.Node, out *strings.Builder, opts ...Option) error {
+// ErrRenderOutput indicates that the output rejected a rendered string.
+var ErrRenderOutput = errors.New("failed to write render output")
+
+// Render renders an element tree to the given string writer.
+func Render(ctx context.Context, v elem.Node, out io.StringWriter, opts ...Option) error {
 	cfg := &renderConfig{}
 	for _, opt := range opts {
 		opt(cfg)
@@ -37,7 +42,7 @@ func Render(ctx context.Context, v elem.Node, out *strings.Builder, opts ...Opti
 	return nil
 }
 
-func renderElemObj(ctx context.Context, obj elem.Obj, out *strings.Builder, cfg *renderConfig, depth int, seen map[string]struct{}) error {
+func renderElemObj(ctx context.Context, obj elem.Obj, out io.StringWriter, cfg *renderConfig, depth int, seen map[string]struct{}) error {
 	indent := ""
 	if cfg.Indent {
 		indent = strings.Repeat("  ", depth)
@@ -45,10 +50,11 @@ func renderElemObj(ctx context.Context, obj elem.Obj, out *strings.Builder, cfg 
 
 	// Raw content (including comments).
 	if obj.Raw != "" {
-		out.WriteString(indent)
-		out.WriteString(obj.Raw)
+		if err := writeStrings(out, indent, obj.Raw); err != nil {
+			return err
+		}
 		if cfg.Indent {
-			out.WriteString("\n")
+			return writeStrings(out, "\n")
 		}
 		return nil
 	}
@@ -57,9 +63,9 @@ func renderElemObj(ctx context.Context, obj elem.Obj, out *strings.Builder, cfg 
 		return fmt.Errorf("expected element to have a tag")
 	}
 
-	out.WriteString(indent)
-	out.WriteString("<")
-	out.WriteString(obj.Tag)
+	if err := writeStrings(out, indent, "<", obj.Tag); err != nil {
+		return err
+	}
 
 	// Flatten and render attributes.
 	if err := renderAttribs(ctx, obj.Attribs, out, seen); err != nil {
@@ -67,14 +73,16 @@ func renderElemObj(ctx context.Context, obj elem.Obj, out *strings.Builder, cfg 
 	}
 
 	if obj.Void {
-		out.WriteString("/>")
+		ending := "/>"
 		if cfg.Indent {
-			out.WriteString("\n")
+			ending += "\n"
 		}
-		return nil
+		return writeStrings(out, ending)
 	}
 
-	out.WriteString(">")
+	if err := writeStrings(out, ">"); err != nil {
+		return err
+	}
 
 	// Disable indentation within <pre> tags.
 	cfgInner := cfg
@@ -102,7 +110,9 @@ func renderElemObj(ctx context.Context, obj elem.Obj, out *strings.Builder, cfg 
 	}
 
 	if cfgInner.Indent && len(children) > 0 {
-		out.WriteString("\n")
+		if err := writeStrings(out, "\n"); err != nil {
+			return err
+		}
 	}
 	for i, child := range children {
 		if err := renderElemObj(ctx, child, out, cfgInner, depth+1, seen); err != nil {
@@ -110,20 +120,22 @@ func renderElemObj(ctx context.Context, obj elem.Obj, out *strings.Builder, cfg 
 		}
 	}
 	if cfgInner.Indent && len(children) > 0 {
-		out.WriteString(indent)
+		if err := writeStrings(out, indent); err != nil {
+			return err
+		}
 	}
 
-	out.WriteString("</")
-	out.WriteString(obj.Tag)
-	out.WriteString(">")
+	if err := writeStrings(out, "</", obj.Tag, ">"); err != nil {
+		return err
+	}
 	if cfg.Indent {
-		out.WriteString("\n")
+		return writeStrings(out, "\n")
 	}
 	return nil
 }
 
 // renderAttribs flattens and renders all attributes.
-func renderAttribs(ctx context.Context, attribs attr.Seq, out *strings.Builder, seen map[string]struct{}) error {
+func renderAttribs(ctx context.Context, attribs attr.Seq, out io.StringWriter, seen map[string]struct{}) error {
 	if attribs == nil {
 		return nil
 	}
@@ -142,19 +154,33 @@ func renderAttribs(ctx context.Context, attribs attr.Seq, out *strings.Builder, 
 	}
 
 	for _, attr := range collected {
-		out.WriteString(" ")
-		out.WriteString(attr.Key)
+		if err := writeStrings(out, " ", attr.Key); err != nil {
+			return err
+		}
 		if !attr.Bool {
-			out.WriteString("=\"")
+			value := attr.Val
 			switch attr.Key {
 			case "class":
-				out.WriteString(classes)
+				value = classes
 			case "style":
-				out.WriteString(styles)
-			default:
-				out.WriteString(attr.Val)
+				value = styles
 			}
-			out.WriteString("\"")
+			if err := writeStrings(out, "=\"", value, "\""); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func writeStrings(out io.StringWriter, values ...string) error {
+	for _, value := range values {
+		n, err := out.WriteString(value)
+		if err != nil {
+			return fmt.Errorf("%w: %w", ErrRenderOutput, err)
+		}
+		if n != len(value) {
+			return fmt.Errorf("%w: %w", ErrRenderOutput, io.ErrShortWrite)
 		}
 	}
 	return nil

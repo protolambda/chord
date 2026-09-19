@@ -15,8 +15,6 @@ type fallback struct {
 	onErr FallbackFn
 }
 
-func (f fallback) ChordNode() {}
-
 func (f fallback) Eval(ctx context.Context) (elem.Obj, error) {
 	var out strings.Builder
 	err := Render(ctx, f.inner, &out)

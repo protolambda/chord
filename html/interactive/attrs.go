@@ -5,4 +5,4 @@ import (
 )
 
 // Open sets the open boolean attribute.
-func Open() attr.Node { return attr.Bool("open") }
+func Open() attr.Node { return attr.Name("open").Bool() }

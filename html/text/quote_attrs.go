@@ -5,4 +5,4 @@ import (
 )
 
 // QuoteCite sets the cite attribute for blockquote/q elements.
-func QuoteCite(v string) attr.Node { return attr.KV("cite", v) }
+func QuoteCite(v string) attr.Node { return attr.Name("cite").Value(v) }

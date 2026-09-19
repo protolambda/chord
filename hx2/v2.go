@@ -16,4 +16,4 @@ import (
 func On(event, handler string) attr.Node { return attr.KV("hx-on:"+event, handler) }
 
 // Inherit sets the hx-inherit attribute to control attribute inheritance.
-func Inherit(v string) attr.Node { return attr.KV("hx-inherit", v) }
+func Inherit(v string) attr.Node { return attr.Name("hx-inherit").Value(v) }

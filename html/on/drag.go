@@ -5,22 +5,22 @@ import (
 )
 
 // Drag sets the ondrag event handler.
-func Drag(v string) attr.Node { return attr.KV("ondrag", v) }
+func Drag(v string) attr.Node { return attr.Name("ondrag").Value(v) }
 
 // DragStart sets the ondragstart event handler.
-func DragStart(v string) attr.Node { return attr.KV("ondragstart", v) }
+func DragStart(v string) attr.Node { return attr.Name("ondragstart").Value(v) }
 
 // DragEnd sets the ondragend event handler.
-func DragEnd(v string) attr.Node { return attr.KV("ondragend", v) }
+func DragEnd(v string) attr.Node { return attr.Name("ondragend").Value(v) }
 
 // DragEnter sets the ondragenter event handler.
-func DragEnter(v string) attr.Node { return attr.KV("ondragenter", v) }
+func DragEnter(v string) attr.Node { return attr.Name("ondragenter").Value(v) }
 
 // DragLeave sets the ondragleave event handler.
-func DragLeave(v string) attr.Node { return attr.KV("ondragleave", v) }
+func DragLeave(v string) attr.Node { return attr.Name("ondragleave").Value(v) }
 
 // DragOver sets the ondragover event handler.
-func DragOver(v string) attr.Node { return attr.KV("ondragover", v) }
+func DragOver(v string) attr.Node { return attr.Name("ondragover").Value(v) }
 
 // Drop sets the ondrop event handler.
-func Drop(v string) attr.Node { return attr.KV("ondrop", v) }
+func Drop(v string) attr.Node { return attr.Name("ondrop").Value(v) }

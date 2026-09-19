@@ -7,4 +7,4 @@ import (
 )
 
 // Iframe creates an iframe element.
-func Iframe(attrs ...attr.Node) elem.Scope { return elem.New("iframe", attrs...) }
+func Iframe(attrs ...attr.Node) elem.Scope { return elem.Name("iframe").New(attrs...) }

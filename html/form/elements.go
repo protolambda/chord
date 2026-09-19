@@ -7,10 +7,10 @@ import (
 )
 
 // Form creates a form element.
-func Form(attrs ...attr.Node) elem.Scope { return elem.New("form", attrs...) }
+func Form(attrs ...attr.Node) elem.Scope { return elem.Name("form").New(attrs...) }
 
 // Fieldset creates a fieldset element.
-func Fieldset(attrs ...attr.Node) elem.Scope { return elem.New("fieldset", attrs...) }
+func Fieldset(attrs ...attr.Node) elem.Scope { return elem.Name("fieldset").New(attrs...) }
 
 // Legend creates a legend element.
-func Legend(attrs ...attr.Node) elem.Scope { return elem.New("legend", attrs...) }
+func Legend(attrs ...attr.Node) elem.Scope { return elem.Name("legend").New(attrs...) }

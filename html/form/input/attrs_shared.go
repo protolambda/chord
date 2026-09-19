@@ -5,28 +5,28 @@ import (
 )
 
 // Name sets the name attribute.
-func Name(v string) attr.Node { return attr.KV("name", v) }
+func Name(v string) attr.Node { return attr.Name("name").Value(v) }
 
 // Value sets the value attribute.
-func Value(v string) attr.Node { return attr.KV("value", v) }
+func Value(v string) attr.Node { return attr.Name("value").Value(v) }
 
 // Placeholder sets the placeholder attribute.
-func Placeholder(v string) attr.Node { return attr.KV("placeholder", v) }
+func Placeholder(v string) attr.Node { return attr.Name("placeholder").Value(v) }
 
 // Required sets the required boolean attribute.
-func Required() attr.Node { return attr.Bool("required") }
+func Required() attr.Node { return attr.Name("required").Bool() }
 
 // Disabled sets the disabled boolean attribute.
-func Disabled() attr.Node { return attr.Bool("disabled") }
+func Disabled() attr.Node { return attr.Name("disabled").Bool() }
 
 // Readonly sets the readonly boolean attribute.
-func Readonly() attr.Node { return attr.Bool("readonly") }
+func Readonly() attr.Node { return attr.Name("readonly").Bool() }
 
 // Autofocus sets the autofocus boolean attribute.
-func Autofocus() attr.Node { return attr.Bool("autofocus") }
+func Autofocus() attr.Node { return attr.Name("autofocus").Bool() }
 
 // Autocomplete sets the autocomplete attribute.
-func Autocomplete(v string) attr.Node { return attr.KV("autocomplete", v) }
+func Autocomplete(v string) attr.Node { return attr.Name("autocomplete").Value(v) }
 
 // Size sets the size attribute.
-func Size(v string) attr.Node { return attr.KV("size", v) }
+func Size(v string) attr.Node { return attr.Name("size").Value(v) }

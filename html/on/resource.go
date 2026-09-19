@@ -5,10 +5,10 @@ import (
 )
 
 // Load sets the onload event handler.
-func Load(v string) attr.Node { return attr.KV("onload", v) }
+func Load(v string) attr.Node { return attr.Name("onload").Value(v) }
 
 // Error sets the onerror event handler.
-func Error(v string) attr.Node { return attr.KV("onerror", v) }
+func Error(v string) attr.Node { return attr.Name("onerror").Value(v) }
 
 // Abort sets the onabort event handler.
-func Abort(v string) attr.Node { return attr.KV("onabort", v) }
+func Abort(v string) attr.Node { return attr.Name("onabort").Value(v) }

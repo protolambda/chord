@@ -7,100 +7,100 @@ import (
 )
 
 // A creates an a (anchor) element.
-func A(attrs ...attr.Node) elem.Scope { return elem.New("a", attrs...) }
+func A(attrs ...attr.Node) elem.Scope { return elem.Name("a").New(attrs...) }
 
 // EM creates an em element.
-func EM(attrs ...attr.Node) elem.Scope { return elem.New("em", attrs...) }
+func EM(attrs ...attr.Node) elem.Scope { return elem.Name("em").New(attrs...) }
 
 // Strong creates a strong element.
-func Strong(attrs ...attr.Node) elem.Scope { return elem.New("strong", attrs...) }
+func Strong(attrs ...attr.Node) elem.Scope { return elem.Name("strong").New(attrs...) }
 
 // Small creates a small element.
-func Small(attrs ...attr.Node) elem.Scope { return elem.New("small", attrs...) }
+func Small(attrs ...attr.Node) elem.Scope { return elem.Name("small").New(attrs...) }
 
 // S creates an s element.
-func S(attrs ...attr.Node) elem.Scope { return elem.New("s", attrs...) }
+func S(attrs ...attr.Node) elem.Scope { return elem.Name("s").New(attrs...) }
 
 // Cite creates a cite element.
-func Cite(attrs ...attr.Node) elem.Scope { return elem.New("cite", attrs...) }
+func Cite(attrs ...attr.Node) elem.Scope { return elem.Name("cite").New(attrs...) }
 
 // Q creates a q element.
-func Q(attrs ...attr.Node) elem.Scope { return elem.New("q", attrs...) }
+func Q(attrs ...attr.Node) elem.Scope { return elem.Name("q").New(attrs...) }
 
 // Dfn creates a dfn element.
-func Dfn(attrs ...attr.Node) elem.Scope { return elem.New("dfn", attrs...) }
+func Dfn(attrs ...attr.Node) elem.Scope { return elem.Name("dfn").New(attrs...) }
 
 // Abbr creates an abbr element.
-func Abbr(attrs ...attr.Node) elem.Scope { return elem.New("abbr", attrs...) }
+func Abbr(attrs ...attr.Node) elem.Scope { return elem.Name("abbr").New(attrs...) }
 
 // Ruby creates a ruby element.
-func Ruby(attrs ...attr.Node) elem.Scope { return elem.New("ruby", attrs...) }
+func Ruby(attrs ...attr.Node) elem.Scope { return elem.Name("ruby").New(attrs...) }
 
 // RT creates an rt element.
-func RT(attrs ...attr.Node) elem.Scope { return elem.New("rt", attrs...) }
+func RT(attrs ...attr.Node) elem.Scope { return elem.Name("rt").New(attrs...) }
 
 // RP creates an rp element.
-func RP(attrs ...attr.Node) elem.Scope { return elem.New("rp", attrs...) }
+func RP(attrs ...attr.Node) elem.Scope { return elem.Name("rp").New(attrs...) }
 
 // Data creates a data element.
-func Data(attrs ...attr.Node) elem.Scope { return elem.New("data", attrs...) }
+func Data(attrs ...attr.Node) elem.Scope { return elem.Name("data").New(attrs...) }
 
 // Time creates a time element.
-func Time(attrs ...attr.Node) elem.Scope { return elem.New("time", attrs...) }
+func Time(attrs ...attr.Node) elem.Scope { return elem.Name("time").New(attrs...) }
 
 // Code creates a code element.
-func Code(attrs ...attr.Node) elem.Scope { return elem.New("code", attrs...) }
+func Code(attrs ...attr.Node) elem.Scope { return elem.Name("code").New(attrs...) }
 
 // Var creates a var element.
-func Var(attrs ...attr.Node) elem.Scope { return elem.New("var", attrs...) }
+func Var(attrs ...attr.Node) elem.Scope { return elem.Name("var").New(attrs...) }
 
 // Samp creates a samp element.
-func Samp(attrs ...attr.Node) elem.Scope { return elem.New("samp", attrs...) }
+func Samp(attrs ...attr.Node) elem.Scope { return elem.Name("samp").New(attrs...) }
 
 // Kbd creates a kbd element.
-func Kbd(attrs ...attr.Node) elem.Scope { return elem.New("kbd", attrs...) }
+func Kbd(attrs ...attr.Node) elem.Scope { return elem.Name("kbd").New(attrs...) }
 
 // Sub creates a sub element.
-func Sub(attrs ...attr.Node) elem.Scope { return elem.New("sub", attrs...) }
+func Sub(attrs ...attr.Node) elem.Scope { return elem.Name("sub").New(attrs...) }
 
 // Sup creates a sup element.
-func Sup(attrs ...attr.Node) elem.Scope { return elem.New("sup", attrs...) }
+func Sup(attrs ...attr.Node) elem.Scope { return elem.Name("sup").New(attrs...) }
 
 // I creates an i element.
-func I(attrs ...attr.Node) elem.Scope { return elem.New("i", attrs...) }
+func I(attrs ...attr.Node) elem.Scope { return elem.Name("i").New(attrs...) }
 
 // B creates a b element.
-func B(attrs ...attr.Node) elem.Scope { return elem.New("b", attrs...) }
+func B(attrs ...attr.Node) elem.Scope { return elem.Name("b").New(attrs...) }
 
 // U creates a u element.
-func U(attrs ...attr.Node) elem.Scope { return elem.New("u", attrs...) }
+func U(attrs ...attr.Node) elem.Scope { return elem.Name("u").New(attrs...) }
 
 // Mark creates a mark element.
-func Mark(attrs ...attr.Node) elem.Scope { return elem.New("mark", attrs...) }
+func Mark(attrs ...attr.Node) elem.Scope { return elem.Name("mark").New(attrs...) }
 
 // Bdi creates a bdi element.
-func Bdi(attrs ...attr.Node) elem.Scope { return elem.New("bdi", attrs...) }
+func Bdi(attrs ...attr.Node) elem.Scope { return elem.Name("bdi").New(attrs...) }
 
 // Bdo creates a bdo element.
-func Bdo(attrs ...attr.Node) elem.Scope { return elem.New("bdo", attrs...) }
+func Bdo(attrs ...attr.Node) elem.Scope { return elem.Name("bdo").New(attrs...) }
 
 // Span creates a span element.
-func Span(attrs ...attr.Node) elem.Scope { return elem.New("span", attrs...) }
+func Span(attrs ...attr.Node) elem.Scope { return elem.Name("span").New(attrs...) }
 
 // BR creates a br element (void).
-func BR(attrs ...attr.Node) elem.Node { return elem.Void("br", attrs...) }
+func BR(attrs ...attr.Node) elem.Node { return elem.Name("br").Void(attrs...) }
 
 // WBR creates a wbr element (void).
-func WBR(attrs ...attr.Node) elem.Node { return elem.Void("wbr", attrs...) }
+func WBR(attrs ...attr.Node) elem.Node { return elem.Name("wbr").Void(attrs...) }
 
 // P creates a p element.
-func P(attrs ...attr.Node) elem.Scope { return elem.New("p", attrs...) }
+func P(attrs ...attr.Node) elem.Scope { return elem.Name("p").New(attrs...) }
 
 // HR creates an hr element (void).
-func HR(attrs ...attr.Node) elem.Node { return elem.Void("hr", attrs...) }
+func HR(attrs ...attr.Node) elem.Node { return elem.Name("hr").Void(attrs...) }
 
 // Pre creates a pre element.
-func Pre(attrs ...attr.Node) elem.Scope { return elem.New("pre", attrs...) }
+func Pre(attrs ...attr.Node) elem.Scope { return elem.Name("pre").New(attrs...) }
 
 // Blockquote creates a blockquote element.
-func Blockquote(attrs ...attr.Node) elem.Scope { return elem.New("blockquote", attrs...) }
+func Blockquote(attrs ...attr.Node) elem.Scope { return elem.Name("blockquote").New(attrs...) }

@@ -7,7 +7,7 @@ import (
 )
 
 // Map creates a map element.
-func Map(attrs ...attr.Node) elem.Scope { return elem.New("map", attrs...) }
+func Map(attrs ...attr.Node) elem.Scope { return elem.Name("map").New(attrs...) }
 
 // Area creates an area element (void).
-func Area(attrs ...attr.Node) elem.Node { return elem.Void("area", attrs...) }
+func Area(attrs ...attr.Node) elem.Node { return elem.Name("area").Void(attrs...) }

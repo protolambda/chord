@@ -7,4 +7,4 @@ import (
 )
 
 // Textarea creates a textarea element.
-func Textarea(attrs ...attr.Node) elem.Scope { return elem.New("textarea", attrs...) }
+func Textarea(attrs ...attr.Node) elem.Scope { return elem.Name("textarea").New(attrs...) }

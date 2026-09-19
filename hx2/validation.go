@@ -5,4 +5,4 @@ import (
 )
 
 // Validate sets the hx-validate attribute to control form validation.
-func Validate(v string) attr.Node { return attr.KV("hx-validate", v) }
+func Validate(v string) attr.Node { return attr.Name("hx-validate").Value(v) }
