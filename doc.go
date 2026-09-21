@@ -12,7 +12,11 @@
 //	chord/
 //	├── core/             # Core rendering
 //	│   ├── elem/         # Element core types and functions
-//	│   └── attr/         # Attribute core types, functions, and global attributes
+//	│   ├── attr/         # Attribute core types, functions, and global attributes
+//	│   └── inspect/      # Evaluated snapshots for inspection
+//	├── ct/               # Testing: subjects, queries, and mustbe assertions
+//	│   ├── cthtml/       # Parsed HTML page and fragment subjects
+//	│   └── cthttp/       # Handler execution and response subjects
 //	├── html/             # HTML elements and attributes
 //	│   ├── aria/         # ARIA accessibility attributes
 //	│   ├── on/           # DOM event handlers (onclick, onsubmit, etc.)
@@ -51,5 +55,6 @@
 // The [github.com/protolambda/chord/core/elem] and
 // [github.com/protolambda/chord/core/attr] packages define the common node
 // interfaces composed by all other packages. Start with
-// [github.com/protolambda/chord/core.Render] to render a completed element tree.
+// [github.com/protolambda/chord/core.Render] to render a completed element tree,
+// and with [github.com/protolambda/chord/ct.View] to test one.
 package chord

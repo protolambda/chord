@@ -8,7 +8,7 @@ import (
 	"github.com/protolambda/chord/core/attr"
 )
 
-func TestKVValidatesNameAndEscapesValue(t *testing.T) {
+func TestKVValidatesNameAndKeepsLogicalValue(t *testing.T) {
 	obj, err := attr.KV("data-user", `one" two<&`).Eval(context.Background())
 	if err != nil {
 		t.Fatalf("eval: %v", err)
@@ -16,7 +16,10 @@ func TestKVValidatesNameAndEscapesValue(t *testing.T) {
 	if got, want := obj.Key, "data-user"; got != want {
 		t.Fatalf("key: got %q, want %q", got, want)
 	}
-	if got, want := obj.Val, "one&#34; two&lt;&amp;"; got != want {
+	if got, want := obj.Kind, attr.KindValue; got != want {
+		t.Fatalf("kind: got %s, want %s", got, want)
+	}
+	if got, want := obj.Val, `one" two<&`; got != want {
 		t.Fatalf("value: got %q, want %q", got, want)
 	}
 }
@@ -71,27 +74,59 @@ func TestParseName(t *testing.T) {
 func TestNameOperations(t *testing.T) {
 	name := attr.Name("title")
 
-	escaped, err := name.Value(`one" two`).Eval(context.Background())
+	logical, err := name.Value(`one" two`).Eval(context.Background())
 	if err != nil {
-		t.Fatalf("escaped eval: %v", err)
+		t.Fatalf("logical eval: %v", err)
 	}
-	if got, want := escaped.Val, "one&#34; two"; got != want {
-		t.Fatalf("escaped value: got %q, want %q", got, want)
+	if logical.Kind != attr.KindValue || logical.Val != `one" two` {
+		t.Fatalf("unexpected logical attribute: %+v", logical)
 	}
 
 	raw, err := name.Raw(`one&#34; two`).Eval(context.Background())
 	if err != nil {
 		t.Fatalf("raw eval: %v", err)
 	}
-	if got, want := raw.Val, `one&#34; two`; got != want {
-		t.Fatalf("raw value: got %q, want %q", got, want)
+	if raw.Kind != attr.KindRawValue || raw.Val != `one&#34; two` {
+		t.Fatalf("unexpected raw attribute: %+v", raw)
 	}
 
 	boolean, err := attr.Name("disabled").Bool().Eval(context.Background())
 	if err != nil {
 		t.Fatalf("boolean eval: %v", err)
 	}
-	if !boolean.Bool || boolean.Key != "disabled" {
+	if boolean.Kind != attr.KindBool || boolean.Key != "disabled" {
 		t.Fatalf("unexpected boolean attribute: %+v", boolean)
+	}
+}
+
+func TestObjValidate(t *testing.T) {
+	valid := map[string]attr.Obj{
+		"noop":          {},
+		"legacy bundle": {Sub: func(func(attr.Node) bool) {}},
+		"value":         {Kind: attr.KindValue, Key: "id", Val: "x"},
+		"raw":           {Kind: attr.KindRawValue, Key: "id", Val: "x"},
+		"bool":          {Kind: attr.KindBool, Key: "disabled"},
+	}
+	for name, obj := range valid {
+		t.Run("valid "+name, func(t *testing.T) {
+			if _, err := obj.Validate(); err != nil {
+				t.Fatalf("expected valid object, got %v", err)
+			}
+		})
+	}
+
+	invalid := map[string]attr.Obj{
+		"key without kind":  {Key: "id", Val: "x"},
+		"bundle with key":   {Kind: attr.KindBundle, Key: "id"},
+		"value without key": {Kind: attr.KindValue, Val: "x"},
+		"bool with value":   {Kind: attr.KindBool, Key: "disabled", Val: "x"},
+		"unknown kind":      {Kind: attr.Kind(42), Key: "x"},
+	}
+	for name, obj := range invalid {
+		t.Run("invalid "+name, func(t *testing.T) {
+			if _, err := obj.Validate(); !errors.Is(err, attr.ErrInvalidObj) {
+				t.Fatalf("expected ErrInvalidObj, got %v", err)
+			}
+		})
 	}
 }

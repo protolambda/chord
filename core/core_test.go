@@ -154,3 +154,107 @@ func TestRenderReturnsShortWrite(t *testing.T) {
 		t.Fatalf("expected io.ErrShortWrite, got %v", err)
 	}
 }
+
+func TestRenderEscapesTextAndCommentsAtOutput(t *testing.T) {
+	node := elem.Name("div").New()(
+		elem.Text(`<script>alert("x")</script> & more`),
+		elem.Comment("ends --> early?"),
+		elem.Raw("<b>trusted</b>"),
+		elem.Raw(""),
+	)
+
+	want := `<div>&lt;script&gt;alert(&#34;x&#34;)&lt;/script&gt; &amp; more<!-- ends --&gt; early? --><b>trusted</b></div>`
+	if got := render(t, node); got != want {
+		t.Fatalf("rendered output mismatch:\n got: %s\nwant: %s", got, want)
+	}
+}
+
+func TestRenderMergesMixedRawAndLogicalClasses(t *testing.T) {
+	node := elem.Name("div").New(
+		attr.Name("class").Raw("btn &amp;"),
+		attr.Class("user<class>"),
+		attr.Style("a:1"),
+		attr.Name("style").Raw("b:&quot;2&quot;"),
+	)
+
+	want := `<div class="btn &amp; user&lt;class&gt;" style="a:1;b:&quot;2&quot;"></div>`
+	if got := render(t, node); got != want {
+		t.Fatalf("rendered output mismatch:\n got: %s\nwant: %s", got, want)
+	}
+}
+
+func TestRenderRejectsInvalidObjectLiterals(t *testing.T) {
+	tests := map[string]elem.Node{
+		"element":   elem.Obj{Kind: elem.KindText, Tag: "div"},
+		"attribute": elem.Name("div").New(attr.Obj{Key: "id", Val: "x"}),
+	}
+	for name, node := range tests {
+		t.Run(name, func(t *testing.T) {
+			var out strings.Builder
+			err := core.Render(context.Background(), node, &out)
+			if !errors.Is(err, elem.ErrInvalidObj) && !errors.Is(err, attr.ErrInvalidObj) {
+				t.Fatalf("expected invalid object error, got %v", err)
+			}
+		})
+	}
+}
+
+func TestRenderAcceptsLegacyLiterals(t *testing.T) {
+	node := elem.Obj{Children: slices.Values([]elem.Node{
+		elem.Obj{Tag: "p", Children: slices.Values([]elem.Node{elem.Text("legacy")})},
+		elem.Obj{Tag: "hr", Void: true},
+	})}
+
+	if got, want := render(t, node), `<p>legacy</p><hr/>`; got != want {
+		t.Fatalf("rendered output mismatch:\n got: %s\nwant: %s", got, want)
+	}
+}
+
+func TestRenderStopsOnCanceledContext(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	var out strings.Builder
+	err := core.Render(ctx, elem.Name("div").New()(elem.Text("never")), &out)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected context.Canceled, got %v", err)
+	}
+	if out.Len() != 0 {
+		t.Fatalf("expected no output, got %q", out.String())
+	}
+}
+
+func TestRenderIndentKeepsPreformattedContent(t *testing.T) {
+	node := elem.Name("div").New()(
+		elem.Name("pre").New()(
+			elem.Text("line 1\n  line 2"),
+			elem.Name("b").New()(elem.Text("bold")),
+		),
+		elem.Name("p").New()(elem.Text("after")),
+	)
+	var out strings.Builder
+	if err := core.Render(context.Background(), node, &out, core.WithIndent()); err != nil {
+		t.Fatalf("render: %v", err)
+	}
+	want := "<div>\n  <pre>line 1\n  line 2<b>bold</b></pre>\n  <p>\n    after\n  </p>\n</div>\n"
+	if got := out.String(); got != want {
+		t.Fatalf("rendered output mismatch:\n got: %q\nwant: %q", got, want)
+	}
+}
+
+func TestRenderLocatesFailures(t *testing.T) {
+	errEval := errors.New("evaluation failed")
+	node := elem.Name("main").New(attr.ID("page"))(
+		elem.Name("ul").New()(
+			elem.Name("li").New()(elem.Text("ok")),
+			elem.Name("li").New()(elem.Fn(func(context.Context) (elem.Node, error) { return nil, errEval })),
+		),
+	)
+	var out strings.Builder
+	err := core.Render(context.Background(), node, &out)
+	if !errors.Is(err, errEval) {
+		t.Fatalf("expected evaluation error in chain, got %v", err)
+	}
+	if want := "render: at main#page[0]/ul[0]/li[1]/[0]: evaluation failed"; err.Error() != want {
+		t.Fatalf("error message:\n got: %s\nwant: %s", err, want)
+	}
+}

@@ -4,178 +4,178 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html"
 	"io"
-	"iter"
 	"strings"
 
 	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
+	"github.com/protolambda/chord/core/internal/walk"
 )
 
 // ErrRenderOutput indicates that the output rejected a rendered string.
 var ErrRenderOutput = errors.New("failed to write render output")
 
-// Render renders an element tree to the given string writer.
+// Render evaluates the element tree once and writes it as HTML to out.
+//
+// Text and logical attribute values are escaped here; raw content is written
+// verbatim. Errors carry the location of the failing node, and wrap the
+// original cause. Output failures wrap [ErrRenderOutput]. The context is
+// checked while walking the tree, so a canceled context stops rendering.
 func Render(ctx context.Context, v elem.Node, out io.StringWriter, opts ...Option) error {
 	cfg := &renderConfig{}
 	for _, opt := range opts {
 		opt(cfg)
 	}
-
-	obj, err := v.Eval(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to load root element: %w", err)
+	w := &htmlWriter{
+		out: out,
+		// The root frame never emits a leading newline: it starts as if it
+		// already has content.
+		frames: []htmlFrame{{indent: cfg.Indent, hasContent: true}},
 	}
-
-	// We allocate this map once, and reuse it during rendering of every element.
-	seen := make(map[string]struct{})
-
-	// Squash the root to support rendering multiple adjacent elements.
-	for o, squashErr := range squashElemObj(ctx, obj) {
-		if squashErr != nil {
-			return fmt.Errorf("failed to open: %w", squashErr)
-		}
-		if err := renderElemObj(ctx, o, out, cfg, 0, seen); err != nil {
-			return fmt.Errorf("failed to render: %w", err)
-		}
+	if err := walk.Walk(ctx, v, w); err != nil {
+		return fmt.Errorf("render: %w", err)
 	}
 	return nil
 }
 
-func renderElemObj(ctx context.Context, obj elem.Obj, out io.StringWriter, cfg *renderConfig, depth int, seen map[string]struct{}) error {
-	indent := ""
-	if cfg.Indent {
-		indent = strings.Repeat("  ", depth)
-	}
+// htmlWriter is the streaming HTML receiver. Its frame stack tracks the
+// indentation state of the currently open elements.
+type htmlWriter struct {
+	out    io.StringWriter
+	frames []htmlFrame
+}
 
-	// Raw content (including comments).
-	if obj.Raw != "" {
-		if err := writeStrings(out, indent, obj.Raw); err != nil {
-			return err
-		}
-		if cfg.Indent {
-			return writeStrings(out, "\n")
-		}
-		return nil
-	}
+type htmlFrame struct {
+	tag  string
+	void bool
+	// indent is whether this frame's content is indented on its own lines.
+	indent bool
+	// depth is the indentation depth of this frame's content.
+	depth int
+	// hasContent is set once any content was written inside the frame.
+	hasContent bool
+}
 
-	if obj.Tag == "" {
-		return fmt.Errorf("expected element to have a tag")
-	}
+var _ walk.Receiver = (*htmlWriter)(nil)
 
-	if err := writeStrings(out, indent, "<", obj.Tag); err != nil {
-		return err
-	}
+func (w *htmlWriter) top() *htmlFrame {
+	return &w.frames[len(w.frames)-1]
+}
 
-	// Flatten and render attributes.
-	if err := renderAttribs(ctx, obj.Attribs, out, seen); err != nil {
-		return err
-	}
-
-	if obj.Void {
-		ending := "/>"
-		if cfg.Indent {
-			ending += "\n"
-		}
-		return writeStrings(out, ending)
-	}
-
-	if err := writeStrings(out, ">"); err != nil {
-		return err
-	}
-
-	// Disable indentation within <pre> tags.
-	cfgInner := cfg
-	if obj.Tag == "pre" {
-		cpy := *cfg
-		cpy.Indent = false
-		cfgInner = &cpy
-	}
-
-	// Collect and flatten children.
-	var children []elem.Obj
-	if obj.Children != nil {
-		for child := range obj.Children {
-			childObj, err := child.Eval(ctx)
-			if err != nil {
-				return fmt.Errorf("failed to load child: %w", err)
-			}
-			for o, squashErr := range squashElemObj(ctx, childObj) {
-				if squashErr != nil {
-					return fmt.Errorf("failed to open child: %w", squashErr)
-				}
-				children = append(children, o)
+// beginContent writes the newline and indentation that precede a piece of
+// content in the current frame.
+func (w *htmlWriter) beginContent() error {
+	parent := w.top()
+	if parent.indent {
+		if !parent.hasContent {
+			if err := w.write("\n"); err != nil {
+				return err
 			}
 		}
-	}
-
-	if cfgInner.Indent && len(children) > 0 {
-		if err := writeStrings(out, "\n"); err != nil {
+		if err := w.write(strings.Repeat("  ", parent.depth)); err != nil {
 			return err
 		}
 	}
-	for i, child := range children {
-		if err := renderElemObj(ctx, child, out, cfgInner, depth+1, seen); err != nil {
-			return fmt.Errorf("failed to render child %d (tag %q): %w", i, child.Tag, err)
-		}
-	}
-	if cfgInner.Indent && len(children) > 0 {
-		if err := writeStrings(out, indent); err != nil {
-			return err
-		}
-	}
+	parent.hasContent = true
+	return nil
+}
 
-	if err := writeStrings(out, "</", obj.Tag, ">"); err != nil {
-		return err
-	}
-	if cfg.Indent {
-		return writeStrings(out, "\n")
+// endContent writes the line ending that follows a piece of content in the
+// current frame.
+func (w *htmlWriter) endContent() error {
+	if w.top().indent {
+		return w.write("\n")
 	}
 	return nil
 }
 
-// renderAttribs flattens and renders all attributes.
-func renderAttribs(ctx context.Context, attribs attr.Seq, out io.StringWriter, seen map[string]struct{}) error {
-	if attribs == nil {
-		return nil
+func (w *htmlWriter) Open(el walk.Element) error {
+	if err := w.beginContent(); err != nil {
+		return err
 	}
-
-	// reset the attributes seen map
-	clear(seen)
-
-	var classes string
-	var styles string
-	var collected []attr.Obj
-
-	for a := range attribs {
-		if err := flattenAttrib(ctx, a, &classes, &styles, &collected, seen); err != nil {
+	if err := w.write("<", el.Tag); err != nil {
+		return err
+	}
+	for _, a := range el.Attrs {
+		if err := w.write(" ", a.Key); err != nil {
 			return err
 		}
-	}
-
-	for _, attr := range collected {
-		if err := writeStrings(out, " ", attr.Key); err != nil {
-			return err
-		}
-		if !attr.Bool {
-			value := attr.Val
-			switch attr.Key {
-			case "class":
-				value = classes
-			case "style":
-				value = styles
+		switch a.Kind {
+		case attr.KindValue:
+			if err := w.write(`="`, html.EscapeString(a.Val), `"`); err != nil {
+				return err
 			}
-			if err := writeStrings(out, "=\"", value, "\""); err != nil {
+		case attr.KindRawValue:
+			if err := w.write(`="`, a.Val, `"`); err != nil {
 				return err
 			}
 		}
 	}
+	if el.Void {
+		if err := w.write("/>"); err != nil {
+			return err
+		}
+		if err := w.endContent(); err != nil {
+			return err
+		}
+		w.frames = append(w.frames, htmlFrame{tag: el.Tag, void: true})
+		return nil
+	}
+	if err := w.write(">"); err != nil {
+		return err
+	}
+	parent := w.top()
+	w.frames = append(w.frames, htmlFrame{
+		tag:    el.Tag,
+		indent: parent.indent && el.Tag != "pre", // never reformat preformatted content
+		depth:  parent.depth + 1,
+	})
 	return nil
 }
 
-func writeStrings(out io.StringWriter, values ...string) error {
+func (w *htmlWriter) leaf(content string) error {
+	if err := w.beginContent(); err != nil {
+		return err
+	}
+	if err := w.write(content); err != nil {
+		return err
+	}
+	return w.endContent()
+}
+
+func (w *htmlWriter) Text(v string) error {
+	return w.leaf(html.EscapeString(v))
+}
+
+func (w *htmlWriter) Raw(v string) error {
+	return w.leaf(v)
+}
+
+func (w *htmlWriter) Comment(v string) error {
+	return w.leaf("<!-- " + html.EscapeString(v) + " -->")
+}
+
+func (w *htmlWriter) Close() error {
+	f := *w.top()
+	w.frames = w.frames[:len(w.frames)-1]
+	if f.void {
+		return nil
+	}
+	if f.indent && f.hasContent {
+		if err := w.write(strings.Repeat("  ", w.top().depth)); err != nil {
+			return err
+		}
+	}
+	if err := w.write("</", f.tag, ">"); err != nil {
+		return err
+	}
+	return w.endContent()
+}
+
+func (w *htmlWriter) write(values ...string) error {
 	for _, value := range values {
-		n, err := out.WriteString(value)
+		n, err := w.out.WriteString(value)
 		if err != nil {
 			return fmt.Errorf("%w: %w", ErrRenderOutput, err)
 		}
@@ -184,84 +184,4 @@ func writeStrings(out io.StringWriter, values ...string) error {
 		}
 	}
 	return nil
-}
-
-// flattenAttrib recursively flattens attribute bundles and collects attributes.
-func flattenAttrib(ctx context.Context, a attr.Node, classes,
-	styles *string, collected *[]attr.Obj, seen map[string]struct{}) error {
-	obj, err := a.Eval(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to eval attribute: %w", err)
-	}
-
-	// Noop.
-	if obj.Key == "" && obj.Sub == nil {
-		return nil
-	}
-
-	// Bundle: flatten sub-attributes.
-	if obj.Key == "" && obj.Sub != nil {
-		for sub := range obj.Sub {
-			if err := flattenAttrib(ctx, sub, classes, styles, collected, seen); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-
-	// Regular attribute.
-	_, alreadySeen := seen[obj.Key]
-	if !alreadySeen {
-		seen[obj.Key] = struct{}{}
-		*collected = append(*collected, obj)
-	}
-
-	switch obj.Key {
-	case "class":
-		if alreadySeen {
-			*classes += " "
-		}
-		*classes += obj.Val
-	case "style":
-		if alreadySeen {
-			*styles += ";"
-		}
-		*styles += obj.Val
-	default:
-		if alreadySeen {
-			return fmt.Errorf("duplicate attribute %q", obj.Key)
-		}
-	}
-
-	return nil
-}
-
-// squashElemObj yields non-bundle elem.Objs by recursively flattening bundles.
-func squashElemObj(ctx context.Context, obj elem.Obj) iter.Seq2[elem.Obj, error] {
-	return func(yield func(elem.Obj, error) bool) {
-		// Non-empty tag or raw content: this is a real element.
-		if obj.Tag != "" || obj.Raw != "" {
-			yield(obj, nil)
-			return
-		}
-		// Noop: no tag, no raw, no children.
-		if obj.Children == nil {
-			return
-		}
-		// Bundle: flatten children.
-		for child := range obj.Children {
-			childObj, err := child.Eval(ctx)
-			if err != nil {
-				if !yield(elem.Obj{}, err) {
-					return
-				}
-				return
-			}
-			for o, squashErr := range squashElemObj(ctx, childObj) {
-				if !yield(o, squashErr) {
-					return
-				}
-			}
-		}
-	}
 }

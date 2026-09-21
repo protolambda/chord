@@ -17,7 +17,8 @@ Structures are lazily evaluated, allowing reuse and context-aware rendering.
 
 - `attr.Node`: A lazy-evaluated attribute (key-value, boolean, or bundle)
 - `attr.Name`: A trusted, statically known attribute name
-- `elem.Node`: A lazy-evaluated element (tag, text, raw HTML, or bundle)
+- `elem.Node`: A lazy-evaluated element (element, text, raw HTML, comment, or fragment)
+- `elem.Obj`/`attr.Obj`: Evaluated objects, tagged with an explicit `Kind`
 - `elem.Name`: A trusted, statically known element tag name
 - `elem.Scope`: A `func(...elem.Node) elem.Node`, a scope of sub-elements (`<div>`, etc.)
 
@@ -30,15 +31,17 @@ Constructors:
 - `elem.ParseName(v)`: Validate a runtime element tag name
 - `elem.Name("div").New(attrs...)`: A non-void HTML element (returns `Scope`)
 - `elem.Name("input").Void(attrs...)`: A self-closing element (returns `elem.Node`)
+- `elem.Text(v)` (also `text.Text(v)`): Text content, HTML-escaped when rendered
 - `elem.Raw(v)`: Raw HTML content (no escaping)
 - `elem.Comment(v)`: An HTML comment
 - `elem.Noop()`, `attr.Noop()`: Empty no-op
 
 Core utils:
-- `text.Text(v)`: HTML-escaped text content (returns `elem.Node`)
 - `elem.If(bool, elem)`, `attr.If(bool, attr)`: Conditional content
 - `elem.Fn(func(ctx) (elem, error))`, `attr.Fn(func(ctx) (attr, error))`: Dynamic content
-- `core.Fallback(node, fallback func(ctx, err) elem)`: Element with recovery
+- `core.Fallback(node, fallback func(ctx, err) elem)`: Element with recovery from evaluation errors
+- `core.Render(ctx, node, w)`: Evaluate once and write HTML; errors carry a location such as `at html[0]/body[1]/form#login[0]/[2]`
+- `core/inspect.Build(ctx, node)`: Evaluate once into a read-only snapshot for inspection
 
 
 Non-void elements use a two-step call: first attributes, then children:
@@ -61,7 +64,11 @@ div.Div(attr.Class("empty"))  // renders as: <div class="empty"></div>
 chord/
 ├── core/             # Core rendering
 │   ├── elem/         # Element core types and functions
-│   └── attr/         # Attribute core types, functions, and global attributes
+│   ├── attr/         # Attribute core types, functions, and global attributes
+│   └── inspect/      # Evaluated snapshots for inspection
+├── ct/               # Testing: subjects, queries, and mustbe assertions
+│   ├── cthtml/       # Parsed HTML page and fragment subjects
+│   └── cthttp/       # Handler execution and response subjects
 ├── html/             # HTML elements and attributes
 │   ├── aria/         # ARIA accessibility attributes
 │   ├── on/           # DOM event handlers (onclick, onsubmit, etc.)
@@ -276,13 +283,70 @@ bi.XLg        // <i class="bi bi-x-lg"></i>
 bi.Github     // <i class="bi bi-github"></i>
 ```
 
+## Testing
+
+The `ct` packages test Chord views, parsed HTML, and HTTP responses with one
+query vocabulary. Every operation is a [mustbe](https://github.com/protolambda/mustbe)
+`assertion.Assertion` value, so it works with `mustbe.Must`, `mustbe.WrapT`,
+and `devtest.T`. A test builds a subject, derives selections, and asserts:
+
+```go
+import (
+	"github.com/protolambda/chord/ct"
+	"github.com/protolambda/mustbe"
+)
+
+func TestAccountPage(gt *testing.T) {
+	t := mustbe.WrapT(gt) // or devtest.SerialT(gt)
+	page := ct.View(AccountPage(account, viewer))
+
+	t.Must(page)                                                  // evaluation succeeds
+	t.Must(page.Find(ct.Role("heading", ct.Named("Account"))))   // exactly one match
+	t.Must(page.Find(ct.Role("link", ct.Named("Admin"))).None()) // absent
+
+	form := page.Find(ct.Tag("form"), ct.ID("profile"))           // every query must match
+	t.Must(form)
+	t.Must(form.Find(ct.Label("Email")).Matches(ct.Tag("input"), ct.Attr("name", "email")))
+	t.Must(page.Find(ct.Role("listitem")).Texts("Alpha", "Beta"))
+	t.Must(page.Valid(ct.UniqueIDs(), ct.LabelReferences()))
+}
+```
+
+Checking a selection asserts exactly one match; `None`, `Any`, `Count`,
+`AtLeast`, and `AtMost` express other cardinalities. `Matches` checks the
+single match, `Each` checks every match, `InOrder`, `Texts`, and `AttrValues`
+check the sequence in document order, and `First`, `Last`, and `Nth` narrow a
+selection to one position. Negative assertions load
+the subject first, so an evaluation error is never mistaken for absence.
+Failures report the expectation, the matches with their locations, and an
+outline of the searched scope, with secret-looking attribute values redacted.
+
+Handlers are tested through `ct/cthttp` and parsed with `ct/cthtml`:
+
+```go
+req := httptest.NewRequest(http.MethodGet, "/account", nil)
+res := cthttp.Serve(handler, req)
+
+t.Must(res.Status(http.StatusOK))
+t.Must(res.Header("Content-Type", ct.Prefix("text/html")))
+page := res.HTML() // or res.HTMLFragment("div") for a partial
+t.Must(page.Find(ct.Role("heading", ct.Named("Account"))))
+```
+
+See the `ct` package documentation for the query vocabulary (`Tag`, `ID`,
+`Class`, `Attr`, `Text`, `Label`, `Alt`, `TestID`, `Role` with `Named` and
+`Level`, `HasChild`, `HasDescendant`, `And`/`Or`/`Not`) and the document rules.
+
 ## Design Philosophy
 
 - **Composition over repetition**: Build reusable components easily
 - **Type safety**: Native Go typing without code generation
 - **Clean API**: Scoped packages prevent namespace bloat
 - **Extensibility**: Create custom components with the same patterns
-- **Zero dependencies**: Core library has no external dependencies
+- **Standard library only for rendering**: The rendering and HTML DSL packages
+  use only the Go standard library. The optional `ct` testing packages use
+  `mustbe` and `golang.org/x/net/html`, and are not linked into applications
+  that do not import them.
 
 ## License
 

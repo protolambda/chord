@@ -2,7 +2,7 @@
 //
 // The core abstractions are:
 //   - [Node]: A lazy-evaluated element.
-//   - [Obj]: A static representation of evaluated content.
+//   - [Obj]: A static representation of evaluated content, tagged with a [Kind].
 //   - [Name]: A trusted, statically known element tag name.
 //
 // Element utils include:
@@ -10,7 +10,9 @@
 //   - [Name.New]: Produces an element, returning a Scope to complete
 //     with child elements (e.g. <div>scope goes here</div>).
 //   - [Name.Void]: A self-closing element (e.g., <br/>, <img/>).
-//   - [Raw]: Raw document content (text, HTML).
+//   - [Text]: Logical text content, HTML-escaped when rendered.
+//   - [Raw]: Raw document content (trusted HTML, written verbatim).
+//   - [Comment]: An HTML comment.
 //   - [Scope]: A function to call to fill in child elements.
 //   - [Bundle]: A slice of multiple elements.
 //   - [Seq]: A sequence of multiple elements.

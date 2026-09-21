@@ -17,17 +17,21 @@ type Bundle []Node
 
 func (b Bundle) Eval(ctx context.Context) (Obj, error) {
 	return Obj{
-		Sub: slices.Values(b),
+		Kind: KindBundle,
+		Sub:  slices.Values(b),
 	}, nil
 }
 
 // Seq is a sequence of attributes.
 // These attributes will be rendered adjacent to each other.
+// The sequence is iterated once per evaluation; a single-use sequence is
+// therefore only safe in a node graph that is evaluated once.
 type Seq iter.Seq[Node]
 
 func (s Seq) Eval(ctx context.Context) (Obj, error) {
 	return Obj{
-		Sub: iter.Seq[Node](s),
+		Kind: KindBundle,
+		Sub:  iter.Seq[Node](s),
 	}, nil
 }
 

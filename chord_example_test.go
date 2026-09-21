@@ -87,7 +87,7 @@ func Example_dataAttributes() {
 // Error case: duplicate non-mergeable attributes cause an error.
 func Example_duplicateAttribute() {
 	core.Dump(div.Div(attr.ID("first"), attr.ID("second")))
-	// Output: ERROR: failed to render: duplicate attribute "id"
+	// Output: ERROR: render: at div[0]: duplicate attribute "id"
 }
 
 // =============================================================================
