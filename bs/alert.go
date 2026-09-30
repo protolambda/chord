@@ -3,7 +3,6 @@ package bs
 import (
 	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
 )
 
@@ -45,13 +44,8 @@ func AlertInfo(attrs ...attr.Node) elem.Scope {
 // AlertDismissible creates a dismissible Bootstrap alert.
 func AlertDismissible(attrs ...attr.Node) elem.Scope {
 	return func(children ...elem.Node) elem.Node {
-		closeBtn := button.Button(
-			rawClass("btn-close"),
-			button.Type(button.TypeButton),
-			attr.Name("data-bs-dismiss").Raw("alert"),
-		)()
 		allChildren := make([]elem.Node, 0, 1+len(children))
-		allChildren = append(allChildren, closeBtn)
+		allChildren = append(allChildren, closeButton("alert"))
 		allChildren = append(allChildren, children...)
 		return div.Div(attr.Cons(
 			rawClass("alert alert-dismissible fade show"),

@@ -10,6 +10,7 @@ import (
 	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/ct"
+	"github.com/protolambda/chord/html/group/div"
 	"github.com/protolambda/chord/html/group/list"
 	"github.com/protolambda/chord/html/section"
 	"github.com/protolambda/chord/html/text"
@@ -147,4 +148,41 @@ func Example_positions() {
 	//   li
 	//     a [href="/projects/chord/edit"]
 	//       "Edit"
+}
+
+// Texts read as users see the page: the text of block-level parts, such as
+// the header and body of a card, is separated, while inline elements join.
+// TextContent is the raw DOM textContent.
+func ExampleInnerText() {
+	t := mustbe.WrapT(printT{})
+	page := ct.View(div.Div(attr.Class("card"))(
+		div.Div(attr.Class("card-header"))(text.Text("Author")),
+		div.Div(attr.Class("card-body"))(text.Text("Signed with "), text.Strong()(text.Text("dev")), text.Text("0")),
+	))
+
+	t.Must(page.Find(ct.Class("card")).Texts("Author Signed with dev0"))
+	t.Must(page.Find(ct.InnerText("Author Signed with dev0")))
+	t.Must(page.Find(ct.TextContent("AuthorSigned with dev0")))
+	fmt.Println("all passed")
+	// Output: all passed
+}
+
+// Attr and Text read a value of the single match, for values that a test
+// uses further, such as the URL that a polling panel requests next.
+func ExampleSelection_Attr() {
+	page := ct.View(div.Div(attr.ID("panel"), attr.KV("hx-get", "/tasks/1/panel"), attr.KV("hx-trigger", "every 1s"))(
+		text.Text("pending"),
+	))
+	panel := page.Find(ct.ID("panel"))
+
+	next, polling, err := panel.Attr(context.Background(), "hx-get")
+	fmt.Println(next, polling, err)
+	status, err := panel.Text(context.Background())
+	fmt.Println(status, err)
+	_, polling, err = panel.Attr(context.Background(), "hx-swap")
+	fmt.Println(polling, err)
+	// Output:
+	// /tasks/1/panel true <nil>
+	// pending <nil>
+	// false <nil>
 }

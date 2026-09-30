@@ -21,6 +21,7 @@ type Accordion struct {
 }
 
 // AccordionItem represents a single accordion item.
+// A nil Header or Body renders the item's structure without that content.
 type AccordionItem struct {
 	Header elem.Node // accordion-header content
 	Body   elem.Node // accordion-body content
@@ -59,7 +60,7 @@ func (a Accordion) Eval(ctx context.Context) (elem.Obj, error) {
 				button.Type(button.TypeButton),
 				attr.Name("data-bs-toggle").Raw("collapse"),
 				attr.Data("bs-target", "#"+collapseID),
-			)(item.Header),
+			)(optional(item.Header)...),
 		)
 
 		collapseAttrs := []attr.Node{
@@ -71,7 +72,7 @@ func (a Accordion) Eval(ctx context.Context) (elem.Obj, error) {
 		}
 
 		collapse := div.Div(collapseAttrs...)(
-			div.Div(rawClass("accordion-body"))(item.Body),
+			div.Div(rawClass("accordion-body"))(optional(item.Body)...),
 		)
 
 		items = append(items, div.Div(

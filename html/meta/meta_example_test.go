@@ -3,7 +3,6 @@ package meta_test
 import (
 	"github.com/protolambda/chord/core"
 	"github.com/protolambda/chord/core/attr"
-	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/meta"
 	"github.com/protolambda/chord/html/text"
 )
@@ -44,6 +43,6 @@ func ExampleBase() {
 }
 
 func ExampleStyle() {
-	core.Dump(meta.Style()(elem.Raw("body { margin: 0; }")))
-	// Output: <style>body { margin: 0; }</style>
+	core.Dump(meta.Style()(text.Text(`body > p::before { content: "»"; }`)))
+	// Output: <style>body > p::before { content: "»"; }</style>
 }

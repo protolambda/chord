@@ -3,6 +3,7 @@ package cthttp_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -77,7 +78,7 @@ func TestServeCapturesResponse(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/account?tab=1", nil)
 	res := cthttp.Serve(accountHandler(), req)
 
-	mustPass(t, res)
+	mustPass(t, res.Captured())
 	mustPass(t, res.Status(http.StatusOK))
 	mustPass(t, res.Header("Content-Type", ct.Prefix("text/html")))
 	mustPass(t, res.Header("Set-Cookie", ct.Prefix("b=")))
@@ -98,7 +99,7 @@ func TestServeCapturesResponse(t *testing.T) {
 	if res.StatusCode() != http.StatusOK || res.Headers().Get("Content-Type") == "" || len(res.Bytes()) == 0 {
 		t.Fatal("accessors should expose the captured response")
 	}
-	if got, want := res.String(), "captured(GET /account?tab=1)"; got != want {
+	if got, want := res.Captured().String(), "captured(GET /account?tab=1)"; got != want {
 		t.Fatalf("String(): got %s, want %s", got, want)
 	}
 	if got, want := res.Status(200).String(), "status(GET /account?tab=1, 200)"; got != want {
@@ -134,7 +135,7 @@ func TestNonHTMLResponse(t *testing.T) {
 func TestBodyLimitIsACaptureFailure(t *testing.T) {
 	res := cthttp.Serve(accountHandler(), httptest.NewRequest(http.MethodGet, "/account", nil), cthttp.WithMaxBody(10))
 
-	mustFail(t, res, ct.ErrLoad, "body exceeds 10 bytes")
+	mustFail(t, res.Captured(), ct.ErrLoad, "body exceeds 10 bytes")
 	// Operational failures take precedence over every derived assertion.
 	mustFail(t, res.Status(http.StatusOK), ct.ErrLoad)
 	mustFail(t, res.Header("Content-Type", ct.Prefix("text/html")), ct.ErrLoad)
@@ -168,10 +169,10 @@ func TestFromResponseAdoptsBody(t *testing.T) {
 	if !body.closed {
 		t.Fatal("body must be closed after capture")
 	}
-	mustPass(t, res)
+	mustPass(t, res.Captured())
 	mustPass(t, res.Status(http.StatusCreated))
 	mustPass(t, res.HTML().Find(ct.Tag("p"), ct.Text("hi")))
-	if got, want := res.String(), "captured(POST /submit)"; got != want {
+	if got, want := res.Captured().String(), "captured(POST /submit)"; got != want {
 		t.Fatalf("String(): got %s, want %s", got, want)
 	}
 
@@ -180,11 +181,14 @@ func TestFromResponseAdoptsBody(t *testing.T) {
 		StatusCode: http.StatusOK,
 		Body:       &trackedBody{Reader: strings.NewReader("x"), closeErr: errClose},
 	})
-	err := mustFail(t, failing, ct.ErrLoad, "close body")
+	err := mustFail(t, failing.Captured(), ct.ErrLoad, "close body")
 	if !errors.Is(err, errClose) {
 		t.Fatalf("expected close error in chain, got %v", err)
 	}
-	if got, want := failing.String(), "captured(response)"; got != want {
+	if got, want := failing.Describe(), "response"; got != want {
+		t.Fatalf("Describe(): got %s, want %s", got, want)
+	}
+	if got, want := failing.Captured().String(), "captured(response)"; got != want {
 		t.Fatalf("String(): got %s, want %s", got, want)
 	}
 
@@ -200,7 +204,113 @@ func TestServeUsesRequestContext(t *testing.T) {
 	res := cthttp.Serve(accountHandler(), req)
 	// The handler renders with the request context, so cancellation is an
 	// application error, not a capture failure.
-	mustPass(t, res)
+	mustPass(t, res.Captured())
 	mustPass(t, res.Status(http.StatusInternalServerError))
 	mustPass(t, res.Body(ct.Contains("context canceled")))
+}
+
+// fragmentHandler writes HTML fragments without a content type, as many
+// htmx handlers do, so that the recorder sniffs one.
+func fragmentHandler() http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/form", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, "\n  <form action=\"/save\"><input name=\"q\"></form>")
+	})
+	mux.HandleFunc("/items", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, "<li>a</li><li>b</li>")
+	})
+	mux.HandleFunc("/bom", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, "\uFEFF<span>x</span>")
+	})
+	mux.HandleFunc("/empty", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	mux.HandleFunc("/text", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, "Saved <a href=\"/x\">view</a>")
+	})
+	mux.HandleFunc("/fail", func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "database unavailable", http.StatusInternalServerError)
+	})
+	mux.HandleFunc("/plain-page", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		_, _ = io.WriteString(w, "<!DOCTYPE html><html><body><h1>Account</h1></body></html>")
+	})
+	mux.HandleFunc("/sniffed-page", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.WriteString(w, `<meta charset="utf-8"><title>Account</title><h1>Account</h1>`)
+	})
+	return mux
+}
+
+func TestSniffedHTMLFragments(t *testing.T) {
+	serve := func(path string) *cthttp.Result {
+		return cthttp.Serve(fragmentHandler(), httptest.NewRequest(http.MethodGet, path, nil))
+	}
+
+	// Go sniffs fragments that do not start with one of a few tags as text/plain.
+	form := serve("/form")
+	mustPass(t, form.Header("Content-Type", ct.Exact("text/plain; charset=utf-8")))
+	mustPass(t, form.HTMLFragment("div").Find(ct.Tag("form"), ct.Attr("action", "/save")).Find(ct.Tag("input")))
+	mustPass(t, serve("/items").HTMLFragment("ul").Find(ct.Role("listitem")).Texts("a", "b"))
+	mustPass(t, serve("/bom").HTMLFragment("div").Find(ct.Tag("span"), ct.Text("x")))
+
+	// An empty body has no content type; it parses to an empty document.
+	empty := serve("/empty")
+	mustPass(t, empty.HeaderAbsent("Content-Type"))
+	mustPass(t, empty.HTMLFragment("div").Find(ct.Tag("div")).None())
+
+	// Text that does not start with markup needs an explicit text/html.
+	mustFail(t, serve("/text").HTMLFragment("div"), ct.ErrLoad,
+		`content type "text/plain; charset=utf-8" is not text/html, and the body does not start with markup`,
+		`Saved <a href=\"/x\">view</a>`)
+	mustFail(t, serve("/fail").HTML(), ct.ErrLoad, "status 500", "database unavailable")
+}
+
+// A complete page needs the content type text/html: browsers show a
+// text/plain page, whether the handler set the type or Go sniffed it, as
+// source. Only fragments, which htmx swaps whatever their type, are lenient.
+func TestHTMLPageRequiresHTMLContentType(t *testing.T) {
+	serve := func(path string) *cthttp.Result {
+		return cthttp.Serve(fragmentHandler(), httptest.NewRequest(http.MethodGet, path, nil))
+	}
+	plain := serve("/plain-page")
+	mustFail(t, plain.HTML().Find(ct.Role("heading", ct.Named("Account"))), ct.ErrLoad,
+		`content type "text/plain; charset=utf-8" is not text/html`)
+	mustPass(t, plain.HTMLFragment("body").Find(ct.Role("heading", ct.Named("Account"))))
+
+	sniffed := serve("/sniffed-page")
+	mustPass(t, sniffed.Header("Content-Type", ct.Exact("text/plain; charset=utf-8")))
+	mustFail(t, sniffed.HTML(), ct.ErrLoad, `content type "text/plain; charset=utf-8" is not text/html`)
+
+	empty := serve("/empty")
+	mustFail(t, empty.HTML(), ct.ErrLoad, `content type "" is not text/html`)
+}
+
+func TestResultIsNotAStringer(t *testing.T) {
+	res := cthttp.Serve(accountHandler(), httptest.NewRequest(http.MethodGet, "/account", nil))
+	// A String method would read like the body (as in bytes.Buffer), but
+	// describe the result, so a check of it could never fail.
+	if _, ok := any(res).(fmt.Stringer); ok {
+		t.Fatal("Result must not have a String method")
+	}
+	if got := res.BodyString(); !strings.Contains(got, "<h1>Account</h1>") {
+		t.Fatalf("BodyString: %q", got)
+	}
+	if got := string(res.Bytes()); got != res.BodyString() {
+		t.Fatalf("Bytes and BodyString differ: %q", got)
+	}
+	if got, want := res.Describe(), "GET /account"; got != want {
+		t.Fatalf("Describe(): got %s, want %s", got, want)
+	}
+}
+
+func TestExcerptTruncatesAtRuneBoundary(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, strings.Repeat("a", 199)+"ééé")
+	})
+	res := cthttp.Serve(handler, httptest.NewRequest(http.MethodGet, "/", nil))
+	err := mustFail(t, res.Status(http.StatusTeapot), ct.ErrMismatch, `"`+strings.Repeat("a", 199)+`"…`)
+	if strings.Contains(err.Error(), `\x`) {
+		t.Fatalf("excerpt split a character:\n%v", err)
+	}
 }

@@ -117,15 +117,15 @@ func Example_elementBundle() {
 
 // Build a complete HTML document with proper structure.
 func Example_fullDocument() {
-	core.Dump(meta.HTML()(
+	core.Dump(elem.Bundle{elem.Doctype(), meta.HTML()(
 		meta.Head()(
 			meta.Title()(text.Text("My Page")),
 		),
 		section.Body()(
 			section.H1()(text.Text("Welcome")),
 		),
-	))
-	// Output: <html><head><title>My Page</title></head><body><h1>Welcome</h1></body></html>
+	)})
+	// Output: <!DOCTYPE html><html><head><title>My Page</title></head><body><h1>Welcome</h1></body></html>
 }
 
 // =============================================================================
@@ -190,12 +190,8 @@ func Example_bootstrapGrid() {
 	// Output:
 	// <div class="container">
 	//   <div class="row">
-	//     <div class="col-md-6">
-	//       Left
-	//     </div>
-	//     <div class="col-md-6">
-	//       Right
-	//     </div>
+	//     <div class="col-md-6">Left</div>
+	//     <div class="col-md-6">Right</div>
 	//   </div>
 	// </div>
 }
@@ -207,9 +203,11 @@ func Example_bootstrapUtilities() {
 }
 
 // Bootstrap button components ARE elements (they create the button tag).
+// They have type="button" unless a type is given, so that they do not submit
+// a form by accident.
 func Example_bootstrapButton() {
 	core.Dump(bs.BtnPrimary()(text.Text("Click me")))
-	// Output: <button class="btn btn-primary">Click me</button>
+	// Output: <button class="btn btn-primary" type="button">Click me</button>
 }
 
 // =============================================================================
@@ -333,33 +331,24 @@ func Example_complete() {
 				bs.Card{Body: text.Text("Users: 42")},
 			),
 		),
-		bs.BtnPrimary(
-			ba.MT(3),
-			hx2.Get("/api/refresh"), hx2.Target("#stats"),
-		)(
-			bi.ArrowClockwise, text.Text(" Refresh"),
+		div.Div(ba.MT(3))(
+			bs.BtnPrimary(hx2.Get("/api/refresh"), hx2.Target("#stats"))(
+				bi.ArrowClockwise, text.Text(" Refresh"),
+			),
 		),
 	), core.WithIndent())
 	// Output:
 	// <div class="container mt-4">
 	//   <header>
-	//     <h1 class="mb-3">
-	//       Dashboard
-	//     </h1>
+	//     <h1 class="mb-3">Dashboard</h1>
 	//   </header>
 	//   <div class="row">
 	//     <div class="col-md-4">
 	//       <div class="card">
-	//         <div class="card-body">
-	//           Users: 42
-	//         </div>
+	//         <div class="card-body">Users: 42</div>
 	//       </div>
 	//     </div>
 	//   </div>
-	//   <button class="btn btn-primary mt-3" hx-get="/api/refresh" hx-target="#stats">
-	//     <i class="bi bi-arrow-clockwise"></i>
-	//      Refresh
-	//   </button>
+	//   <div class="mt-3"><button class="btn btn-primary" type="button" hx-get="/api/refresh" hx-target="#stats"><i class="bi bi-arrow-clockwise"></i> Refresh</button></div>
 	// </div>
-	//
 }

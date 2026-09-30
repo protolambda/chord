@@ -5,6 +5,7 @@ import (
 	"github.com/protolambda/chord/bs"
 	"github.com/protolambda/chord/core"
 	"github.com/protolambda/chord/core/attr"
+	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/form/input"
 	"github.com/protolambda/chord/html/form/label"
 	selectel "github.com/protolambda/chord/html/form/select"
@@ -16,12 +17,18 @@ import (
 
 func ExampleBtnPrimary() {
 	core.Dump(bs.BtnPrimary()(text.Text("Click me")))
-	// Output: <button class="btn btn-primary">Click me</button>
+	// Output: <button class="btn btn-primary" type="button">Click me</button>
+}
+
+// A button submits its form only with an explicit type.
+func ExampleBtnPrimary_submit() {
+	core.Dump(bs.BtnPrimary(button.Type(button.TypeSubmit))(text.Text("Save")))
+	// Output: <button class="btn btn-primary" type="submit">Save</button>
 }
 
 func ExampleBtnOutlinePrimary() {
 	core.Dump(bs.BtnOutlinePrimary()(text.Text("Outline")))
-	// Output: <button class="btn btn-outline-primary">Outline</button>
+	// Output: <button class="btn btn-outline-primary" type="button">Outline</button>
 }
 
 func ExampleBtnGroup() {
@@ -29,7 +36,7 @@ func ExampleBtnGroup() {
 		bs.BtnPrimary()(text.Text("Left")),
 		bs.BtnPrimary()(text.Text("Right")),
 	))
-	// Output: <div class="btn-group"><button class="btn btn-primary">Left</button><button class="btn btn-primary">Right</button></div>
+	// Output: <div class="btn-group"><button class="btn btn-primary" type="button">Left</button><button class="btn btn-primary" type="button">Right</button></div>
 }
 
 // Badges

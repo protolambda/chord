@@ -2,6 +2,7 @@ package attr
 
 import (
 	"context"
+	"fmt"
 	"iter"
 	"slices"
 )
@@ -26,6 +27,7 @@ func (b Bundle) Eval(ctx context.Context) (Obj, error) {
 // These attributes will be rendered adjacent to each other.
 // The sequence is iterated once per evaluation; a single-use sequence is
 // therefore only safe in a node graph that is evaluated once.
+// A nil Seq is empty.
 type Seq iter.Seq[Node]
 
 func (s Seq) Eval(ctx context.Context) (Obj, error) {
@@ -70,14 +72,22 @@ func IfElse(x bool, trueCase Node, falseCase Node) Node {
 }
 
 // Fn is a type of node that generates the output dynamically.
+// The function must return a non-nil node or an error; return [Noop] for no
+// attribute. A nil node, or a nil Fn, fails evaluation with [ErrNilNode].
 type Fn func(ctx context.Context) (Node, error)
 
 var _ Node = Fn(nil)
 
 func (fn Fn) Eval(ctx context.Context) (Obj, error) {
+	if fn == nil {
+		return Obj{}, fmt.Errorf("%w: Fn is nil", ErrNilNode)
+	}
 	out, err := fn(ctx)
 	if err != nil {
 		return Obj{}, err
+	}
+	if out == nil {
+		return Obj{}, fmt.Errorf("%w returned by Fn", ErrNilNode)
 	}
 	return out.Eval(ctx)
 }

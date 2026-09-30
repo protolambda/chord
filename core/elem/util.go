@@ -2,6 +2,7 @@ package elem
 
 import (
 	"context"
+	"fmt"
 	"iter"
 	"slices"
 )
@@ -15,10 +16,14 @@ func Noop() Node {
 // These elements will be rendered adjacent to each other.
 type Bundle []Node
 
+// Eval returns a fragment of the elements, with ctx as its Context: the
+// elements are evaluated with the context that evaluated the fragment (see the
+// Context section of [Obj]).
 func (b Bundle) Eval(ctx context.Context) (Obj, error) {
 	return Obj{
 		Kind:     KindFragment,
 		Children: slices.Values(b),
+		Context:  ctx,
 	}, nil
 }
 
@@ -26,12 +31,17 @@ func (b Bundle) Eval(ctx context.Context) (Obj, error) {
 // These elements will be rendered adjacent to each other.
 // The sequence is iterated once per evaluation; a single-use sequence is
 // therefore only safe in a node graph that is evaluated once.
+// A nil Seq is empty.
 type Seq iter.Seq[Node]
 
+// Eval returns a fragment of the elements, with ctx as its Context: the
+// elements are evaluated with the context that evaluated the fragment (see the
+// Context section of [Obj]).
 func (s Seq) Eval(ctx context.Context) (Obj, error) {
 	return Obj{
 		Kind:     KindFragment,
 		Children: iter.Seq[Node](s),
+		Context:  ctx,
 	}, nil
 }
 
@@ -70,14 +80,22 @@ func IfElse(x bool, trueCase Node, falseCase Node) Node {
 }
 
 // Fn is a type of node that generates the output dynamically.
+// The function must return a non-nil node or an error; return [Noop] for no
+// content. A nil node, or a nil Fn, fails evaluation with [ErrNilNode].
 type Fn func(ctx context.Context) (Node, error)
 
 var _ Node = Fn(nil)
 
 func (fn Fn) Eval(ctx context.Context) (Obj, error) {
+	if fn == nil {
+		return Obj{}, fmt.Errorf("%w: Fn is nil", ErrNilNode)
+	}
 	out, err := fn(ctx)
 	if err != nil {
 		return Obj{}, err
+	}
+	if out == nil {
+		return Obj{}, fmt.Errorf("%w returned by Fn", ErrNilNode)
 	}
 	return out.Eval(ctx)
 }

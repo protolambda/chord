@@ -13,6 +13,7 @@
 //   - [Text]: Logical text content, HTML-escaped when rendered.
 //   - [Raw]: Raw document content (trusted HTML, written verbatim).
 //   - [Comment]: An HTML comment.
+//   - [Doctype]: The HTML document type declaration, <!DOCTYPE html>.
 //   - [Scope]: A function to call to fill in child elements.
 //   - [Bundle]: A slice of multiple elements.
 //   - [Seq]: A sequence of multiple elements.
@@ -21,4 +22,8 @@
 //   - [If]: A conditional element.
 //   - [IfElse]: A choice between elements.
 //   - [Fn]: A dynamically produced element.
+//
+// A nil [Node] is not "no content": rendering it fails with [ErrNilNode],
+// located like any other evaluation error, and so does an [Fn] that returns a
+// nil node without an error. Use [Noop] or [If] for optional content.
 package elem

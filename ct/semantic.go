@@ -269,8 +269,9 @@ var nameFromContentRoles = map[string]bool{
 // button-like inputs, alt of image inputs and images, the caption of a
 // table, the legend of a fieldset, the figcaption of a figure), the text
 // content for roles that allow naming from content, and finally the title
-// attribute. Whitespace is collapsed. A reference to a missing id is an
-// error.
+// attribute. Text is taken as in [InnerText], so block-level parts are
+// separated, with the alt of images; whitespace is collapsed. A reference
+// to a missing id is an error.
 func AccessibleName(n Node) (string, error) {
 	if ids, ok := n.Attr("aria-labelledby"); ok {
 		var parts []string
@@ -404,29 +405,12 @@ func labelTexts(n Node) ([]labelText, error) {
 	return out, nil
 }
 
-// contentText is the text of a subtree for naming purposes: text nodes, and
-// the alt of images, with whitespace collapsed.
+// contentText is the text of a subtree for naming purposes: the inner text
+// (see [InnerText]), with the alt of images, and whitespace collapsed.
 func contentText(n Node) string {
-	var b strings.Builder
-	appendContentText(&b, n)
-	return collapseSpace(b.String())
-}
-
-func appendContentText(b *strings.Builder, n Node) {
-	switch n.Kind() {
-	case KindText:
-		b.WriteString(n.Data())
-		return
-	case KindElement:
-		if n.Tag() == "img" {
-			alt, _ := n.Attr("alt")
-			b.WriteString(" " + alt + " ")
-			return
-		}
-	}
-	for c := range n.Children() {
-		appendContentText(b, c)
-	}
+	w := textWriter{alt: true}
+	w.children(n)
+	return collapseSpace(w.b.String())
 }
 
 func childText(n Node, tag string) string {

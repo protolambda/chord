@@ -35,6 +35,28 @@
 //   - [SSEConnect], [SSESwap], [SSEClose]: SSE extension attributes
 //   - [WSConnect], [WSSend]: WebSocket extension attributes
 //
+// # Request and response headers
+//
+// [ParseRequestHeaders] reads the headers that htmx sends with a request
+// into [RequestHeaders], for example to answer an htmx request with a
+// fragment and other requests with a full page:
+//
+//	if hx2.ParseRequestHeaders(r.Header).Request { ... }
+//
+// It decodes the values that htmx sends as Latin-1 bytes or percent-encoded
+// (for characters above U+00FF), so that ids, names and prompt answers read
+// as the user wrote them.
+//
+// The Set functions write the response headers that htmx reads, on the header
+// of a response before it is written: [SetRedirect], [SetRefresh],
+// [SetLocation], [SetPushURL], [SetReplaceURL], [SetReswap], [SetRetarget],
+// [SetReselect], and [SetTrigger], [SetTriggerAfterSwap], and
+// [SetTriggerAfterSettle] with [Event] values. Each replaces an existing
+// value of its header. Plain values are set as given: URLs must be
+// percent-encoded, and no value may contain control characters; JSON values
+// are encoded with ASCII escapes. htmx ignores these headers on 3xx
+// responses. The Header constants name every header.
+//
 // Reference: https://htmx.org/reference/
 // Migration guide: https://htmx.org/migration-guide-htmx-1/
 //

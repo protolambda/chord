@@ -28,15 +28,33 @@ var _ assertion.Assertion = (*Subject)(nil)
 type Option func(*options)
 
 type options struct {
-	redact func(tag, key string) bool
+	redact        func(tag, key string) bool
+	redactContent []Query
 }
 
 // WithRedact hides the values of additional attributes in diagnostics.
 // The predicate receives the lowercase element tag and attribute name.
-// Values that look like secrets are redacted regardless of this option.
+// Values that look like secrets are redacted regardless of this option; see
+// the package documentation.
 func WithRedact(fn func(tag, key string) bool) Option {
 	return func(o *options) {
 		o.redact = fn
+	}
+}
+
+// WithRedactContent marks the elements that match the query as sensitive
+// in diagnostics, in addition to the elements that look sensitive (see the
+// package documentation): the text, raw content and comments inside them,
+// and the value and content attributes of the elements and their
+// descendants, are shown as [redacted]. A query that fails counts as a
+// match. Repeated options add up.
+//
+// Redaction only applies to failure messages. Values that a test reads,
+// such as [Selection.Text], and the expected values that a test states are
+// never redacted.
+func WithRedactContent(query Query) Option {
+	return func(o *options) {
+		o.redactContent = append(o.redactContent, query)
 	}
 }
 

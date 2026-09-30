@@ -55,12 +55,15 @@ func TestPageParsesDocument(t *testing.T) {
 	// The parser inserts html, head, and body, and decodes entities.
 	mustPass(t, page.Find(ct.Tag("html")).Find(ct.Tag("head")).Find(ct.Tag("title"), ct.Text("Hi & bye")))
 	mustPass(t, page.Find(ct.Tag("body")).Find(ct.Tag("p"), ct.Class("b"), ct.HasAttr("hidden")))
-	mustPass(t, page.Find(ct.Tag("p")).Texts("onetwo"))
-	mustPass(t, page.Find(ct.Tag("p"), ct.Text("onetwo")))
+	// A br separates text; the raw textContent joins it.
+	mustPass(t, page.Find(ct.Tag("p")).Texts("one two"))
+	mustPass(t, page.Find(ct.Tag("p"), ct.Text("one two")))
+	mustPass(t, page.Find(ct.Tag("p"), ct.TextContent("onetwo")))
+	// The parser gives a boolean attribute the empty value, and so do the diagnostics.
 	mustFail(t, page.Find(ct.Tag("p")).Find(ct.Tag("span")), ct.ErrCount,
-		"scope outline:", `p.a.b [hidden]`, `"one"`, `br`, `<!-- c -->`)
+		"scope outline:", `p.a.b [hidden=""]`, `"one"`, `br`, `<!-- c -->`)
 	mustFail(t, page.Find(ct.Tag("p").Or(ct.Tag("br"))), ct.ErrCount,
-		"found 2", "html[1]/body[1]/p[0] p.a.b [hidden]", "html[1]/body[1]/p[0]/br[1] br")
+		"found 2", `html[1]/body[1]/p[0] p.a.b [hidden=""]`, "html[1]/body[1]/p[0]/br[1] br")
 
 	doc, err := page.Load(t.Context())
 	if err != nil {
@@ -147,7 +150,7 @@ func accountPage() elem.Node {
 				list.LI()(text.A(text.Href("/"))(text.Text("Home"))),
 				list.LI()(text.A(text.Href("/account"))(text.Text("Your "), text.EM()(text.Text("account")))),
 			)),
-			form.Form(attr.ID("profile"), form.Method(form.MethodPost), attr.Class("card shadow"))(
+			form.Form(attr.ID("profile"), form.Method(form.MethodPost), attr.Class("card shadow"), attr.Name("title").Raw("Profile &amp; settings"))(
 				label.Label(label.For("email"))(text.Text("Email address")),
 				input.Input(input.Type(input.Email), attr.ID("email"), attr.KV("name", "email"), attr.KV("value", `a "quoted" <value>`)),
 				label.Label()(text.Text("Remember me"), input.Input(input.Type(input.Checkbox), attr.Name("checked").Bool())),
@@ -179,6 +182,9 @@ func TestParsedAndDirectViewsAgree(t *testing.T) {
 		"form": func(p *ct.Subject) assertion.Assertion {
 			return p.Find(ct.Tag("form"), ct.ID("profile"), ct.Class("shadow"), ct.Attr("method", "post"))
 		},
+		"raw value": func(p *ct.Subject) assertion.Assertion {
+			return p.Find(ct.Tag("form")).Matches(ct.Attr("title", "Profile & settings"))
+		},
 		"escaped value": func(p *ct.Subject) assertion.Assertion {
 			return p.Find(ct.ID("email")).Matches(ct.Attr("value", `a "quoted" <value>`))
 		},
@@ -199,6 +205,12 @@ func TestParsedAndDirectViewsAgree(t *testing.T) {
 		"rules": func(p *ct.Subject) assertion.Assertion {
 			return p.Valid(ct.UniqueIDs(), ct.LabelReferences(), ct.ButtonsHaveType(), ct.NoRaw())
 		},
+		"inner text": func(p *ct.Subject) assertion.Assertion {
+			return p.Find(ct.Tag("table")).Texts("Users Name Bob")
+		},
+		"form text": func(p *ct.Subject) assertion.Assertion {
+			return p.Find(ct.Tag("form")).Texts("Email address Remember me Save")
+		},
 		"comment excluded": func(p *ct.Subject) assertion.Assertion {
 			return p.Find(ct.Tag("body")).Find(ct.TextContentMatches(ct.Contains("footer"))).None()
 		},
@@ -209,5 +221,45 @@ func TestParsedAndDirectViewsAgree(t *testing.T) {
 				mustPass(t, check(page))
 			})
 		}
+	}
+}
+
+// The value of an attribute in a view is the value that a parser reads from
+// the rendered page, for logical and raw values alike.
+func TestAttributeValuesAgreeWithParsedPage(t *testing.T) {
+	tests := map[string]struct {
+		value attr.Node
+		want  string
+	}{
+		"raw quote":            {attr.Name("title").Raw(`a"b`), "a"},
+		"raw quote, reference": {attr.Name("title").Raw(`a"b&amp;`), "a"},
+		"raw references":       {attr.Name("title").Raw("x &amp; y&copy=z"), "x & y&copy=z"},
+		"raw crlf":             {attr.Name("title").Raw("1\r\n2\r3"), "1\n2\n3"},
+		"logical crlf":         {attr.Name("title").Value("1\r\n2\r3"), "1\n2\n3"},
+		"logical nul":          {attr.Name("title").Value("a\x00b"), "a�b"},
+		"logical markup":       {attr.Name("title").Value(`a "b" <c> & d`), `a "b" <c> & d`},
+		"logical class":        {attr.Class("a\r\nb"), "a\nb"},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			node := elem.Name("p").New(tc.value)()
+			var out strings.Builder
+			if err := core.Render(context.Background(), node, &out); err != nil {
+				t.Fatalf("render: %v", err)
+			}
+			key := "title"
+			if strings.Contains(name, "class") {
+				key = "class"
+			}
+			subjects := map[string]*ct.Subject{
+				"view":   ct.View(node),
+				"parsed": cthtml.FragmentString("body", out.String()),
+			}
+			for kind, page := range subjects {
+				if err := page.Find(ct.Tag("p")).Matches(ct.Attr(key, tc.want)).Check(t.Context()); err != nil {
+					t.Fatalf("%s of %q: %v", kind, out.String(), err)
+				}
+			}
+		})
 	}
 }

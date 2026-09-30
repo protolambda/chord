@@ -104,3 +104,24 @@ func TestFallbackContentErrorsPropagate(t *testing.T) {
 		t.Fatalf("expected fallback content error, got %v", err)
 	}
 }
+
+func TestFallbackRejectsNilAlternative(t *testing.T) {
+	errPrimary := errors.New("primary failed")
+	primary := elem.Fn(func(context.Context) (elem.Node, error) { return nil, errPrimary })
+	tests := map[string]core.FallbackFn{
+		"nil function": nil,
+		"nil result":   func(context.Context, error) elem.Node { return nil },
+	}
+	for name, onErr := range tests {
+		t.Run(name, func(t *testing.T) {
+			var out strings.Builder
+			err := core.Render(context.Background(), core.Fallback(primary, onErr), &out)
+			if !errors.Is(err, elem.ErrNilNode) {
+				t.Fatalf("expected ErrNilNode, got %v", err)
+			}
+			if !errors.Is(err, errPrimary) {
+				t.Fatalf("expected the primary error in the chain, got %v", err)
+			}
+		})
+	}
+}

@@ -20,7 +20,8 @@ const (
 	KindRaw
 	// KindComment is a comment.
 	KindComment
-	// KindDoctype is a document type declaration. Only parsers produce it.
+	// KindDoctype is a document type declaration, from a parser or from
+	// [github.com/protolambda/chord/core/elem.Doctype] in a view.
 	KindDoctype
 )
 
@@ -68,10 +69,13 @@ type Node interface {
 	Kind() NodeKind
 	// Tag returns the lowercase element tag, or "" for other kinds.
 	Tag() string
-	// Data returns text, raw HTML, or comment content, depending on Kind.
+	// Data returns text, raw HTML, comment content, or the doctype name,
+	// depending on Kind.
 	Data() string
-	// Attr returns the logical attribute value. Boolean attributes report an
-	// empty value and true.
+	// Attr returns the logical attribute value, as an HTML parser reads it
+	// from the page: character references are decoded, also in raw
+	// (output-ready) values of a view, and line breaks are LF. Boolean
+	// attributes report an empty value and true.
 	Attr(name string) (value string, ok bool)
 	// Attrs iterates attributes as name/value pairs in source order.
 	Attrs() iter.Seq2[string, string]
@@ -81,6 +85,19 @@ type Node interface {
 	Children() iter.Seq[Node]
 	// Location describes the node position for diagnostics.
 	Location() string
+}
+
+// BoolAttrNode is implemented by nodes whose source tells a boolean
+// attribute, written without a value, apart from an attribute with an empty
+// value. [View] nodes implement it. Parsed documents do not: the HTML parser
+// gives both the empty value, and so does the DOM.
+//
+// Queries follow the DOM and treat both alike; diagnostics show a boolean
+// attribute as a bare name and an empty value as name="".
+type BoolAttrNode interface {
+	Node
+	// BoolAttr reports whether the attribute is present without a value.
+	BoolAttr(name string) bool
 }
 
 // descendants iterates all descendants of n in document order, excluding n.

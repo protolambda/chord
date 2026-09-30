@@ -16,6 +16,7 @@ import (
 	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/form/input"
 	"github.com/protolambda/chord/html/form/label"
+	"github.com/protolambda/chord/html/group/div"
 	"github.com/protolambda/chord/html/group/list"
 	"github.com/protolambda/chord/html/meta"
 	"github.com/protolambda/chord/html/section"
@@ -353,4 +354,123 @@ func TestDiagnosticsOutlineScope(t *testing.T) {
 		"\n    label [for=\"email\"]\n",
 		"\n      \"Email\"\n",
 		"\n    button [type=\"submit\" data-testid=\"save\"]\n")
+}
+
+func TestViewDoctype(t *testing.T) {
+	page := ct.View(elem.Bundle{elem.Doctype(), accountPage(false)})
+	doc, err := page.Load(t.Context())
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	var kinds []ct.NodeKind
+	var data []string
+	for c := range doc.Root().Children() {
+		kinds = append(kinds, c.Kind())
+		data = append(data, c.Data())
+	}
+	if len(kinds) != 2 || kinds[0] != ct.KindDoctype || kinds[1] != ct.KindElement || data[0] != "html" {
+		t.Fatalf("unexpected root children: %v %q", kinds, data)
+	}
+	mustPass(t, page.Valid(ct.NoRaw()))
+	mustPass(t, page.Find(ct.Role("heading", ct.Named("Account"))))
+}
+
+func TestViewDecodesRawAttributeValues(t *testing.T) {
+	page := ct.View(div.Div(
+		attr.Name("title").Raw("Tom &amp; Jerry &lt;3"),
+		// A logical class merged with a raw class becomes one raw value.
+		attr.Class("a&b"), attr.Name("class").Raw("c&amp;d"),
+		attr.Name("data-legacy").Raw("x&copy=y&copy;"),
+		attr.Name("data-lines").Raw("1\r\n2"),
+	))
+
+	mustPass(t, page.Find(ct.Tag("div")).Matches(
+		ct.Attr("title", "Tom & Jerry <3"),
+		ct.Class("a&b"), ct.Class("c&d"),
+		// In attribute values, a legacy entity without ';' followed by '=' stays literal.
+		ct.Attr("data-legacy", "x&copy=y©"),
+		ct.Attr("data-lines", "1\n2"),
+	))
+	mustPass(t, page.Find(ct.Tag("div")).AttrValues("title", "Tom & Jerry <3"))
+}
+
+func TestBooleanAttributesAreDistinguishable(t *testing.T) {
+	page := ct.View(form.Form()(
+		input.Input(attr.KV("name", "q"), attr.KV("value", ""), attr.Bool("disabled")),
+	))
+	// Queries follow the DOM: a boolean attribute has the empty value.
+	mustPass(t, page.Find(ct.Tag("input")).Matches(ct.Attr("disabled", ""), ct.Attr("value", "")))
+	// Diagnostics show a boolean attribute as a bare name, and an empty value as such.
+	mustFail(t, page.Find(ct.Tag("form")).Find(ct.Tag("select")), ct.ErrCount,
+		`input [name="q" value="" disabled]`)
+
+	nodes, err := page.Find(ct.Tag("input")).Nodes(t.Context())
+	if err != nil || len(nodes) != 1 {
+		t.Fatalf("nodes: %v %v", nodes, err)
+	}
+	b, ok := nodes[0].(ct.BoolAttrNode)
+	if !ok {
+		t.Fatal("view nodes should tell boolean attributes apart")
+	}
+	if !b.BoolAttr("disabled") || b.BoolAttr("value") || b.BoolAttr("missing") {
+		t.Fatalf("BoolAttr: disabled=%t value=%t missing=%t", b.BoolAttr("disabled"), b.BoolAttr("value"), b.BoolAttr("missing"))
+	}
+}
+
+func TestSelectionValues(t *testing.T) {
+	page := ct.View(section.Main()(
+		div.Div(attr.ID("panel"), attr.KV("hx-get", "/tasks/1/panel"), attr.KV("hx-trigger", "every 1s"))(
+			form.Form()(
+				input.Input(input.Type(input.Hidden), attr.KV("name", "version"), attr.KV("value", "7")),
+				input.Input(input.Type(input.Text), attr.KV("name", "note"), attr.Bool("required")),
+			),
+			div.Div()(text.Text("Status")), text.Text("pending"),
+		),
+	))
+	panel := page.Find(ct.ID("panel"))
+
+	v, ok, err := panel.Attr(t.Context(), "hx-get")
+	if err != nil || !ok || v != "/tasks/1/panel" {
+		t.Fatalf("hx-get: %q %t %v", v, ok, err)
+	}
+	v, ok, err = panel.Find(ct.Attr("name", "version")).Attr(t.Context(), "value")
+	if err != nil || !ok || v != "7" {
+		t.Fatalf("version: %q %t %v", v, ok, err)
+	}
+	v, ok, err = panel.Find(ct.Attr("name", "note")).Attr(t.Context(), "required")
+	if err != nil || !ok || v != "" {
+		t.Fatalf("boolean attribute: %q %t %v", v, ok, err)
+	}
+	v, ok, err = panel.Attr(t.Context(), "hx-swap")
+	if err != nil || ok || v != "" {
+		t.Fatalf("absent attribute: %q %t %v", v, ok, err)
+	}
+	txt, err := panel.Text(t.Context())
+	if err != nil || txt != "Status pending" {
+		t.Fatalf("text: %q %v", txt, err)
+	}
+
+	// The values need exactly one match, like the default assertion.
+	_, _, err = page.Find(ct.Tag("input")).Attr(t.Context(), "name")
+	if !errors.Is(err, ct.ErrCount) || !strings.Contains(err.Error(), "found 2") {
+		t.Fatalf("expected a count failure, got %v", err)
+	}
+	_, err = page.Find(ct.Tag("table")).Text(t.Context())
+	if !errors.Is(err, ct.ErrCount) || !strings.Contains(err.Error(), "found 0") {
+		t.Fatalf("expected a count failure, got %v", err)
+	}
+	errDB := errors.New("database unavailable")
+	broken := ct.View(elem.Fn(func(context.Context) (elem.Node, error) { return nil, errDB }))
+	if _, _, err := broken.Find(ct.Tag("div")).Attr(t.Context(), "id"); !errors.Is(err, ct.ErrLoad) || !errors.Is(err, errDB) {
+		t.Fatalf("expected a load failure, got %v", err)
+	}
+}
+
+func TestDiagnosticsTruncateAtRuneBoundary(t *testing.T) {
+	long := strings.Repeat("a", 47) + "ééé"
+	page := ct.View(div.Div()(text.Text(long)))
+	err := mustFail(t, page.Find(ct.Tag("div")).Find(ct.Tag("p")), ct.ErrCount, `"`+strings.Repeat("a", 47)+`…"`)
+	if strings.Contains(err.Error(), `\x`) {
+		t.Fatalf("truncation split a character:\n%v", err)
+	}
 }

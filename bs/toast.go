@@ -5,7 +5,6 @@ import (
 
 	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
-	"github.com/protolambda/chord/html/form/button"
 	"github.com/protolambda/chord/html/group/div"
 )
 
@@ -28,11 +27,7 @@ func (t Toast) Eval(ctx context.Context) (elem.Obj, error) {
 	if t.Header != nil {
 		header := div.Div(rawClass("toast-header"))(
 			t.Header,
-			button.Button(
-				rawClass("btn-close"),
-				button.Type(button.TypeButton),
-				attr.Name("data-bs-dismiss").Raw("toast"),
-			)(),
+			closeButton("toast"),
 		)
 		children = append(children, header)
 	}
