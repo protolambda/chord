@@ -11,8 +11,10 @@ import (
 // Rule is a document-wide structural check, such as unique ids or resolving
 // references. Rules are not full HTML or accessibility validation.
 type Rule struct {
-	desc  string
-	check func(root Node) []string
+	desc string
+	// check describes the violations; o holds the redaction options of the
+	// subject for node descriptions, and may be nil.
+	check func(root Node, o *options) []string
 }
 
 func (r Rule) String() string {
@@ -21,15 +23,17 @@ func (r Rule) String() string {
 
 // Violations runs the rule against a document root and returns one
 // description per violation. It exists for custom assertions; prefer
-// [Subject.Valid].
+// [Subject.Valid], which also applies the redaction options of the subject
+// to the descriptions (Violations only applies the built-in redaction).
 func (r Rule) Violations(root Node) []string {
-	return r.check(root)
+	return r.check(root, nil)
 }
 
 // CustomRule creates a rule from a description and a check that returns one
-// description per violation.
+// description per violation. Keep secret values out of the descriptions:
+// they appear in failure messages as written.
 func CustomRule(desc string, check func(root Node) []string) Rule {
-	return Rule{desc: desc, check: check}
+	return Rule{desc: desc, check: func(root Node, _ *options) []string { return check(root) }}
 }
 
 // Valid asserts that the document satisfies every rule.
@@ -60,7 +64,7 @@ func (a validAssertion) Check(ctx context.Context) error {
 	}
 	var b strings.Builder
 	for _, r := range a.rules {
-		for _, v := range r.check(doc.Root()) {
+		for _, v := range r.check(doc.Root(), &a.subject.opts) {
 			fmt.Fprintf(&b, "\n  %s: %s", r.desc, v)
 		}
 	}
@@ -83,7 +87,7 @@ func elements(root Node) func(yield func(Node) bool) {
 
 // UniqueIDs requires every non-empty id to occur once.
 func UniqueIDs() Rule {
-	return Rule{desc: "uniqueIDs()", check: func(root Node) []string {
+	return Rule{desc: "uniqueIDs()", check: func(root Node, _ *options) []string {
 		seen := make(map[string]Node)
 		var out []string
 		for e := range elements(root) {
@@ -115,7 +119,7 @@ func labelable(n Node) bool {
 // LabelReferences requires every label with a for attribute to reference a
 // labelable element.
 func LabelReferences() Rule {
-	return Rule{desc: "labelReferences()", check: func(root Node) []string {
+	return Rule{desc: "labelReferences()", check: func(root Node, o *options) []string {
 		var out []string
 		for e := range elements(root) {
 			if e.Tag() != "label" {
@@ -130,7 +134,7 @@ func LabelReferences() Rule {
 			case target == nil:
 				out = append(out, fmt.Sprintf("label at %s references missing id %q", locationOf(e), id))
 			case !labelable(target):
-				out = append(out, fmt.Sprintf("label at %s references non-labelable %s", locationOf(e), describeNode(target, nil)))
+				out = append(out, fmt.Sprintf("label at %s references non-labelable %s", locationOf(e), describeNode(target, o)))
 			}
 		}
 		return out
@@ -145,7 +149,7 @@ var ariaReferenceAttrs = []string{
 
 // ARIAReferences requires every id in an ARIA id-list attribute to resolve.
 func ARIAReferences() Rule {
-	return Rule{desc: "ariaReferences()", check: func(root Node) []string {
+	return Rule{desc: "ariaReferences()", check: func(root Node, _ *options) []string {
 		var out []string
 		for e := range elements(root) {
 			for _, key := range ariaReferenceAttrs {
@@ -167,7 +171,7 @@ func ARIAReferences() Rule {
 // LocalTargets requires every link to a local fragment ("#id") to resolve.
 // The bare "#" and "#top" targets are always valid.
 func LocalTargets() Rule {
-	return Rule{desc: "localTargets()", check: func(root Node) []string {
+	return Rule{desc: "localTargets()", check: func(root Node, _ *options) []string {
 		var out []string
 		for e := range elements(root) {
 			if e.Tag() != "a" && e.Tag() != "area" {
@@ -191,7 +195,7 @@ func LocalTargets() Rule {
 
 // ImagesHaveAlt requires every img to have an alt attribute, possibly empty.
 func ImagesHaveAlt() Rule {
-	return Rule{desc: "imagesHaveAlt()", check: func(root Node) []string {
+	return Rule{desc: "imagesHaveAlt()", check: func(root Node, _ *options) []string {
 		var out []string
 		for e := range elements(root) {
 			if e.Tag() != "img" {
@@ -208,7 +212,7 @@ func ImagesHaveAlt() Rule {
 // ButtonsHaveType requires every button inside a form to state its type,
 // so that a button does not submit the form by accident.
 func ButtonsHaveType() Rule {
-	return Rule{desc: "buttonsHaveType()", check: func(root Node) []string {
+	return Rule{desc: "buttonsHaveType()", check: func(root Node, _ *options) []string {
 		var out []string
 		for e := range elements(root) {
 			if e.Tag() != "button" {
@@ -230,7 +234,7 @@ func ButtonsHaveType() Rule {
 
 // NoInlineHandlers forbids inline event handler attributes (on*).
 func NoInlineHandlers() Rule {
-	return Rule{desc: "noInlineHandlers()", check: func(root Node) []string {
+	return Rule{desc: "noInlineHandlers()", check: func(root Node, _ *options) []string {
 		var out []string
 		for e := range elements(root) {
 			for key := range e.Attrs() {
@@ -246,11 +250,11 @@ func NoInlineHandlers() Rule {
 // NoRaw forbids raw HTML nodes. Only direct views contain them; parsed
 // documents never do.
 func NoRaw() Rule {
-	return Rule{desc: "noRaw()", check: func(root Node) []string {
+	return Rule{desc: "noRaw()", check: func(root Node, o *options) []string {
 		var out []string
 		for d := range descendants(root) {
 			if d.Kind() == KindRaw {
-				out = append(out, fmt.Sprintf("raw content at %s: %s", locationOf(d), describeNode(d, nil)))
+				out = append(out, fmt.Sprintf("raw content at %s: %s", locationOf(d), describeNode(d, o)))
 			}
 		}
 		return out

@@ -3,7 +3,6 @@ package script_test
 import (
 	"github.com/protolambda/chord/core"
 	"github.com/protolambda/chord/core/attr"
-	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/html/script"
 	"github.com/protolambda/chord/html/text"
 )
@@ -14,8 +13,18 @@ func ExampleScript() {
 }
 
 func ExampleScript_inline() {
-	core.Dump(script.Script()(elem.Raw("console.log('hello');")))
-	// Output: <script>console.log('hello');</script>
+	core.Dump(script.Script()(text.Text("if (a < b) console.log('hello');")))
+	// Output: <script>if (a < b) console.log('hello');</script>
+}
+
+func ExampleInline() {
+	core.Dump(script.Inline(`import { start } from "/app.js"; start();`, script.Type("module")))
+	// Output: <script type="module">import { start } from "/app.js"; start();</script>
+}
+
+func ExampleInline_unsafe() {
+	core.Dump(script.Inline(`document.write("</script>");`))
+	// Output: ERROR: render: at script[0]/[0]: unsafe script or style text: script text contains "</script"
 }
 
 func ExampleScript_module() {

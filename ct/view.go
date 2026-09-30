@@ -5,6 +5,8 @@ import (
 	"iter"
 	"strings"
 
+	"golang.org/x/net/html"
+
 	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
 	"github.com/protolambda/chord/core/inspect"
@@ -48,7 +50,10 @@ type viewNode struct {
 	n *inspect.Node
 }
 
-var _ Node = viewNode{}
+var (
+	_ Node         = viewNode{}
+	_ BoolAttrNode = viewNode{}
+)
 
 func (v viewNode) Kind() NodeKind {
 	switch v.n.Kind() {
@@ -60,6 +65,8 @@ func (v viewNode) Kind() NodeKind {
 		return KindRaw
 	case elem.KindComment:
 		return KindComment
+	case elem.KindDoctype:
+		return KindDoctype
 	default:
 		return KindDocument
 	}
@@ -78,24 +85,63 @@ func (v viewNode) Attr(name string) (string, bool) {
 	if !ok {
 		return "", false
 	}
-	if a.Kind == attr.KindBool {
-		return "", true
-	}
-	return a.Val, true
+	return logicalValue(a), true
 }
 
 func (v viewNode) Attrs() iter.Seq2[string, string] {
 	return func(yield func(string, string) bool) {
 		for a := range v.n.Attrs() {
-			val := a.Val
-			if a.Kind == attr.KindBool {
-				val = ""
-			}
-			if !yield(a.Key, val) {
+			if !yield(a.Key, logicalValue(a)) {
 				return
 			}
 		}
 	}
+}
+
+func (v viewNode) BoolAttr(name string) bool {
+	a, ok := v.n.Attr(name)
+	return ok && a.Kind == attr.KindBool
+}
+
+// logicalValue returns the value of an attribute as a parser reads it from
+// the rendered output: empty for a boolean attribute, decoded for a raw
+// (output-ready) value, and with line breaks and NUL characters normalized,
+// so that views and parsed pages agree.
+func logicalValue(a inspect.Attribute) string {
+	switch a.Kind {
+	case attr.KindBool:
+		return ""
+	case attr.KindRawValue:
+		return decodeRawValue(a.Val)
+	default:
+		// The renderer escapes the markup characters of a logical value, which
+		// the parser decodes again; it only normalizes the input.
+		if strings.ContainsAny(a.Val, "\r\x00") {
+			return inputNormalizer.Replace(a.Val)
+		}
+		return a.Val
+	}
+}
+
+// inputNormalizer changes text as the HTML parser does in attribute values:
+// CR LF and CR become LF, and NUL becomes U+FFFD.
+var inputNormalizer = strings.NewReplacer("\r\n", "\n", "\r", "\n", "\x00", "\uFFFD")
+
+// decodeRawValue decodes an output-ready attribute value with the HTML
+// tokenizer, as the renderer writes it: in double quotes. This applies the
+// attribute rules for character references and newline normalization. A raw
+// value that contains a double quote breaks out of the attribute; the result
+// is then the part a parser reads as the value.
+func decodeRawValue(v string) string {
+	if !strings.ContainsAny(v, "&\r\x00\"") {
+		return v
+	}
+	z := html.NewTokenizer(strings.NewReader(`<a v="` + v + `">`))
+	if z.Next() != html.StartTagToken {
+		return v
+	}
+	_, val, _ := z.TagAttr()
+	return string(val)
 }
 
 func (v viewNode) Parent() Node {

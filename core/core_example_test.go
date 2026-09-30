@@ -45,28 +45,32 @@ func ExampleComment() {
 	// Output: <div><!-- Hello world --></div>
 }
 
+// Indentation only goes between block-level elements, where browsers render
+// no whitespace: inline content such as links stays on one line.
 func ExampleWithIndent() {
 	Dump(
-		elem.Name("div").New(attr.KV("class", "outer"), attr.KV("id", "root"))(
-			elem.Name("div").New(attr.KV("class", "middle"))(
-				elem.Name("div").New(attr.KV("class", "inner"))(
-					elem.Raw("Hello"),
-				),
-				elem.Name("span").New()(elem.Raw("World")),
+		elem.Name("div").New(attr.Class("outer"))(
+			elem.Name("h1").New()(elem.Text("Title")),
+			elem.Name("p").New()(
+				elem.Text("Read the "),
+				elem.Name("a").New(attr.KV("href", "/docs"))(elem.Text("docs")),
+				elem.Text("."),
+			),
+			elem.Name("ul").New()(
+				elem.Name("li").New()(elem.Text("One")),
+				elem.Name("li").New()(elem.Text("Two")),
 			),
 		),
 		WithIndent(),
 	)
 	// Output:
-	// <div class="outer" id="root">
-	//   <div class="middle">
-	//     <div class="inner">
-	//       Hello
-	//     </div>
-	//     <span>
-	//       World
-	//     </span>
-	//   </div>
+	// <div class="outer">
+	//   <h1>Title</h1>
+	//   <p>Read the <a href="/docs">docs</a>.</p>
+	//   <ul>
+	//     <li>One</li>
+	//     <li>Two</li>
+	//   </ul>
 	// </div>
 }
 

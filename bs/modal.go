@@ -54,12 +54,7 @@ func (m Modal) Eval(ctx context.Context) (elem.Obj, error) {
 	if m.Title != nil {
 		headerChildren = append(headerChildren, section.H1(rawClass("modal-title fs-5"))(m.Title))
 	}
-	closeBtn := button.Button(
-		rawClass("btn-close"),
-		button.Type(button.TypeButton),
-		attr.Name("data-bs-dismiss").Raw("modal"),
-	)()
-	headerChildren = append(headerChildren, closeBtn)
+	headerChildren = append(headerChildren, closeButton("modal"))
 
 	// Content
 	var contentChildren []elem.Node

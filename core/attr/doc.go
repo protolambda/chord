@@ -17,6 +17,9 @@
 //   - [IfElse]: A choice between attributes.
 //   - [Fn]: A dynamically produced attribute.
 //
+// A nil [Node] is not "no attribute": evaluating it fails with [ErrNilNode].
+// Use [Noop] or [If] for optional attributes.
+//
 // Values from callers should use [KV], [Name.Value], or the attribute helpers in
 // this package. Chord internals may use [Name.Raw] for values already known to be
 // safe; Raw does not escape its value.

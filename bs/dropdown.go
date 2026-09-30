@@ -13,6 +13,8 @@ import (
 )
 
 // Dropdown represents a Bootstrap dropdown component.
+// A nil Toggle renders the toggle button without content, and a nil Attrs
+// adds no attributes.
 type Dropdown struct {
 	Toggle elem.Node   // toggle button content
 	Items  []elem.Node // dropdown items
@@ -31,7 +33,7 @@ func (d Dropdown) Eval(ctx context.Context) (elem.Obj, error) {
 		rawClass("btn btn-secondary dropdown-toggle"),
 		button.Type(button.TypeButton),
 		attr.Name("data-bs-toggle").Raw("dropdown"),
-	)(d.Toggle)
+	)(optional(d.Toggle)...)
 
 	menu := list.UL(rawClass("dropdown-menu"))(d.Items...)
 

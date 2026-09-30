@@ -31,15 +31,27 @@ Constructors:
 - `elem.ParseName(v)`: Validate a runtime element tag name
 - `elem.Name("div").New(attrs...)`: A non-void HTML element (returns `Scope`)
 - `elem.Name("input").Void(attrs...)`: A self-closing element (returns `elem.Node`)
-- `elem.Text(v)` (also `text.Text(v)`): Text content, HTML-escaped when rendered
+- `elem.Text(v)` (also `text.Text(v)`): Text content, HTML-escaped when rendered; inside
+  `<script>` and `<style>` it is written literally, as browsers read it, and refused
+  (`elem.ErrUnsafeText`) when it could end the element, or an enclosing `<noscript>` or
+  similar text element, early
+- `script.Inline(js, attrs...)`: A script element with inline code (`script.Script(attrs...)(elem.Text(js))`)
 - `elem.Raw(v)`: Raw HTML content (no escaping)
 - `elem.Comment(v)`: An HTML comment
+- `elem.Doctype()`: The `<!DOCTYPE html>` declaration (a node of its own kind, not raw HTML)
 - `elem.Noop()`, `attr.Noop()`: Empty no-op
 
 Core utils:
 - `elem.If(bool, elem)`, `attr.If(bool, attr)`: Conditional content
 - `elem.Fn(func(ctx) (elem, error))`, `attr.Fn(func(ctx) (attr, error))`: Dynamic content
+  (return `elem.Noop()` for no content: a nil node is an error, `elem.ErrNilNode`)
 - `core.Fallback(node, fallback func(ctx, err) elem)`: Element with recovery from evaluation errors
+- Custom nodes implement `Eval(ctx) (elem.Obj, error)`. Passing a derived context to an inner
+  node's `Eval` scopes it to that subtree: attributes and children are evaluated with it
+  (see `elem.Obj`). A derived context that the node cancels when `Eval` returns (`defer cancel()`)
+  still scopes its values; the subtree gets the cancellation of the parent context. Retain nodes, not
+  evaluated objects: a retained `elem.Obj` gets the context of the render it is used in, without
+  the context its node derived
 - `core.Render(ctx, node, w)`: Evaluate once and write HTML; errors carry a location such as `at html[0]/body[1]/form#login[0]/[2]`
 - `core/inspect.Build(ctx, node)`: Evaluate once into a read-only snapshot for inspection
 
@@ -131,7 +143,7 @@ const isLoggedInKey ctxKey = "isLoggedIn"
 
 func main() {
 	// Build the page structure (can be reused with different contexts)
-	page := meta.HTML()(
+	page := elem.Bundle{elem.Doctype(), meta.HTML()(
 		meta.Head()(
 			meta.Title()(text.Text("My Page")),
 		),
@@ -150,7 +162,7 @@ func main() {
 				text.P()(text.Text("Hello, world!")),
 			),
 		),
-	)
+	)}
 
 	// Attach state to context and render
 	ctx := context.WithValue(context.Background(), isLoggedInKey, true)
@@ -176,6 +188,16 @@ button.Button(hx1.Post("/api/submit"), hx1.Target("#result"))(
 )
 ```
 
+`hx2` also reads the htmx request headers and sets the response headers:
+
+```go
+if hx2.ParseRequestHeaders(r.Header).Request { // HX-Request: true
+    // answer with a fragment instead of a full page (and send Vary: HX-Request)
+}
+hx2.SetRetarget(w.Header(), "#errors")                          // HX-Retarget
+err := hx2.SetTrigger(w.Header(), hx2.Event{Name: "itemAdded"}) // HX-Trigger
+```
+
 ### Bootstrap 5.3
 
 Bootstrap support is split into two packages:
@@ -198,10 +220,11 @@ bs.Col(attrs...)(children...)         // <div class="col">
 bs.Col6(attrs...)(children...)        // <div class="col-6">
 bs.ColMD(4, attrs...)(children...)    // <div class="col-md-4">
 
-// Buttons
-bs.Btn(attrs...)(children...)                 // <button class="btn">
-bs.BtnPrimary(attrs...)(children...)          // <button class="btn btn-primary">
-bs.BtnOutlineSecondary(attrs...)(children...) // <button class="btn btn-outline-secondary">
+// Buttons: type="button" unless attrs set a type, e.g. button.Type(button.TypeSubmit)
+bs.Btn(attrs...)(children...)                 // <button class="btn" type="button">
+bs.BtnPrimary(attrs...)(children...)          // <button class="btn btn-primary" type="button">
+bs.BtnOutlineSecondary(attrs...)(children...) // <button class="btn btn-outline-secondary" type="button">
+bs.BtnPrimary(button.Type(button.TypeSubmit))(children...) // <button class="btn btn-primary" type="submit">
 
 // Components
 bs.Card{Header: ..., Body: ...}     // struct implementing elem.Node
@@ -316,10 +339,14 @@ Checking a selection asserts exactly one match; `None`, `Any`, `Count`,
 `AtLeast`, and `AtMost` express other cardinalities. `Matches` checks the
 single match, `Each` checks every match, `InOrder`, `Texts`, and `AttrValues`
 check the sequence in document order, and `First`, `Last`, and `Nth` narrow a
-selection to one position. Negative assertions load
+selection to one position. `Attr(ctx, name)` and `Text(ctx)` read a value of
+the single match (e.g. the `version` of a hidden input), and `Nodes(ctx)`
+returns every match for custom assertions. Negative assertions load
 the subject first, so an evaluation error is never mistaken for absence.
 Failures report the expectation, the matches with their locations, and an
-outline of the searched scope, with secret-looking attribute values redacted.
+outline of the searched scope. Secret-looking attribute values, and the text
+and values inside sensitive elements (such as a `textarea` named `mnemonic`,
+or elements selected with `ct.WithRedactContent`), are redacted.
 
 Handlers are tested through `ct/cthttp` and parsed with `ct/cthtml`:
 
@@ -333,9 +360,21 @@ page := res.HTML() // or res.HTMLFragment("div") for a partial
 t.Must(page.Find(ct.Role("heading", ct.Named("Account"))))
 ```
 
+`res.Captured()` asserts the capture itself, `res.BodyString()` and
+`res.Bytes()` return the body, and `res.Describe()` names the request. A page
+needs the content type `text/html`; a fragment without one (Go sniffs most
+fragments as `text/plain`, and htmx swaps them all the same) parses as HTML
+when it starts with markup.
+
 See the `ct` package documentation for the query vocabulary (`Tag`, `ID`,
-`Class`, `Attr`, `Text`, `Label`, `Alt`, `TestID`, `Role` with `Named` and
-`Level`, `HasChild`, `HasDescendant`, `And`/`Or`/`Not`) and the document rules.
+`Class`, `Attr`, `Text`, `InnerText`, `TextContent`, `Label`, `Alt`, `TestID`,
+`Role` with `Named` and `Level`, `HasChild`, `HasDescendant`, `And`/`Or`/`Not`)
+and the document rules. Texts read as users see them: like a browser's
+`innerText`, `Texts`, `InnerText` and accessible names separate the text of
+block-level parts ("Author Signed", not "AuthorSigned") and leave out script
+and style code, approximating the layout from the default display of HTML
+elements, display styles, and Bootstrap classes; `TextContent` is the raw DOM
+`textContent`.
 
 ## Design Philosophy
 

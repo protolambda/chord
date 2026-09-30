@@ -24,5 +24,10 @@ func Link(attrs ...attr.Node) elem.Node { return elem.Name("link").Void(attrs...
 // Meta creates a meta element (void).
 func Meta(attrs ...attr.Node) elem.Node { return elem.Name("meta").Void(attrs...) }
 
-// Style creates a style element.
+// Style creates a style element. Text children are written literally, as
+// browsers read CSS, not HTML-escaped: meta.Style()(text.Text(css)).
+// Rendering fails with [elem.ErrUnsafeText] when the text contains "</style"
+// (ASCII case-insensitive), which would end the element early, or the end
+// tag of an enclosing element whose content is text, such as noscript. The
+// CSS applies to the whole page: never build it from untrusted input.
 func Style(attrs ...attr.Node) elem.Scope { return elem.Name("style").New(attrs...) }

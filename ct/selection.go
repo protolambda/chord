@@ -103,14 +103,17 @@ func (s *Selection) InOrder(queries ...Query) assertion.Assertion {
 }
 
 // Texts asserts that the matched elements, in document order, have exactly
-// the given subtree texts. Whitespace is collapsed before comparison.
+// the given inner texts: the subtree text as users read it, with block-level
+// text separated and whitespace collapsed (see [InnerText]). For the raw
+// textContent, use [Selection.InOrder] with [TextContent] queries.
 func (s *Selection) Texts(values ...string) assertion.Assertion {
 	return sequenceAssertion{
 		sel:    s,
 		name:   "texts",
 		what:   "texts",
 		values: values,
-		get:    func(n Node) (string, bool) { return textContent(n), true },
+		get:    func(n Node) (string, bool) { return innerText(n), true },
+		show:   func(o *options, n Node, _ string) string { return o.redactedInnerText(n) },
 	}
 }
 
@@ -124,6 +127,7 @@ func (s *Selection) AttrValues(name string, values ...string) assertion.Assertio
 		what:   name + " values",
 		values: values,
 		get:    func(n Node) (string, bool) { return n.Attr(name) },
+		show:   func(o *options, n Node, v string) string { return o.redactValue(n, name, v) },
 	}
 }
 
@@ -131,6 +135,47 @@ func (s *Selection) AttrValues(name string, values ...string) assertion.Assertio
 // order. It exists for custom assertions; prefer the assertion methods.
 func (s *Selection) Nodes(ctx context.Context) ([]Node, error) {
 	return s.nodes(ctx)
+}
+
+// Attr loads the subject and returns the value of the attribute of the
+// single matched element, for values a test needs, such as the version in
+// a hidden input or the URL a panel polls. ok is false when the element
+// does not have the attribute; a boolean attribute has the empty value.
+// Like the default assertion, it fails with [ErrCount] unless exactly one
+// element matches. To check a value, prefer [Selection.Matches] with
+// [Attr], or [Selection.AttrValues].
+func (s *Selection) Attr(ctx context.Context, name string) (value string, ok bool, err error) {
+	n, err := s.one(ctx)
+	if err != nil {
+		return "", false, err
+	}
+	value, ok = n.Attr(name)
+	return value, ok, nil
+}
+
+// Text loads the subject and returns the inner text of the single matched
+// element, as [Selection.Texts] compares it (see [InnerText]). Like the
+// default assertion, it fails with [ErrCount] unless exactly one element
+// matches. To check a text, prefer [Selection.Texts].
+func (s *Selection) Text(ctx context.Context) (string, error) {
+	n, err := s.one(ctx)
+	if err != nil {
+		return "", err
+	}
+	return innerText(n), nil
+}
+
+// one returns the single matched element, or the failure of the default
+// assertion.
+func (s *Selection) one(ctx context.Context) (Node, error) {
+	nodes, err := s.nodes(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(nodes) != 1 {
+		return nil, s.countFailure(ctx, "exactly one", nodes)
+	}
+	return nodes[0], nil
 }
 
 // path describes the selection as a chain of queries, e.g.
@@ -232,7 +277,7 @@ func (s *Selection) countFailure(ctx context.Context, want string, nodes []Node)
 	fmt.Fprintf(&b, "expected %s match of %s, found %d", want, s.path(), len(nodes))
 	if len(nodes) > 0 {
 		b.WriteString("\nmatches:\n")
-		b.WriteString(listNodes(nodes, s.subject.opts.redact))
+		b.WriteString(listNodes(nodes, &s.subject.opts))
 	}
 	if scope, err := s.scope(ctx); err == nil {
 		if s.parent != nil {
@@ -240,7 +285,7 @@ func (s *Selection) countFailure(ctx context.Context, want string, nodes []Node)
 		}
 		if len(scope) > 0 && len(nodes) == 0 {
 			b.WriteString("\nscope outline:\n")
-			b.WriteString(outline(scope, s.subject.opts.redact))
+			b.WriteString(outline(scope, &s.subject.opts))
 		}
 	}
 	return fmt.Errorf("%w: %s", ErrCount, b.String())
@@ -259,33 +304,31 @@ func (a matchesAssertion) String() string {
 }
 
 func (a matchesAssertion) Check(ctx context.Context) error {
-	nodes, err := a.sel.nodes(ctx)
+	n, err := a.sel.one(ctx)
 	if err != nil {
 		return err
 	}
-	if len(nodes) != 1 {
-		return a.sel.countFailure(ctx, "exactly one", nodes)
-	}
-	n := nodes[0]
 	q, err := firstMismatch(n, a.queries)
 	if err != nil {
 		return err
 	}
 	if q != nil {
 		return fmt.Errorf("%w: expected %s to match %s\nnode:\n%s",
-			ErrMismatch, describeNode(n, a.sel.subject.opts.redact), q, outline([]Node{n}, a.sel.subject.opts.redact))
+			ErrMismatch, describeNode(n, &a.sel.subject.opts), q, outline([]Node{n}, &a.sel.subject.opts))
 	}
 	return nil
 }
 
 // sequenceAssertion compares one extracted value per matched node, in
-// document order, against an expected sequence.
+// document order, against an expected sequence. show returns the value for
+// diagnostics, redacted where needed.
 type sequenceAssertion struct {
 	sel    *Selection
 	name   string
 	what   string
 	values []string
 	get    func(n Node) (string, bool)
+	show   func(o *options, n Node, v string) string
 }
 
 var _ assertion.Assertion = sequenceAssertion{}
@@ -299,14 +342,9 @@ func (a sequenceAssertion) Check(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	got := make([]string, len(nodes))
 	equal := len(nodes) == len(a.values)
 	for i, n := range nodes {
 		v, ok := a.get(n)
-		if !ok {
-			v = "(absent)"
-		}
-		got[i] = v
 		if !ok || i >= len(a.values) || v != a.values[i] {
 			equal = false
 		}
@@ -314,8 +352,17 @@ func (a sequenceAssertion) Check(ctx context.Context) error {
 	if equal {
 		return nil
 	}
+	o := &a.sel.subject.opts
+	got := make([]string, len(nodes))
+	for i, n := range nodes {
+		if v, ok := a.get(n); ok {
+			got[i] = a.show(o, n, v)
+		} else {
+			got[i] = "(absent)"
+		}
+	}
 	return fmt.Errorf("%w: expected %s of %s to be %q, got %q\nmatches:\n%s",
-		ErrMismatch, a.what, a.sel.path(), a.values, got, listNodes(nodes, a.sel.subject.opts.redact))
+		ErrMismatch, a.what, a.sel.path(), a.values, got, listNodes(nodes, &a.sel.subject.opts))
 }
 
 // eachAssertion asserts that every matched node matches more queries.
@@ -345,7 +392,7 @@ func (a eachAssertion) Check(ctx context.Context) error {
 		}
 		if q != nil {
 			return fmt.Errorf("%w: expected every match of %s to match %s, match %d does not\nmatches:\n%s",
-				ErrMismatch, a.sel.path(), q, i, listNodes(nodes, a.sel.subject.opts.redact))
+				ErrMismatch, a.sel.path(), q, i, listNodes(nodes, &a.sel.subject.opts))
 		}
 	}
 	return nil
@@ -378,7 +425,7 @@ func (a inOrderAssertion) Check(ctx context.Context) error {
 		}
 		if q != nil {
 			return fmt.Errorf("%w: expected match %d of %s to match %s\nmatches:\n%s",
-				ErrMismatch, i, a.sel.path(), q, listNodes(nodes, a.sel.subject.opts.redact))
+				ErrMismatch, i, a.sel.path(), q, listNodes(nodes, &a.sel.subject.opts))
 		}
 	}
 	return nil

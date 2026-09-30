@@ -55,7 +55,7 @@ type Attribute struct {
 }
 
 // Node is a read-only node of a [Document]. The root is a fragment; other
-// nodes are elements, text, raw content, or comments.
+// nodes are elements, text, raw content, comments, or doctypes.
 type Node struct {
 	kind     elem.Kind
 	tag      string
@@ -75,7 +75,8 @@ func (n *Node) Kind() elem.Kind { return n.kind }
 // Tag returns the element tag, or "" for non-element nodes.
 func (n *Node) Tag() string { return n.tag }
 
-// Data returns logical text, raw HTML, or comment content, depending on Kind.
+// Data returns logical text, raw HTML, comment content, or the doctype name,
+// depending on Kind.
 func (n *Node) Data() string { return n.data }
 
 // Void reports whether the node is a self-closing element.
@@ -296,6 +297,11 @@ func (b *builder) Raw(v string) error {
 
 func (b *builder) Comment(v string) error {
 	b.add(&Node{kind: elem.KindComment, data: v})
+	return nil
+}
+
+func (b *builder) Doctype(name string) error {
+	b.add(&Node{kind: elem.KindDoctype, data: name})
 	return nil
 }
 

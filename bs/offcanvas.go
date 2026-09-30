@@ -11,6 +11,7 @@ import (
 )
 
 // Offcanvas represents a Bootstrap offcanvas component.
+// Title, Body, and Attrs are optional: a nil Title or Body is left out.
 type Offcanvas struct {
 	ID        string    // required for targeting
 	Title     elem.Node // offcanvas-title
@@ -45,18 +46,18 @@ func (o Offcanvas) Eval(ctx context.Context) (elem.Obj, error) {
 		attrs = append(attrs, attr.Name("data-bs-backdrop").Raw("false"))
 	}
 
-	header := div.Div(rawClass("offcanvas-header"))(
-		section.H5(rawClass("offcanvas-title"))(o.Title),
-		button.Button(
-			rawClass("btn-close"),
-			button.Type(button.TypeButton),
-			attr.Name("data-bs-dismiss").Raw("offcanvas"),
-		)(),
-	)
+	var headerChildren []elem.Node
+	if o.Title != nil {
+		headerChildren = append(headerChildren, section.H5(rawClass("offcanvas-title"))(o.Title))
+	}
+	headerChildren = append(headerChildren, closeButton("offcanvas"))
 
-	body := div.Div(rawClass("offcanvas-body"))(o.Body)
+	children := []elem.Node{div.Div(rawClass("offcanvas-header"))(headerChildren...)}
+	if o.Body != nil {
+		children = append(children, div.Div(rawClass("offcanvas-body"))(o.Body))
+	}
 
-	return div.Div(attrs...)(header, body).Eval(ctx)
+	return div.Div(attrs...)(children...).Eval(ctx)
 }
 
 // OffcanvasTrigger creates a button that triggers an offcanvas.

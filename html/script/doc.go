@@ -2,6 +2,8 @@
 //
 // Elements:
 //   - [Script]: JavaScript code or reference
+//   - [Inline]: A script element with inline code, written literally and
+//     refused when it could end the element early
 //   - [Noscript]: Fallback for no JavaScript
 //   - [Template]: HTML template (not rendered)
 //   - [Canvas]: Graphics canvas

@@ -3,8 +3,8 @@
 // [Serve] invokes a handler synchronously with a recorder and captures the
 // response; [FromResponse] adopts a response obtained elsewhere. Both read
 // the body once, up to a limit, so that several assertions and the HTML
-// parser never compete for it. The [Result] is itself an assertion that the
-// capture succeeded, and every assertion derived from it reports a capture
+// parser never compete for it. [Result.Captured] asserts that the capture
+// succeeded, and every assertion derived from a [Result] reports a capture
 // failure rather than a mismatch.
 //
 //	req := httptest.NewRequest(http.MethodGet, "/account", nil)
@@ -12,14 +12,20 @@
 //
 //	t.Must(res.Status(http.StatusOK))
 //	t.Must(res.Header("Content-Type", ct.Prefix("text/html")))
+//	t.Must(res.Body(ct.Contains("Account")))
 //	page := res.HTML()
 //	t.Must(page.Find(ct.Role("heading", ct.Named("Account"))))
+//
+// [Result.BodyString] and [Result.Bytes] return the captured body, for
+// custom checks. A Result has no String method: [Result.Describe] names the
+// request of the response, for messages.
 //
 // Failure messages include a bounded excerpt of the body. Keep secrets out
 // of test fixtures, or use [Result.Bytes] with custom assertions instead.
 package cthttp
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -28,6 +34,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/protolambda/mustbe/assertion"
 
@@ -107,8 +114,12 @@ func capture(desc string, res *http.Response, opts []Option) *Result {
 	return r
 }
 
-// Result is a captured response. It is an assertion that the capture
-// succeeded, and the root of response assertions.
+// Result is a captured response, and the root of response assertions.
+//
+// It is not an assertion itself, and has no String method, which would read
+// like the body: use [Result.Captured] to assert the capture,
+// [Result.BodyString] for the body, and [Result.Describe] for a
+// description.
 type Result struct {
 	desc    string
 	status  int
@@ -119,15 +130,24 @@ type Result struct {
 	err     error
 }
 
-var _ assertion.Assertion = (*Result)(nil)
+// Describe names the response by its request, e.g. "GET /account?tab=1",
+// or "response" when [FromResponse] got a response without a request.
+// Assertion descriptions and failure messages use it.
+func (r *Result) Describe() string { return r.desc }
 
-// String describes the assertion: the response was captured.
-func (r *Result) String() string {
-	return fmt.Sprintf("captured(%s)", r.desc)
+// Captured asserts that the response was captured: the body was read
+// completely, within the limit, and closed. A failure wraps [ct.ErrLoad].
+// Every other assertion of the result checks this first.
+func (r *Result) Captured() assertion.Assertion {
+	return check{
+		desc:   fmt.Sprintf("captured(%s)", r.desc),
+		result: r,
+		run:    func() error { return nil },
+	}
 }
 
-// Check reports a capture failure, wrapped in [ct.ErrLoad].
-func (r *Result) Check(context.Context) error {
+// captureErr reports a capture failure, wrapped in [ct.ErrLoad].
+func (r *Result) captureErr() error {
 	if r.err != nil {
 		return fmt.Errorf("%w: %s: %w", ct.ErrLoad, r.desc, r.err)
 	}
@@ -145,6 +165,10 @@ func (r *Result) Trailers() http.Header { return r.trailer.Clone() }
 
 // Bytes returns a copy of the captured body.
 func (r *Result) Bytes() []byte { return append([]byte(nil), r.body...) }
+
+// BodyString returns the captured body as a string. To check the body,
+// prefer the [Result.Body] assertion, which also reports a capture failure.
+func (r *Result) BodyString() string { return string(r.body) }
 
 // Flushed reports whether the handler flushed the response. It is only
 // known for results of [Serve].
@@ -218,14 +242,21 @@ func (r *Result) Body(expected ct.ValueMatch) assertion.Assertion {
 }
 
 // HTML returns a subject for the body parsed as a complete HTML document.
-// Loading fails when the capture failed or the content type is not text/html.
+// Loading fails when the capture failed, or when the content type is not
+// text/html: browsers show a page of another type, including a text/plain
+// type that Go's content sniffing chose, as text.
 func (r *Result) HTML(opts ...ct.Option) *ct.Subject {
 	return ct.From(&htmlSource{result: r}, opts...)
 }
 
 // HTMLFragment returns a subject for the body parsed as the content of an
 // element with the given tag, for example a "div" for an HTMX partial.
-// Loading fails when the capture failed or the content type is not text/html.
+// Loading fails when the capture failed, or when the body is not HTML: the
+// content type must be text/html, or absent or text/plain with a body that
+// is empty or starts with markup ('<'). Go's content sniffing labels many
+// HTML fragments text/plain, and htmx swaps a fragment whatever its content
+// type. A handler that writes a fragment starting with text needs to set
+// the content type text/html.
 func (r *Result) HTMLFragment(contextTag string, opts ...ct.Option) *ct.Subject {
 	return ct.From(&htmlSource{result: r, context: contextTag}, opts...)
 }
@@ -233,7 +264,11 @@ func (r *Result) HTMLFragment(contextTag string, opts ...ct.Option) *ct.Subject 
 func (r *Result) excerpt() string {
 	body := strings.TrimSpace(string(r.body))
 	if len(body) > excerptLength {
-		return fmt.Sprintf("%q…", body[:excerptLength])
+		cut := excerptLength
+		for cut > 0 && !utf8.RuneStart(body[cut]) {
+			cut--
+		}
+		return fmt.Sprintf("%q…", body[:cut])
 	}
 	return fmt.Sprintf("%q", body)
 }
@@ -252,8 +287,8 @@ func (c check) String() string {
 	return c.desc
 }
 
-func (c check) Check(ctx context.Context) error {
-	if err := c.result.Check(ctx); err != nil {
+func (c check) Check(context.Context) error {
+	if err := c.result.captureErr(); err != nil {
 		return err
 	}
 	return c.run()
@@ -279,13 +314,56 @@ func (s *htmlSource) Load(ctx context.Context) (ct.Document, error) {
 		return nil, s.result.err
 	}
 	contentType := s.result.header.Get("Content-Type")
-	mediaType, _, err := mime.ParseMediaType(contentType)
-	if err != nil || mediaType != "text/html" {
-		return nil, fmt.Errorf("content type %q is not text/html; status %d, body: %s",
+	if s.context == "" {
+		if !htmlType(contentType) {
+			return nil, fmt.Errorf("content type %q is not text/html; status %d, body: %s",
+				contentType, s.result.status, s.result.excerpt())
+		}
+		return cthtml.PageBytes(s.result.body).Load(ctx)
+	}
+	if !htmlFragment(contentType, s.result.body) {
+		return nil, fmt.Errorf("content type %q is not text/html, and the body does not start with markup; status %d, body: %s",
 			contentType, s.result.status, s.result.excerpt())
 	}
-	if s.context != "" {
-		return cthtml.FragmentBytes(s.context, s.result.body).Load(ctx)
+	return cthtml.FragmentBytes(s.context, s.result.body).Load(ctx)
+}
+
+// htmlType reports whether the content type is text/html.
+func htmlType(contentType string) bool {
+	mediaType, _, err := mime.ParseMediaType(contentType)
+	return err == nil && mediaType == "text/html"
+}
+
+// htmlFragment reports whether a response body is parsed as an HTML
+// fragment: when the content type is text/html, or when it is absent or
+// text/plain and the body is empty or starts with markup. Go's content
+// sniffing (in httptest.ResponseRecorder and net/http servers alike) only
+// recognizes HTML that starts with one of a few tags, such as <div> or <p>,
+// and gives fragments that start with <form>, <li> or <span> text/plain;
+// htmx swaps them all the same. A complete page is not lenient: browsers
+// sniff with the same rules and show such a page as text.
+func htmlFragment(contentType string, body []byte) bool {
+	if contentType == "" {
+		return startsWithMarkup(body)
 	}
-	return cthtml.PageBytes(s.result.body).Load(ctx)
+	mediaType, _, err := mime.ParseMediaType(contentType)
+	if err != nil {
+		return false
+	}
+	switch mediaType {
+	case "text/html":
+		return true
+	case "text/plain":
+		return startsWithMarkup(body)
+	default:
+		return false
+	}
+}
+
+// startsWithMarkup reports whether the body is empty or starts with '<',
+// after a byte order mark and whitespace.
+func startsWithMarkup(body []byte) bool {
+	body = bytes.TrimPrefix(body, []byte("\xef\xbb\xbf"))
+	body = bytes.TrimLeft(body, "\t\n\f\r ")
+	return len(body) == 0 || body[0] == '<'
 }

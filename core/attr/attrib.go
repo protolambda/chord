@@ -16,6 +16,11 @@ var ErrInvalidName = errors.New("invalid attribute name")
 // belong to its [Kind].
 var ErrInvalidObj = errors.New("invalid attribute object")
 
+// ErrNilNode indicates a nil [Node] where an attribute was expected: a nil
+// entry in an attribute list or bundle, a nil [Fn], or an Fn that returned a
+// nil node without an error. Use [Noop] for "no attribute".
+var ErrNilNode = errors.New("nil attribute node")
+
 // Name is a trusted, statically known HTML attribute name.
 // Converting runtime input to Name bypasses attribute-name validation.
 type Name string

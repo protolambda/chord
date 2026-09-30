@@ -151,3 +151,21 @@ func TestBuildFailureReturnsNoDocument(t *testing.T) {
 		t.Fatalf("error:\n got: %s\nwant: %s", err, want)
 	}
 }
+
+func TestBuildDoctype(t *testing.T) {
+	doc := build(t, elem.Bundle{elem.Doctype(), elem.Name("html").New()})
+	var kinds []elem.Kind
+	for c := range doc.Root().Children() {
+		kinds = append(kinds, c.Kind())
+	}
+	if !slices.Equal(kinds, []elem.Kind{elem.KindDoctype, elem.KindElement}) {
+		t.Fatalf("root children kinds: %v", kinds)
+	}
+	var out strings.Builder
+	if err := core.Render(context.Background(), doc.Root(), &out); err != nil {
+		t.Fatalf("render snapshot: %v", err)
+	}
+	if got, want := out.String(), "<!DOCTYPE html><html></html>"; got != want {
+		t.Fatalf("rendered snapshot: got %q, want %q", got, want)
+	}
+}

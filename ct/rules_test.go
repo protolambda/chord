@@ -76,6 +76,12 @@ func TestRules(t *testing.T) {
 			div.Div()(elem.Raw("<script>")),
 			`raw content at div[0]/[0]: raw("<script>")`,
 		},
+		"no raw doctype": {
+			ct.NoRaw(),
+			elem.Bundle{elem.Doctype(), elem.Name("html").New()},
+			elem.Bundle{elem.Raw("<!DOCTYPE html>"), elem.Name("html").New()},
+			`raw content at [0]: raw("<!DOCTYPE html>")`,
+		},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {

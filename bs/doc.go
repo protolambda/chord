@@ -20,6 +20,7 @@
 // The package provides element constructors for Bootstrap components:
 //
 //   - Buttons: [Btn], [BtnPrimary], [BtnOutlinePrimary], [BtnGroup]
+//     (type="button" unless a type is passed, e.g. button.Type(button.TypeSubmit))
 //   - Badges: [Badge], [BadgePrimary], [BadgeSuccess]
 //   - Alerts: [Alert], [AlertDanger], [AlertDismissible]
 //   - Cards: [Card], [CardBody], [CardImgOverlay]
