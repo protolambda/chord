@@ -81,40 +81,35 @@ chord/
 ├── ct/               # Testing: subjects, queries, and mustbe assertions
 │   ├── cthtml/       # Parsed HTML page and fragment subjects
 │   └── cthttp/       # Handler execution and response subjects
-├── html/             # HTML elements and attributes
-│   ├── aria/         # ARIA accessibility attributes
-│   ├── on/           # DOM event handlers (onclick, onsubmit, etc.)
-│   ├── meta/         # Document metadata (html, head, title, meta, link, style)
-│   ├── section/      # Sectioning (body, article, nav, header, footer, h1-h6)
-│   ├── text/         # Text semantics (span, a, em, strong, code, p, pre, etc.)
-│   ├── group/        # Grouping content
-│   │   ├── div/      # Div element
-│   │   ├── list/     # Lists (ol, ul, li, menu)
-│   │   ├── dl/       # Definition lists (dl, dt, dd)
-│   │   └── figure/   # Figures (figure, figcaption)
-│   ├── edit/         # Edit elements (ins, del)
-│   ├── embed/        # Embedded content
-│   │   ├── img/      # Images (img, picture, source)
-│   │   ├── media/    # Media (video, audio, track)
-│   │   ├── iframe/   # Inline frames
-│   │   ├── object/   # Object/embed (legacy)
-│   │   └── area/     # Image maps (map, area)
-│   ├── table/        # Table elements
-│   ├── form/         # Form elements
-│   │   ├── input/    # Input element
-│   │   ├── button/   # Button element
-│   │   ├── select/   # Select, option, optgroup, datalist
-│   │   ├── textarea/ # Textarea element
-│   │   ├── label/    # Label element
-│   │   └── output/   # Output, progress, meter
-│   ├── interactive/  # Interactive elements (details, summary, dialog)
-│   ├── script/       # Scripting (script, noscript, template, canvas)
-│   └── webcomp/      # Web components (slot)
-├── hx1/              # HTMX v1 attributes
-├── hx2/              # HTMX v2 attributes
-├── bs/               # Bootstrap 5.3 element components
-├── ba/               # Bootstrap 5.3 attribute utilities
-└── bi/               # Bootstrap Icons
+└── html/             # HTML elements and attributes
+    ├── aria/         # ARIA accessibility attributes
+    ├── on/           # DOM event handlers (onclick, onsubmit, etc.)
+    ├── meta/         # Document metadata (html, head, title, meta, link, style)
+    ├── section/      # Sectioning (body, article, nav, header, footer, h1-h6)
+    ├── text/         # Text semantics (span, a, em, strong, code, p, pre, etc.)
+    ├── group/        # Grouping content
+    │   ├── div/      # Div element
+    │   ├── list/     # Lists (ol, ul, li, menu)
+    │   ├── dl/       # Definition lists (dl, dt, dd)
+    │   └── figure/   # Figures (figure, figcaption)
+    ├── edit/         # Edit elements (ins, del)
+    ├── embed/        # Embedded content
+    │   ├── img/      # Images (img, picture, source)
+    │   ├── media/    # Media (video, audio, track)
+    │   ├── iframe/   # Inline frames
+    │   ├── object/   # Object/embed (legacy)
+    │   └── area/     # Image maps (map, area)
+    ├── table/        # Table elements
+    ├── form/         # Form elements
+    │   ├── input/    # Input element
+    │   ├── button/   # Button element
+    │   ├── select/   # Select, option, optgroup, datalist
+    │   ├── textarea/ # Textarea element
+    │   ├── label/    # Label element
+    │   └── output/   # Output, progress, meter
+    ├── interactive/  # Interactive elements (details, summary, dialog)
+    ├── script/       # Scripting (script, noscript, template, canvas)
+    └── webcomp/      # Web components (slot)
 ```
 
 ## Example
@@ -176,135 +171,13 @@ func main() {
 
 ## Extensions
 
-### HTMX
-
-```go
-import "github.com/protolambda/chord/hx1" // HTMX v1
-import "github.com/protolambda/chord/hx2" // HTMX v2
-
-// Attributes go in the first call, children in the second
-button.Button(hx1.Post("/api/submit"), hx1.Target("#result"))(
-    text.Text("Submit"),
-)
-```
-
-`hx2` also reads the htmx request headers and sets the response headers:
-
-```go
-if hx2.ParseRequestHeaders(r.Header).Request { // HX-Request: true
-    // answer with a fragment instead of a full page (and send Vary: HX-Request)
-}
-hx2.SetRetarget(w.Header(), "#errors")                          // HX-Retarget
-err := hx2.SetTrigger(w.Header(), hx2.Event{Name: "itemAdded"}) // HX-Trigger
-```
-
-### Bootstrap 5.3
-
-Bootstrap support is split into two packages:
-- `bs`: Element components that create HTML elements (return `Scope`)
-- `ba`: Attribute utilities that add classes to elements (return `Attrib`)
-
-This separation prevents confusion: `bs.Row()` creates a `<div class="row">`,
-while `ba.Row()` returns a class attribute you can apply to any element.
-
-#### Elements (bs package)
-
-```go
-import "github.com/protolambda/chord/bs"
-
-// Grid elements (attrs...)(children...)
-bs.Container(attrs...)(children...)   // <div class="container">
-bs.ContainerFluid(attrs...)(...)      // <div class="container-fluid">
-bs.Row(attrs...)(children...)         // <div class="row">
-bs.Col(attrs...)(children...)         // <div class="col">
-bs.Col6(attrs...)(children...)        // <div class="col-6">
-bs.ColMD(4, attrs...)(children...)    // <div class="col-md-4">
-
-// Buttons: type="button" unless attrs set a type, e.g. button.Type(button.TypeSubmit)
-bs.Btn(attrs...)(children...)                 // <button class="btn" type="button">
-bs.BtnPrimary(attrs...)(children...)          // <button class="btn btn-primary" type="button">
-bs.BtnOutlineSecondary(attrs...)(children...) // <button class="btn btn-outline-secondary" type="button">
-bs.BtnPrimary(button.Type(button.TypeSubmit))(children...) // <button class="btn btn-primary" type="submit">
-
-// Components
-bs.Card{Header: ..., Body: ...}     // struct implementing elem.Node
-bs.Modal{ID: "...", Title: ..., Body: ...}
-bs.Dropdown{Toggle: ..., Items: ...}
-bs.AlertDanger()(children...)
-bs.BadgeSuccess()(children...)
-bs.Nav()(children...), bs.Navbar(attrs...)(children...)
-```
-
-#### Attributes (ba package)
-
-```go
-import "github.com/protolambda/chord/ba"
-
-// Spacing (margin/padding, values 0-5)
-ba.M(3), ba.MT(4), ba.MB(2), ba.MX(3), ba.MY(2)
-ba.P(3), ba.PT(4), ba.PB(2), ba.PX(3), ba.PY(2)
-
-// Flexbox
-ba.DFlex(), ba.DInlineFlex()
-ba.FlexRow(), ba.FlexColumn(), ba.FlexWrap()
-ba.JustifyContentCenter(), ba.JustifyContentBetween()
-ba.AlignItemsCenter(), ba.AlignItemsStart()
-ba.Gap(3)
-
-// Colors
-ba.BgPrimary(), ba.BgDark(), ba.BgLight()
-ba.TextPrimary(), ba.TextMuted(), ba.TextWhite()
-
-// Borders & Shadows
-ba.Border(), ba.BorderPrimary(), ba.Border0()
-ba.Rounded(), ba.RoundedCircle(), ba.RoundedPill()
-ba.Shadow(), ba.ShadowSM(), ba.ShadowLG()
-
-// Sizing
-ba.W100(), ba.W50(), ba.H100(), ba.WAuto()
-
-// Display
-ba.DNone(), ba.DBlock(), ba.DInline()
-
-// Text
-ba.TextCenter(), ba.TextEnd()
-ba.FWBold(), ba.FSItalic()
-
-// Forms
-ba.FormControl(), ba.FormSelect(), ba.FormCheckInput()
-```
-
-#### Combined Example
-
-```go
-bs.Container(ba.MT(4))(
-    bs.Row()(
-        bs.ColMD(6, ba.MB(3))(
-            bs.Card{
-                Header: text.Text("Users"),
-                Body:   text.Text("42 active"),
-            },
-        ),
-        bs.ColMD(6, ba.MB(3))(
-            div.Div(ba.DFlex(), ba.JustifyContentBetween())(
-                text.Span()(text.Text("Status")),
-                bs.BadgeSuccess()(text.Text("Online")),
-            ),
-        ),
-    ),
-    bs.BtnPrimary(ba.MT(3))(text.Text("Refresh")),
-)
-```
-
-### Bootstrap Icons
-
-```go
-import "github.com/protolambda/chord/bi"
-
-bi.Check      // <i class="bi bi-check"></i>
-bi.XLg        // <i class="bi bi-x-lg"></i>
-bi.Github     // <i class="bi bi-github"></i>
-```
+The htmx (`hx1`, `hx2`), Bootstrap 5.3 (`bs`, `ba`) and Bootstrap Icons (`bi`)
+packages moved to [webui](https://github.com/protolambda/webui) in chord
+v0.5.0, with the same names: import `github.com/protolambda/webui/hx2` instead
+of `github.com/protolambda/chord/hx2`, and so on. webui is a toolkit for
+server-rendered web user interfaces built on chord. Other attribute
+vocabularies are trusted names with escaped values, such as
+`attr.Name("hx-get").Value("/api/refresh")`.
 
 ## Testing
 
