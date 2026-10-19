@@ -4,9 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/protolambda/chord/ba"
-	"github.com/protolambda/chord/bi"
-	"github.com/protolambda/chord/bs"
 	"github.com/protolambda/chord/core"
 	"github.com/protolambda/chord/core/attr"
 	"github.com/protolambda/chord/core/elem"
@@ -19,7 +16,6 @@ import (
 	"github.com/protolambda/chord/html/section"
 	"github.com/protolambda/chord/html/table"
 	"github.com/protolambda/chord/html/text"
-	"github.com/protolambda/chord/hx2"
 )
 
 // =============================================================================
@@ -176,75 +172,31 @@ func Example_labeledInput() {
 }
 
 // =============================================================================
-// BOOTSTRAP 5.3 - Elements and Attributes
+// CUSTOM ATTRIBUTES
 // =============================================================================
 
-// bs.Container(), bs.Row(), bs.Col*() are ELEMENT constructors that create divs.
-func Example_bootstrapGrid() {
-	core.Dump(bs.Container()(
-		bs.Row()(
-			bs.ColMD(6)(text.Text("Left")),
-			bs.ColMD(6)(text.Text("Right")),
-		),
-	), core.WithIndent())
-	// Output:
-	// <div class="container">
-	//   <div class="row">
-	//     <div class="col-md-6">Left</div>
-	//     <div class="col-md-6">Right</div>
-	//   </div>
-	// </div>
-}
-
-// Bootstrap utility classes (from ba package) can be combined freely.
-func Example_bootstrapUtilities() {
-	core.Dump(div.Div(ba.DFlex(), ba.JustifyContentBetween(), ba.AlignItemsCenter(), ba.P(3)))
-	// Output: <div class="d-flex justify-content-between align-items-center p-3"></div>
-}
-
-// Bootstrap button components ARE elements (they create the button tag).
-// They have type="button" unless a type is given, so that they do not submit
-// a form by accident.
-func Example_bootstrapButton() {
-	core.Dump(bs.BtnPrimary()(text.Text("Click me")))
-	// Output: <button class="btn btn-primary" type="button">Click me</button>
-}
-
-// =============================================================================
-// BOOTSTRAP ICONS
-// =============================================================================
-
-// Icons are typed constants that render as <i class="bi bi-{name}"></i>.
-// They implement elem.Node so can be used directly in element trees.
-func Example_bootstrapIcon() {
-	core.Dump(button.Button()(bi.Check, text.Text(" Save")))
-	// Output: <button><i class="bi bi-check"></i> Save</button>
-}
-
-// =============================================================================
-// HTMX v2
-// =============================================================================
-
-// HTMX attributes enable hypermedia-driven interactions.
-func Example_htmxBasic() {
+// Attribute vocabularies of libraries, such as htmx, are trusted names with
+// escaped values. The packages of github.com/protolambda/webui (hx2, bs, ba,
+// bi) are built this way.
+func Example_customAttributes() {
+	hxPost := attr.Name("hx-post")
+	hxTarget := attr.Name("hx-target")
 	core.Dump(button.Button(
-		hx2.Post("/api/submit"),
-		hx2.Target("#result"),
-		hx2.Swap("innerHTML"),
+		button.Type(button.TypeSubmit),
+		hxPost.Value("/api/submit"),
+		hxTarget.Value("#result"),
 	)(text.Text("Submit")))
-	// Output: <button hx-post="/api/submit" hx-target="#result" hx-swap="innerHTML">Submit</button>
+	// Output: <button type="submit" hx-post="/api/submit" hx-target="#result">Submit</button>
 }
 
-// hx2.On() uses v2 syntax: hx-on:event="handler"
-func Example_htmxEvents() {
-	core.Dump(div.Div(hx2.On("htmx:after-swap", "console.log('swapped')")))
-	// Output: <div hx-on:htmx:after-swap="console.log(&#39;swapped&#39;)"></div>
-}
-
-// SSE in v2 requires the extension: hx-ext="sse"
-func Example_htmxSSE() {
-	core.Dump(div.Div(hx2.Ext("sse"), hx2.SSEConnect("/events"), hx2.SSESwap("message")))
-	// Output: <div hx-ext="sse" sse-connect="/events" sse-swap="message"></div>
+// A component is a plain Go function that composes elements, and accepts
+// the attributes of the caller.
+func Example_component() {
+	alert := func(attrs ...attr.Node) elem.Scope {
+		return div.Div(attr.Class("alert"), attr.Bundle(attrs))
+	}
+	core.Dump(alert(attr.Class("alert-danger"))(text.Text("Failed")))
+	// Output: <div class="alert alert-danger">Failed</div>
 }
 
 // =============================================================================
@@ -322,33 +274,29 @@ func Example_fallback() {
 
 // A realistic example combining multiple features.
 func Example_complete() {
-	core.Dump(bs.Container(ba.MT(4))(
+	hxGet := attr.Name("hx-get")
+	hxTarget := attr.Name("hx-target")
+	core.Dump(div.Div(attr.Class("container"))(
 		section.Header()(
-			section.H1(attr.Class("mb-3"))(text.Text("Dashboard")),
+			section.H1()(text.Text("Dashboard")),
 		),
-		bs.Row()(
-			bs.ColMD(4)(
-				bs.Card{Body: text.Text("Users: 42")},
-			),
+		div.Div(attr.ID("stats"))(
+			text.P()(text.Text("Users: 42")),
 		),
-		div.Div(ba.MT(3))(
-			bs.BtnPrimary(hx2.Get("/api/refresh"), hx2.Target("#stats"))(
-				bi.ArrowClockwise, text.Text(" Refresh"),
+		div.Div(attr.Class("actions"))(
+			button.Button(button.Type(button.TypeButton), hxGet.Value("/api/refresh"), hxTarget.Value("#stats"))(
+				text.Text("Refresh"),
 			),
 		),
 	), core.WithIndent())
 	// Output:
-	// <div class="container mt-4">
+	// <div class="container">
 	//   <header>
-	//     <h1 class="mb-3">Dashboard</h1>
+	//     <h1>Dashboard</h1>
 	//   </header>
-	//   <div class="row">
-	//     <div class="col-md-4">
-	//       <div class="card">
-	//         <div class="card-body">Users: 42</div>
-	//       </div>
-	//     </div>
+	//   <div id="stats">
+	//     <p>Users: 42</p>
 	//   </div>
-	//   <div class="mt-3"><button class="btn btn-primary" type="button" hx-get="/api/refresh" hx-target="#stats"><i class="bi bi-arrow-clockwise"></i> Refresh</button></div>
+	//   <div class="actions"><button type="button" hx-get="/api/refresh" hx-target="#stats">Refresh</button></div>
 	// </div>
 }

@@ -127,8 +127,9 @@ var blockTags = map[string]bool{
 	"xmp": true,
 }
 
-// utilityDisplays are the unprefixed Bootstrap 5.3 display utilities (see
-// package ba). d-none is left out: text queries do not model visibility.
+// utilityDisplays are the unprefixed Bootstrap 5.3 display utility classes
+// (d-block, d-flex, ...). d-none is left out: text queries do not model
+// visibility.
 var utilityDisplays = map[string]display{
 	"d-inline": displayInline, "d-inline-block": displayInline, "d-block": displayBlock,
 	"d-grid": displayFlex, "d-inline-grid": displayInlineFlex, "d-table": displayBlock,
