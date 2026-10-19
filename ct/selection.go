@@ -222,7 +222,7 @@ func (s *Selection) nodes(ctx context.Context) ([]Node, error) {
 	seen := make(map[Node]struct{})
 	var out []Node
 	for _, sc := range scope {
-		for n := range descendants(sc) {
+		for n := range Descendants(sc) {
 			if n.Kind() != KindElement {
 				continue
 			}

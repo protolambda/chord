@@ -31,9 +31,19 @@ func (r Rule) Violations(root Node) []string {
 
 // CustomRule creates a rule from a description and a check that returns one
 // description per violation. Keep secret values out of the descriptions:
-// they appear in failure messages as written.
+// they appear in failure messages as written. [DescribedRule] helps with
+// that.
 func CustomRule(desc string, check func(root Node) []string) Rule {
 	return Rule{desc: desc, check: func(root Node, _ *options) []string { return check(root) }}
+}
+
+// DescribedRule creates a rule like [CustomRule], whose check formats nodes
+// and values for its descriptions with a [Describer]: [Subject.Valid]
+// passes one with the redaction options of the subject, and
+// [Rule.Violations] the zero Describer, which applies the built-in
+// redaction only.
+func DescribedRule(desc string, check func(root Node, d Describer) []string) Rule {
+	return Rule{desc: desc, check: func(root Node, o *options) []string { return check(root, Describer{opts: o}) }}
 }
 
 // Valid asserts that the document satisfies every rule.
@@ -74,23 +84,12 @@ func (a validAssertion) Check(ctx context.Context) error {
 	return fmt.Errorf("%w in %s:%s", ErrRule, a.subject.source, b.String())
 }
 
-// elements iterates all element nodes of the tree in document order.
-func elements(root Node) func(yield func(Node) bool) {
-	return func(yield func(Node) bool) {
-		for d := range descendants(root) {
-			if d.Kind() == KindElement && !yield(d) {
-				return
-			}
-		}
-	}
-}
-
 // UniqueIDs requires every non-empty id to occur once.
 func UniqueIDs() Rule {
 	return Rule{desc: "uniqueIDs()", check: func(root Node, _ *options) []string {
 		seen := make(map[string]Node)
 		var out []string
-		for e := range elements(root) {
+		for e := range Elements(root) {
 			id, ok := e.Attr("id")
 			if !ok || id == "" {
 				continue
@@ -121,7 +120,7 @@ func labelable(n Node) bool {
 func LabelReferences() Rule {
 	return Rule{desc: "labelReferences()", check: func(root Node, o *options) []string {
 		var out []string
-		for e := range elements(root) {
+		for e := range Elements(root) {
 			if e.Tag() != "label" {
 				continue
 			}
@@ -151,7 +150,7 @@ var ariaReferenceAttrs = []string{
 func ARIAReferences() Rule {
 	return Rule{desc: "ariaReferences()", check: func(root Node, _ *options) []string {
 		var out []string
-		for e := range elements(root) {
+		for e := range Elements(root) {
 			for _, key := range ariaReferenceAttrs {
 				ids, ok := e.Attr(key)
 				if !ok {
@@ -173,7 +172,7 @@ func ARIAReferences() Rule {
 func LocalTargets() Rule {
 	return Rule{desc: "localTargets()", check: func(root Node, _ *options) []string {
 		var out []string
-		for e := range elements(root) {
+		for e := range Elements(root) {
 			if e.Tag() != "a" && e.Tag() != "area" {
 				continue
 			}
@@ -197,7 +196,7 @@ func LocalTargets() Rule {
 func ImagesHaveAlt() Rule {
 	return Rule{desc: "imagesHaveAlt()", check: func(root Node, _ *options) []string {
 		var out []string
-		for e := range elements(root) {
+		for e := range Elements(root) {
 			if e.Tag() != "img" {
 				continue
 			}
@@ -214,7 +213,7 @@ func ImagesHaveAlt() Rule {
 func ButtonsHaveType() Rule {
 	return Rule{desc: "buttonsHaveType()", check: func(root Node, _ *options) []string {
 		var out []string
-		for e := range elements(root) {
+		for e := range Elements(root) {
 			if e.Tag() != "button" {
 				continue
 			}
@@ -232,11 +231,13 @@ func ButtonsHaveType() Rule {
 	}}
 }
 
-// NoInlineHandlers forbids inline event handler attributes (on*).
+// NoInlineHandlers forbids inline event handler attributes (on*). It does
+// not report the inline handlers of htmx, such as hx-on:click, whose names
+// do not start with "on": see [NoHxOn].
 func NoInlineHandlers() Rule {
 	return Rule{desc: "noInlineHandlers()", check: func(root Node, _ *options) []string {
 		var out []string
-		for e := range elements(root) {
+		for e := range Elements(root) {
 			for key := range e.Attrs() {
 				if len(key) > 2 && strings.HasPrefix(strings.ToLower(key), "on") {
 					out = append(out, fmt.Sprintf("inline handler %s at %s", key, locationOf(e)))
@@ -247,12 +248,37 @@ func NoInlineHandlers() Rule {
 	}}
 }
 
+// NoHxOn forbids the inline handler attributes of htmx, which htmx runs as
+// code, as browsers run on* handlers: hx-on:* and hx-on-* (such as
+// hx-on:click and hx-on::after-request), the older hx-on attribute of
+// htmx 1, and each with a data- prefix. Names are compared
+// case-insensitively.
+func NoHxOn() Rule {
+	return Rule{desc: "noHxOn()", check: func(root Node, _ *options) []string {
+		var out []string
+		for e := range Elements(root) {
+			for key := range e.Attrs() {
+				if hxOn(key) {
+					out = append(out, fmt.Sprintf("htmx handler %s at %s", key, locationOf(e)))
+				}
+			}
+		}
+		return out
+	}}
+}
+
+// hxOn reports whether an attribute name is an htmx inline handler.
+func hxOn(key string) bool {
+	name := strings.TrimPrefix(strings.ToLower(key), "data-")
+	return name == "hx-on" || strings.HasPrefix(name, "hx-on:") || strings.HasPrefix(name, "hx-on-")
+}
+
 // NoRaw forbids raw HTML nodes. Only direct views contain them; parsed
 // documents never do.
 func NoRaw() Rule {
 	return Rule{desc: "noRaw()", check: func(root Node, o *options) []string {
 		var out []string
-		for d := range descendants(root) {
+		for d := range Descendants(root) {
 			if d.Kind() == KindRaw {
 				out = append(out, fmt.Sprintf("raw content at %s: %s", locationOf(d), describeNode(d, o)))
 			}

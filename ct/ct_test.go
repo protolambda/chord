@@ -282,11 +282,21 @@ func TestValueMatchers(t *testing.T) {
 		no   string
 		desc string
 	}{
-		"exact":    {ct.Exact("a"), "a", "ab", `"a"`},
-		"contains": {ct.Contains("b"), "abc", "ac", `contains("b")`},
-		"prefix":   {ct.Prefix("ab"), "abc", "bab", `prefix("ab")`},
-		"suffix":   {ct.Suffix("bc"), "abc", "bca", `suffix("bc")`},
-		"regexp":   {ct.Regexp(regexp.MustCompile(`^\d+$`)), "123", "12a", `regexp("^\\d+$")`},
+		"exact":       {ct.Exact("a"), "a", "ab", `"a"`},
+		"contains":    {ct.Contains("b"), "abc", "ac", `contains("b")`},
+		"prefix":      {ct.Prefix("ab"), "abc", "bab", `prefix("ab")`},
+		"suffix":      {ct.Suffix("bc"), "abc", "bca", `suffix("bc")`},
+		"regexp":      {ct.Regexp(regexp.MustCompile(`^\d+$`)), "123", "12a", `regexp("^\\d+$")`},
+		"func":        {ct.MatchFunc("even()", func(v string) bool { return len(v)%2 == 0 }), "ab", "abc", `even()`},
+		"and":         {ct.Prefix("a").And(ct.Suffix("c"), ct.Contains("b")), "abc", "ac", `and(prefix("a"), suffix("c"), contains("b"))`},
+		"or":          {ct.Exact("a").Or(ct.Exact("b")), "b", "c", `or("a", "b")`},
+		"not":         {ct.Prefix("a").Not(), "ba", "ab", `not(prefix("a"))`},
+		"one of":      {ct.OneOf("a", "b"), "b", "ab", `oneOf("a", "b")`},
+		"token":       {ct.Token("noopener"), "external NoOpener\tnoreferrer", "noopener-x", `token("noopener")`},
+		"comma token": {ct.CommaToken("hx-request"), "Accept-Encoding, HX-Request ", "hx-request-x", `commaToken("hx-request")`},
+		"comma item":  {ct.CommaToken("max-age=0"), "no-cache,max-age=0", "max-age=600", `commaToken("max-age=0")`},
+		"single and":  {ct.Exact("a").And(), "a", "b", `"a"`},
+		"single or":   {ct.Exact("a").Or(), "a", "b", `"a"`},
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -300,6 +310,35 @@ func TestValueMatchers(t *testing.T) {
 	}
 	if (ct.ValueMatch{}).Match("") {
 		t.Fatal("zero matcher must not match")
+	}
+	// A negation of a forgotten matcher does not accept everything.
+	for _, m := range []ct.ValueMatch{{}, ct.MatchFunc("nil()", nil)} {
+		if m.Match("") || m.Not().Match("") || m.Not().Match("x") {
+			t.Fatalf("%s: zero matchers and their inversions must not match", m)
+		}
+	}
+	if ct.OneOf().Match("") {
+		t.Fatal("oneOf() must not match")
+	}
+	// OneOf keeps its own copy of the values.
+	values := []string{"a"}
+	m := ct.OneOf(values...)
+	values[0] = "b"
+	if !m.Match("a") || m.Match("b") {
+		t.Fatal("oneOf must not alias the values of the caller")
+	}
+}
+
+func TestLooksSecret(t *testing.T) {
+	for _, name := range []string{"Set-Cookie", "Authorization", "X-CSRF-Token", "api_key", "data-seed-phrase"} {
+		if !ct.LooksSecret(name) {
+			t.Errorf("%s must look secret", name)
+		}
+	}
+	for _, name := range []string{"Content-Type", "Vary", "href", "data-id"} {
+		if ct.LooksSecret(name) {
+			t.Errorf("%s must not look secret", name)
+		}
 	}
 }
 

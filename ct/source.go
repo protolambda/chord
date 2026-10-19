@@ -100,10 +100,13 @@ type BoolAttrNode interface {
 	BoolAttr(name string) bool
 }
 
-// descendants iterates all descendants of n in document order, excluding n.
-func descendants(n Node) iter.Seq[Node] {
+// Descendants iterates over the descendants of n in document order,
+// excluding n itself. A nil n yields nothing. The iterator is restartable.
+func Descendants(n Node) iter.Seq[Node] {
 	return func(yield func(Node) bool) {
-		descend(n, yield)
+		if n != nil {
+			descend(n, yield)
+		}
 	}
 }
 
@@ -117,6 +120,30 @@ func descend(n Node, yield func(Node) bool) bool {
 		}
 	}
 	return true
+}
+
+// Elements iterates over the element descendants of root in document order,
+// excluding root itself. A nil root yields nothing. The iterator is
+// restartable.
+func Elements(root Node) iter.Seq[Node] {
+	return func(yield func(Node) bool) {
+		for d := range Descendants(root) {
+			if d.Kind() == KindElement && !yield(d) {
+				return
+			}
+		}
+	}
+}
+
+// Closest returns the nearest element among n and its ancestors for which
+// match reports true, or nil when there is none. A nil n returns nil.
+func Closest(n Node, match func(Node) bool) Node {
+	for cur := n; cur != nil; cur = cur.Parent() {
+		if cur.Kind() == KindElement && match(cur) {
+			return cur
+		}
+	}
+	return nil
 }
 
 // root returns the root of the tree containing n.

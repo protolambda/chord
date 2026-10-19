@@ -195,7 +195,7 @@ func HasDescendant(query Query) Query {
 	return Query{
 		desc: "hasDescendant(" + query.desc + ")",
 		match: func(n Node) (bool, error) {
-			for d := range descendants(n) {
+			for d := range Descendants(n) {
 				ok, err := query.Match(d)
 				if err != nil || ok {
 					return ok, err

@@ -13,6 +13,46 @@ const (
 	redactedValue   = "[redacted]"
 )
 
+// Describer formats nodes and attribute values for the failure messages of
+// custom rules and assertions as this package formats them, with the
+// redaction of a subject (see Redaction in the package documentation).
+// [DescribedRule] passes one to its check, and [Subject.Describer] returns
+// one for custom assertions. The zero Describer applies the built-in
+// redaction only.
+type Describer struct {
+	opts *options // nil for the zero Describer
+}
+
+// Node summarizes a node on one line, as in form#profile.card
+// [method="post"], with redacted attribute values, text, raw content and
+// comments.
+func (d Describer) Node(n Node) string {
+	return describeNode(n, d.opts)
+}
+
+// Location returns the location of a node, as [Node.Location] describes
+// it, or "(root)" for the root.
+func (Describer) Location(n Node) string {
+	return locationOf(n)
+}
+
+// Attr returns the value of an attribute of n as failure messages show it:
+// [redacted] when the value looks secret. ok reports whether n has the
+// attribute.
+func (d Describer) Attr(n Node, name string) (value string, ok bool) {
+	value, ok = n.Attr(name)
+	if !ok {
+		return "", false
+	}
+	return d.opts.redactValue(n, name, value), true
+}
+
+// Text returns the inner text of n (see [InnerText]) as failure messages
+// show it: the text of sensitive elements is [redacted].
+func (d Describer) Text(n Node) string {
+	return d.opts.redactedInnerText(n)
+}
+
 // listNodes formats one line per node with its location and summary,
 // bounded to maxListedNodes.
 func listNodes(nodes []Node, o *options) string {
