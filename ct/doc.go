@@ -20,7 +20,8 @@
 // # Subjects and selections
 //
 // A [Subject] wraps a [Source] such as a Chord view ([View]), a parsed HTML
-// document (package ct/html), or an HTTP response (package ct/http). It loads
+// document (package [github.com/protolambda/chord/ct/cthtml]), or an HTTP
+// response (package [github.com/protolambda/chord/ct/cthttp]). It loads
 // at most once, with the context of the first check, and every selection
 // derived from it shares that result. Checking a subject asserts that it
 // loads. A subject belongs to one test or subtest; do not share it across
@@ -64,6 +65,26 @@
 // queries do not model visibility, hidden attributes, or script behavior.
 // [Role] and [Named] implement a documented subset of implicit roles and
 // accessible names, not a browser accessibility tree.
+//
+// Queries and assertions that accept more than an exact value take a
+// [ValueMatch]: [Exact], [Contains], [Prefix], [Suffix], [Regexp], [OneOf],
+// [Token] for space-separated lists such as rel, and [CommaToken] for
+// comma-separated lists such as the Vary header. Combine them with
+// [ValueMatch.And], [ValueMatch.Or] and [ValueMatch.Not], or create one
+// with [MatchFunc].
+//
+// # Rules
+//
+// [Subject.Valid] checks document-wide rules: [UniqueIDs],
+// [LabelReferences], [ARIAReferences], [LocalTargets], [ImagesHaveAlt],
+// [ButtonsHaveType], [NoInlineHandlers], [NoHxOn] and [NoRaw]. They are
+// structural checks, not full HTML or accessibility validation.
+//
+// Custom rules ([CustomRule], [DescribedRule]) and custom assertions walk
+// the tree with [Descendants], [Elements] and [Closest]. A [Describer]
+// formats nodes and values for their messages as this package does, with
+// the redaction of the subject, and [LooksSecret] tells which other names
+// hold secrets.
 //
 // # Diagnostics
 //

@@ -388,7 +388,7 @@ func labelTexts(n Node) ([]labelText, error) {
 		out = append(out, labelText{text: collapseSpace(strings.Join(parts, " "))})
 	}
 	if id, ok := n.Attr("id"); ok && id != "" {
-		for d := range descendants(root(n)) {
+		for d := range Descendants(root(n)) {
 			if d.Kind() == KindElement && d.Tag() == "label" && attrEquals(d, "for", id) {
 				out = append(out, labelText{text: contentText(d), element: true})
 			}
@@ -424,7 +424,7 @@ func childText(n Node, tag string) string {
 
 // elementByID returns the first element with the id in the tree, or nil.
 func elementByID(root Node, id string) Node {
-	for d := range descendants(root) {
+	for d := range Descendants(root) {
 		if d.Kind() == KindElement && attrEquals(d, "id", id) {
 			return d
 		}

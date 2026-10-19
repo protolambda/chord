@@ -237,12 +237,25 @@ t.Must(page.Find(ct.Role("heading", ct.Named("Account"))))
 `res.Bytes()` return the body, and `res.Describe()` names the request. A page
 needs the content type `text/html`; a fragment without one (Go sniffs most
 fragments as `text/plain`, and htmx swaps them all the same) parses as HTML
-when it starts with markup.
+when it starts with markup. Failure messages redact the values of headers
+that look secret, such as `Set-Cookie`, `Cookie` and `Authorization`.
+
+Streaming handlers, such as server-sent event streams, are captured for a
+bounded time: until the handler returns, the body matches `WithUntil`, or a
+timeout passes. Then the request context is canceled, and the handler must
+return:
+
+```go
+res := cthttp.ServeStream(events, req, cthttp.WithUntil(ct.Contains("event: ready")))
+t.Must(res.HeaderOnce("Content-Type", ct.Exact("text/event-stream")))
+t.Must(res.Body(ct.Contains("data: 1")))
+```
 
 See the `ct` package documentation for the query vocabulary (`Tag`, `ID`,
 `Class`, `Attr`, `Text`, `InnerText`, `TextContent`, `Label`, `Alt`, `TestID`,
-`Role` with `Named` and `Level`, `HasChild`, `HasDescendant`, `And`/`Or`/`Not`)
-and the document rules. Texts read as users see them: like a browser's
+`Role` with `Named` and `Level`, `HasChild`, `HasDescendant`, `And`/`Or`/`Not`),
+the value matchers, the document rules, and custom rules (`DescribedRule`,
+`Elements`, `Closest`). Texts read as users see them: like a browser's
 `innerText`, `Texts`, `InnerText` and accessible names separate the text of
 block-level parts ("Author Signed", not "AuthorSigned") and leave out script
 and style code, approximating the layout from the default display of HTML

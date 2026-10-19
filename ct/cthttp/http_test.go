@@ -93,7 +93,7 @@ func TestServeCapturesResponse(t *testing.T) {
 	mustFail(t, res.Status(http.StatusNotFound), ct.ErrMismatch, "expected status 404 for GET /account?tab=1, got 200", "body:")
 	mustFail(t, res.Header("Content-Type", ct.Exact("text/plain")), ct.ErrMismatch, `got ["text/html; charset=utf-8"]`)
 	mustFail(t, res.Header("X-Missing", ct.Exact("x")), ct.ErrMismatch, "header is absent")
-	mustFail(t, res.HeaderAbsent("Set-Cookie"), ct.ErrMismatch, `got ["a=1" "b=2"]`)
+	mustFail(t, res.HeaderAbsent("Set-Cookie"), ct.ErrMismatch, `got ["a=[redacted]" "b=[redacted]"]`)
 	mustFail(t, res.Body(ct.Contains("nope")), ct.ErrMismatch, "expected body of GET /account?tab=1 to match contains(\"nope\")")
 
 	if res.StatusCode() != http.StatusOK || res.Headers().Get("Content-Type") == "" || len(res.Bytes()) == 0 {
@@ -313,4 +313,63 @@ func TestExcerptTruncatesAtRuneBoundary(t *testing.T) {
 	if strings.Contains(err.Error(), `\x`) {
 		t.Fatalf("excerpt split a character:\n%v", err)
 	}
+}
+
+// Failure messages hide the values of secret headers, and keep what a test
+// of them usually needs: cookie names and attributes, and the scheme of a
+// credential.
+func TestHeaderFailuresRedactSecrets(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Set-Cookie", "session=s3cr3t-session; Path=/; HttpOnly; SameSite=Lax")
+		w.Header().Add("Set-Cookie", "old=; Max-Age=0")
+		w.Header().Set("Cookie", "a=cookie-a; b=cookie-b")
+		w.Header().Set("Authorization", "Bearer s3cr3t-bearer")
+		w.Header().Set("Proxy-Authorization", "s3cr3t-proxy")
+		w.Header().Set("X-CSRF-Token", "s3cr3t-csrf")
+	})
+	res := cthttp.Serve(handler, httptest.NewRequest(http.MethodGet, "/", nil))
+	failures := []struct {
+		a    assertion.Assertion
+		want string
+	}{
+		{res.Header("Set-Cookie", ct.Contains("Secure")), `got ["session=[redacted]; Path=/; HttpOnly; SameSite=Lax" "old=; Max-Age=0"]`},
+		{res.HeaderAbsent("Cookie"), `got ["a=[redacted]; b=[redacted]"]`},
+		{res.HeaderOnce("Authorization", ct.Prefix("Basic ")), `got ["Bearer [redacted]"]`},
+		{res.Header("Proxy-Authorization", ct.Exact("x")), `got ["[redacted]"]`},
+		{res.HeaderAbsent("X-CSRF-Token"), `got ["[redacted]"]`},
+		{res.HeaderOnce("Set-Cookie", ct.Contains("session=")), `got 2 values ["session=[redacted]; Path=/; HttpOnly; SameSite=Lax" "old=; Max-Age=0"]`},
+	}
+	for _, f := range failures {
+		err := mustFail(t, f.a, ct.ErrMismatch, f.want)
+		if strings.Contains(err.Error(), "s3cr3t") || strings.Contains(err.Error(), "cookie-") {
+			t.Fatalf("%s: secret leaked:\n%v", f.a, err)
+		}
+	}
+	// The expected value is the test's own, and is shown as written.
+	mustFail(t, res.Header("X-CSRF-Token", ct.Exact("expected-token")), ct.ErrMismatch, `match "expected-token", got ["[redacted]"]`)
+}
+
+func TestHeaderOnce(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		w.Header().Add("Vary", "Accept-Encoding")
+		w.Header().Add("Vary", "HX-Request")
+	})
+	res := cthttp.Serve(handler, httptest.NewRequest(http.MethodGet, "/", nil))
+
+	mustPass(t, res.HeaderOnce("Cache-Control", ct.Exact("no-store")))
+	mustPass(t, res.Header("Vary", ct.CommaToken("hx-request")))
+	mustFail(t, res.HeaderOnce("Cache-Control", ct.Exact("no-cache")), ct.ErrMismatch,
+		`expected header Cache-Control of GET / to match "no-cache", got ["no-store"]`)
+	mustFail(t, res.HeaderOnce("Vary", ct.CommaToken("hx-request")), ct.ErrMismatch,
+		`expected header Vary of GET / once, matching commaToken("hx-request"), got 2 values ["Accept-Encoding" "HX-Request"]`)
+	mustFail(t, res.HeaderOnce("X-Missing", ct.Exact("x")), ct.ErrMismatch, "header is absent")
+	if got, want := res.HeaderOnce("Vary", ct.Exact("x")).String(), `headerOnce(GET /, "Vary", "x")`; got != want {
+		t.Fatalf("String(): got %s, want %s", got, want)
+	}
+}
+
+func TestNegativeBodyLimit(t *testing.T) {
+	res := cthttp.Serve(accountHandler(), httptest.NewRequest(http.MethodGet, "/account", nil), cthttp.WithMaxBody(-1))
+	mustFail(t, res.Captured(), ct.ErrLoad, "body exceeds 0 bytes")
 }

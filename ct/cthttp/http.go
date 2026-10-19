@@ -1,11 +1,12 @@
 // Package cthttp runs HTTP handlers and turns responses into ct subjects.
 //
 // [Serve] invokes a handler synchronously with a recorder and captures the
-// response; [FromResponse] adopts a response obtained elsewhere. Both read
-// the body once, up to a limit, so that several assertions and the HTML
-// parser never compete for it. [Result.Captured] asserts that the capture
-// succeeded, and every assertion derived from a [Result] reports a capture
-// failure rather than a mismatch.
+// response; [ServeStream] captures a streaming response, such as
+// server-sent events, for a bounded time; [FromResponse] adopts a response
+// obtained elsewhere. All read the body once, up to a limit, so that
+// several assertions and the HTML parser never compete for it.
+// [Result.Captured] asserts that the capture succeeded, and every assertion
+// derived from a [Result] reports a capture failure rather than a mismatch.
 //
 //	req := httptest.NewRequest(http.MethodGet, "/account", nil)
 //	res := cthttp.Serve(handler, req)
@@ -22,6 +23,12 @@
 //
 // Failure messages include a bounded excerpt of the body. Keep secrets out
 // of test fixtures, or use [Result.Bytes] with custom assertions instead.
+// They redact the values of headers whose name looks secret
+// ([ct.LooksSecret]), such as Set-Cookie, Cookie, Authorization and
+// X-CSRF-Token: a cookie keeps its name and attributes, a credential its
+// scheme, as in "session=[redacted]; Path=/; HttpOnly" and
+// "Bearer [redacted]". Expected values that a test states are shown as
+// written.
 package cthttp
 
 import (
@@ -34,6 +41,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/protolambda/mustbe/assertion"
@@ -45,20 +53,61 @@ import (
 // DefaultMaxBody is the default body capture limit in bytes.
 const DefaultMaxBody = 8 << 20
 
-const excerptLength = 200
+// DefaultStreamTimeout is how long [ServeStream] captures a response at
+// most, by default.
+const DefaultStreamTimeout = 5 * time.Second
+
+const (
+	excerptLength = 200
+	redactedValue = "[redacted]"
+)
 
 // Option configures body capture.
 type Option func(*options)
 
 type options struct {
-	maxBody int64
+	maxBody  int64
+	until    ct.ValueMatch
+	hasUntil bool
+	timeout  time.Duration
 }
 
-// WithMaxBody limits the number of body bytes that are captured. A larger
-// body is a capture failure.
+func newOptions(opts []Option) options {
+	o := options{maxBody: DefaultMaxBody, timeout: DefaultStreamTimeout}
+	for _, opt := range opts {
+		opt(&o)
+	}
+	return o
+}
+
+// WithMaxBody limits the number of body bytes that are captured; n < 0
+// means 0. A larger body is a capture failure.
 func WithMaxBody(n int64) Option {
 	return func(o *options) {
-		o.maxBody = n
+		o.maxBody = max(n, 0)
+	}
+}
+
+// WithUntil ends the capture of [ServeStream] as soon as the body captured
+// so far matches, for example ct.Contains("event: done"), so that a test
+// does not wait for the timeout. [Serve] and [FromResponse] ignore it.
+func WithUntil(m ct.ValueMatch) Option {
+	return func(o *options) {
+		o.until = m
+		o.hasUntil = true
+	}
+}
+
+// WithTimeout sets how long [ServeStream] captures a response at most, and
+// how long it then waits for the handler to return; d <= 0 means
+// [DefaultStreamTimeout]. [Serve] and [FromResponse] ignore it.
+func WithTimeout(d time.Duration) Option {
+	return func(o *options) {
+		if d > 0 {
+			o.timeout = d
+		} else {
+			o.timeout = DefaultStreamTimeout
+		}
 	}
 }
 
@@ -85,10 +134,7 @@ func FromResponse(response *http.Response, opts ...Option) *Result {
 }
 
 func capture(desc string, res *http.Response, opts []Option) *Result {
-	o := options{maxBody: DefaultMaxBody}
-	for _, opt := range opts {
-		opt(&o)
-	}
+	o := newOptions(opts)
 	r := &Result{
 		desc:    desc,
 		status:  res.StatusCode,
@@ -171,7 +217,7 @@ func (r *Result) Bytes() []byte { return append([]byte(nil), r.body...) }
 func (r *Result) BodyString() string { return string(r.body) }
 
 // Flushed reports whether the handler flushed the response. It is only
-// known for results of [Serve].
+// known for results of [Serve] and [ServeStream].
 func (r *Result) Flushed() bool { return r.flushed }
 
 // Status asserts the response status code.
@@ -205,8 +251,34 @@ func (r *Result) Header(name string, expected ct.ValueMatch) assertion.Assertion
 				return fmt.Errorf("%w: expected header %s of %s to match %s, header is absent",
 					ct.ErrMismatch, name, r.desc, expected)
 			}
-			return fmt.Errorf("%w: expected header %s of %s to match %s, got %q",
-				ct.ErrMismatch, name, r.desc, expected, values)
+			return fmt.Errorf("%w: expected header %s of %s to match %s, got %s",
+				ct.ErrMismatch, name, r.desc, expected, shownValues(name, values))
+		},
+	}
+}
+
+// HeaderOnce asserts that the header has exactly one value, and that it
+// satisfies the matcher. Several values fail even when one matches: a
+// recipient may join them, or, as for Content-Security-Policy, enforce
+// them all.
+func (r *Result) HeaderOnce(name string, expected ct.ValueMatch) assertion.Assertion {
+	return check{
+		desc:   fmt.Sprintf("headerOnce(%s, %q, %s)", r.desc, name, expected),
+		result: r,
+		run: func() error {
+			values := r.header.Values(name)
+			switch {
+			case len(values) == 0:
+				return fmt.Errorf("%w: expected header %s of %s once, matching %s, header is absent",
+					ct.ErrMismatch, name, r.desc, expected)
+			case len(values) > 1:
+				return fmt.Errorf("%w: expected header %s of %s once, matching %s, got %d values %s",
+					ct.ErrMismatch, name, r.desc, expected, len(values), shownValues(name, values))
+			case !expected.Match(values[0]):
+				return fmt.Errorf("%w: expected header %s of %s to match %s, got %s",
+					ct.ErrMismatch, name, r.desc, expected, shownValues(name, values))
+			}
+			return nil
 		},
 	}
 }
@@ -218,8 +290,8 @@ func (r *Result) HeaderAbsent(name string) assertion.Assertion {
 		result: r,
 		run: func() error {
 			if values := r.header.Values(name); len(values) > 0 {
-				return fmt.Errorf("%w: expected header %s of %s to be absent, got %q",
-					ct.ErrMismatch, name, r.desc, values)
+				return fmt.Errorf("%w: expected header %s of %s to be absent, got %s",
+					ct.ErrMismatch, name, r.desc, shownValues(name, values))
 			}
 			return nil
 		},
@@ -259,6 +331,61 @@ func (r *Result) HTML(opts ...ct.Option) *ct.Subject {
 // the content type text/html.
 func (r *Result) HTMLFragment(contextTag string, opts ...ct.Option) *ct.Subject {
 	return ct.From(&htmlSource{result: r, context: contextTag}, opts...)
+}
+
+// shownValues formats the values of a header for a failure message, with
+// the values of a header whose name looks secret redacted.
+func shownValues(name string, values []string) string {
+	if !ct.LooksSecret(name) {
+		return fmt.Sprintf("%q", values)
+	}
+	shown := make([]string, len(values))
+	for i, v := range values {
+		shown[i] = redactHeader(name, v)
+	}
+	return fmt.Sprintf("%q", shown)
+}
+
+// redactHeader hides the secret parts of a header value: the cookie values
+// of Set-Cookie and Cookie, whose names and attributes stay, the
+// credentials of Authorization and Proxy-Authorization, whose scheme stays,
+// and other values whole. Empty values stay empty.
+func redactHeader(name, v string) string {
+	if v == "" {
+		return v
+	}
+	switch http.CanonicalHeaderKey(name) {
+	case "Set-Cookie":
+		pair, attrs, ok := strings.Cut(v, ";")
+		if ok {
+			return redactPair(pair) + ";" + attrs
+		}
+		return redactPair(pair)
+	case "Cookie":
+		pairs := strings.Split(v, ";")
+		for i, pair := range pairs {
+			pairs[i] = redactPair(pair)
+		}
+		return strings.Join(pairs, ";")
+	case "Authorization", "Proxy-Authorization":
+		if scheme, _, ok := strings.Cut(strings.TrimSpace(v), " "); ok {
+			return scheme + " " + redactedValue
+		}
+	}
+	return redactedValue
+}
+
+// redactPair hides the value of a cookie name=value pair. An empty value,
+// as of a cookie that is cleared, stays empty.
+func redactPair(pair string) string {
+	name, value, ok := strings.Cut(pair, "=")
+	switch {
+	case !ok:
+		return redactedValue
+	case strings.TrimSpace(value) == "":
+		return pair
+	}
+	return name + "=" + redactedValue
 }
 
 func (r *Result) excerpt() string {

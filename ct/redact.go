@@ -19,8 +19,13 @@ var secretAutocomplete = map[string]bool{
 	"cc-number": true, "cc-csc": true,
 }
 
-// looksSecret reports whether a name contains one of the secretWords.
-func looksSecret(s string) bool {
+// LooksSecret reports whether a name, such as the name of an attribute, an
+// element or an HTTP header, looks like it holds a secret: whether it
+// contains one of the words listed in the package documentation (see
+// Redaction), ignoring case and the separators '-', '_', '.', ':' and
+// spaces. Custom assertions use it to keep secret values out of failure
+// messages; ct/cthttp redacts the values of such headers.
+func LooksSecret(s string) bool {
 	var b strings.Builder
 	for _, r := range strings.ToLower(s) {
 		switch r {
@@ -50,7 +55,7 @@ func (o *options) sensitive(n Node) bool {
 		return true
 	}
 	for _, key := range []string{"name", "id", "data-testid"} {
-		if v, ok := n.Attr(key); ok && looksSecret(v) {
+		if v, ok := n.Attr(key); ok && LooksSecret(v) {
 			return true
 		}
 	}
@@ -92,7 +97,7 @@ func (o *options) redactValue(n Node, key, val string) string {
 	if o != nil && o.redact != nil && o.redact(n.Tag(), key) {
 		return redactedValue
 	}
-	if looksSecret(key) {
+	if LooksSecret(key) {
 		return redactedValue
 	}
 	if (key == "value" || key == "content") && o.inSensitive(n) {

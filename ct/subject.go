@@ -94,6 +94,12 @@ func (s *Subject) Load(ctx context.Context) (Document, error) {
 	return s.doc, s.err
 }
 
+// Describer returns a [Describer] with the redaction options of the
+// subject, for the failure messages of custom assertions.
+func (s *Subject) Describer() Describer {
+	return Describer{opts: &s.opts}
+}
+
 // Find selects the elements in the document that match every query.
 // The document is not loaded until the selection is checked.
 func (s *Subject) Find(query Query, more ...Query) *Selection {
