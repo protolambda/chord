@@ -77,6 +77,17 @@ type Node interface {
 	// (output-ready) values of a view, and line breaks are LF. Boolean
 	// attributes report an empty value and true.
 	Attr(name string) (value string, ok bool)
+	// AttrFold returns the value of the attribute whose name matches name
+	// regardless of case: the attribute named exactly name when there is
+	// one, else the first, in source order, whose name equals name under
+	// Unicode case folding ([strings.EqualFold]). Values are those of Attr.
+	// Attribute names are not case-sensitive in HTML, but sources keep them
+	// in different cases: parsed pages lower-case them, except that the
+	// parser gives SVG and MathML attributes their mixed-case names
+	// (viewBox), while views keep the case in which they were written. A
+	// check for an attribute that any source may write uses AttrFold rather
+	// than Attr. Implementations do not allocate.
+	AttrFold(name string) (value string, ok bool)
 	// Attrs iterates attributes as name/value pairs in source order.
 	Attrs() iter.Seq2[string, string]
 	// Parent returns the parent node, or nil at the root.

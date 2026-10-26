@@ -84,7 +84,8 @@
 // the tree with [Descendants], [Elements] and [Closest]. A [Describer]
 // formats nodes and values for their messages as this package does, with
 // the redaction of the subject, and [LooksSecret] tells which other names
-// hold secrets.
+// hold secrets. [Node.AttrFold] looks an attribute up regardless of the
+// case of its name, as views keep the case in which names were written.
 //
 // # Diagnostics
 //
