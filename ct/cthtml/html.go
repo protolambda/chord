@@ -175,6 +175,22 @@ func (v node) Attr(name string) (string, bool) {
 	return "", false
 }
 
+func (v node) AttrFold(name string) (string, bool) {
+	folded := -1
+	for i, a := range v.n.Attr {
+		if a.Key == name {
+			return a.Val, true
+		}
+		if folded < 0 && strings.EqualFold(a.Key, name) {
+			folded = i
+		}
+	}
+	if folded < 0 {
+		return "", false
+	}
+	return v.n.Attr[folded].Val, true
+}
+
 func (v node) Attrs() iter.Seq2[string, string] {
 	return func(yield func(string, string) bool) {
 		for _, a := range v.n.Attr {

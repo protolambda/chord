@@ -88,6 +88,23 @@ func (v viewNode) Attr(name string) (string, bool) {
 	return logicalValue(a), true
 }
 
+func (v viewNode) AttrFold(name string) (string, bool) {
+	var folded inspect.Attribute
+	found := false
+	for a := range v.n.Attrs() {
+		if a.Key == name {
+			return logicalValue(a), true
+		}
+		if !found && strings.EqualFold(a.Key, name) {
+			folded, found = a, true
+		}
+	}
+	if !found {
+		return "", false
+	}
+	return logicalValue(folded), true
+}
+
 func (v viewNode) Attrs() iter.Seq2[string, string] {
 	return func(yield func(string, string) bool) {
 		for a := range v.n.Attrs() {
